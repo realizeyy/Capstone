@@ -135,6 +135,16 @@ button.is-busy, .btn.is-busy, [aria-busy="true"] {
   opacity: 0.8;
   cursor: wait;
 }
+/* Absolute positioned buttons inside inputs keep their placement when busy */
+button.code-send.is-busy,
+button.code-send[aria-busy="true"],
+.code-send.is-busy,
+.code-send[aria-busy="true"] {
+  position: absolute !important;
+  top: 50% !important;
+  right: 6px !important;
+  transform: translateY(-50%) !important;
+}
 button.is-busy::after, .btn.is-busy::after, [aria-busy="true"]::after {
   content: "";
   display: inline-block;

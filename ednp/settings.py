@@ -223,9 +223,9 @@ SMS_BACKEND = 'test' if TESTING else (os.environ.get('SMS_BACKEND') or ('test' i
 if SMS_BACKEND not in ('semaphore', 'test'):
     raise ImproperlyConfigured(f"SMS_BACKEND must be 'semaphore' or 'test', not {SMS_BACKEND!r}.")
 
-SEMAPHORE_API_KEY = os.environ.get('SEMAPHORE_API_KEY') or os.environ.get('API_Key', '')
+SEMAPHORE_API_KEY = (os.environ.get('SEMAPHORE_API_KEY') or os.environ.get('API_Key', '')).strip().strip('\'"')
 # Optional; Semaphore falls back to the account's default sender name.
-SEMAPHORE_SENDER_NAME = os.environ.get('SEMAPHORE_SENDER_NAME', '')
+SEMAPHORE_SENDER_NAME = os.environ.get('SEMAPHORE_SENDER_NAME', '').strip().strip('\'"')
 
 # Which Semaphore route carries the code: 'standard' (1 credit per text) or 'otp' (2 credits, their
 # priority lane, which may arrive faster). Switch with SEMAPHORE_ROUTE in .env, no code change.

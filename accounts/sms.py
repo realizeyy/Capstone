@@ -73,14 +73,26 @@ def _send_via_semaphore(e164, code):
             body = json.loads(response.read().decode())
     except urllib.error.HTTPError as exc:
         # Never log the payload: it holds the API key and the code.
-        logger.error('Semaphore rejected the %s request: HTTP %s', route, exc.code)
+        detail = ''
+        try:
+            if hasattr(exc, 'read'):
+                detail = exc.read().decode('utf-8', errors='replace')
+        except Exception:
+            pass
+        logger.error('Semaphore rejected the %s request: HTTP %s %s', route, exc.code, detail)
         raise SmsError("We couldn't send the text message. Please try again in a moment.") from exc
     except (urllib.error.URLError, TimeoutError, OSError, ValueError) as exc:
         logger.error('Semaphore %s request failed: %s', route, type(exc).__name__)
         raise SmsError("We couldn't reach the SMS service. Please try again in a moment.") from exc
 
     # Success is a list of message objects; failures come back as a dict of
-    # field errors (bad number, no credits, ...).
+    # field errors (bad number, no credits, unapproved sender name, ...).
+    if isinstance(body, dict):
+        logger.error('Semaphore returned an error for %s request: %s', route, body)
+        if 'number' in body:
+            raise SmsError("We couldn't send the text message. Please check the number and try again.")
+        raise SmsError("We couldn't send the text message. Please try again in a moment.")
+
     if not isinstance(body, list) or not body:
         logger.error('Semaphore returned an unexpected %s response shape: %s', route, type(body).__name__)
         raise SmsError("We couldn't send the text message. Please try again in a moment.")
