@@ -18,3 +18,6 @@ findings.json
 REPORT.md
 FINDINGS-DETAIL.md
 GEMINI.md
+.keep-the-why
+context/
+agents.md

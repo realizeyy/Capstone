@@ -39,7 +39,7 @@ class LayoutTests(SecurityTestCase):
         r = self.client.post(reverse('clergy:my_profile'), {
             'name': 'Fr. Juan Dela Cruz', 'gender': 'Male', 'date_of_birth': '1980-01-01',
             'baptism_date': '1981-01-01', 'confirmation_date': '1995-01-01',
-            'address': 'Baguio City', 'email': 'juan@example.org', 'username': 'hacker', 'password': 'x'})
+            'address': 'Baguio City', 'email': 'juan@gmail.com', 'username': 'hacker', 'password': 'x'})
         self.assertRedirects(r, reverse('clergy:my_profile'), fetch_redirect_response=False)
         self.record.refresh_from_db()
         self.assertEqual(self.record.name, 'Fr. Juan Dela Cruz')

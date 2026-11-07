@@ -736,7 +736,8 @@
 
           <div class="field">
             <label>Email Address <span class="req-mark">*</span></label>
-            <input name="email" type="email" value="{{ profile.record.email|default:'' }}" required>
+            <input name="email" type="email" value="{{ profile.record.email|default:'' }}" pattern="[a-zA-Z0-9._%+-]+@[gG][mM][aA][iI][lL]\.[cC][oO][mM]" placeholder="example@gmail.com" title="Please enter a valid Gmail address (@gmail.com)" required>
+            <span class="muted" style="font-size: 11px; color: #64748b;">Only Gmail accounts (@gmail.com) are accepted at this time.</span>
           </div>
         </div>
 

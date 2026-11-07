@@ -699,7 +699,8 @@
        title="Verified by the clergy member. Only they can change it.">
               </div>
               <div class="edit-field">
-                <label>Email Address</label><input name="email" type="email" value="{{ record.email|default:'' }}">
+                <label>Email Address</label><input name="email" type="email" value="{{ record.email|default:'' }}" pattern="[a-zA-Z0-9._%+-]+@[gG][mM][aA][iI][lL]\.[cC][oO][mM]" placeholder="example@gmail.com" title="Please enter a valid Gmail address (@gmail.com)">
+                <span class="muted" style="font-size: 11px; color: #64748b; display: block; margin-top: 4px;">Only Gmail accounts (@gmail.com) are accepted at this time.</span>
               </div>
             </div>
 

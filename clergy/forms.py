@@ -129,6 +129,15 @@ class ClergyRecordSelfServiceForm(forms.ModelForm):
             raise forms.ValidationError('Date of birth cannot be in the future.')
         return dob
 
+    def clean_email(self):
+        email = (self.cleaned_data.get('email') or '').strip()
+        if not email:
+            raise forms.ValidationError('Email address is required.')
+        parts = email.split('@')
+        if len(parts) != 2 or not parts[0] or parts[1].lower() != 'gmail.com':
+            raise forms.ValidationError('Only Gmail addresses (@gmail.com) are accepted.')
+        return f"{parts[0]}@gmail.com"
+
     def clean(self):
         cleaned_data = super().clean()
         rank = self.instance.rank if self.instance else 'deacon'

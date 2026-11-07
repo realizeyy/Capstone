@@ -188,7 +188,7 @@ class RecordEventTests(MediaFolderMixin, TestCase):
     def save_profile(self, **changes):
         return self.clergy.post(reverse('clergy:my_profile'), {
             'name': 'Fr. Juan', 'gender': 'Male', 'date_of_birth': '1980-01-01', 'baptism_date': '1981-01-01',
-            'confirmation_date': '1995-01-01', 'email': 'juan@example.org', 'address': 'Baguio City', **changes})
+            'confirmation_date': '1995-01-01', 'email': 'juan@gmail.com', 'address': 'Baguio City', **changes})
 
     def test_saving_the_profile_names_what_changed_but_never_the_values(self):
         self.save_profile(sss_number='34-1234567-8')

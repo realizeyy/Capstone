@@ -197,7 +197,7 @@ class EnhancedClergyProfileTests(TestCase):
             'baptism_date': '1980-06-01',
             'confirmation_date': '1992-06-01',
             'address': 'Bontoc, Mountain Province',
-            'email': 'luke@example.com',
+            'email': 'luke@gmail.com',
             'marriage_date': '2008-10-12',
             'marriage_place': 'Epiphany Church, La Trinidad',
             'spouse_name': 'Mara Jade',
@@ -250,7 +250,7 @@ class EnhancedClergyProfileTests(TestCase):
             'baptism_date': '1980-06-01',
             'confirmation_date': '1992-06-01',
             'address': 'Bontoc, Mountain Province',
-            'email': 'luke@example.com',
+            'email': 'luke@gmail.com',
             'diaconate_date': '2005-07-15',
             'diaconate_place': 'Holy Trinity Church, Sagada',
             'ordination_date': '2006-08-20',
@@ -313,7 +313,7 @@ class EnhancedClergyProfileTests(TestCase):
             'baptism_date': '1980-06-01',
             'confirmation_date': '1992-06-01',
             'address': 'Bontoc, Mountain Province',
-            'email': 'luke@example.com',
+            'email': 'luke@gmail.com',
             'marriage_date': '2008-10-12',
             'marriage_place': 'Epiphany Church, La Trinidad',
             'spouse_name': 'Mara Jade',
@@ -352,7 +352,7 @@ class EnhancedClergyProfileTests(TestCase):
             'baptism_date': '1980-06-01',
             'confirmation_date': '1992-06-01',
             'address': 'Bontoc, Mountain Province',
-            'email': 'luke@example.com',
+            'email': 'luke@gmail.com',
         }
         res = self.client.post(reverse('clergy:my_profile'), post_data, follow=True)
         self.assertEqual(res.status_code, 200)
@@ -362,6 +362,52 @@ class EnhancedClergyProfileTests(TestCase):
         self.assertIsNone(self.profile.marriage_date)
         self.assertEqual(self.profile.spouse_name, '')
         self.assertEqual(self.profile.children.count(), 0)
+
+    def test_clergy_email_accepts_gmail(self):
+        post_data = {
+            'name': 'Fr. Luke Skywalker Updated',
+            'date_of_birth': '1980-05-15',
+            'gender': 'Male',
+            'civil_status': 'Single',
+            'baptism_date': '1980-06-01',
+            'confirmation_date': '1992-06-01',
+            'address': 'Bontoc, Mountain Province',
+            'email': 'Father.Luke@GMAIL.COM',
+        }
+        res = self.client.post(reverse('clergy:my_profile'), post_data, follow=True)
+        self.assertEqual(res.status_code, 200)
+        self.record.refresh_from_db()
+        self.assertEqual(self.record.email, 'Father.Luke@gmail.com')
+
+    def test_clergy_email_rejects_non_gmail(self):
+        post_data = {
+            'name': 'Fr. Luke Skywalker Updated',
+            'date_of_birth': '1980-05-15',
+            'gender': 'Male',
+            'civil_status': 'Single',
+            'baptism_date': '1980-06-01',
+            'confirmation_date': '1992-06-01',
+            'address': 'Bontoc, Mountain Province',
+            'email': 'luke@yahoo.com',
+        }
+        res = self.client.post(reverse('clergy:my_profile'), post_data)
+        self.assertContains(res, 'Only Gmail addresses (@gmail.com) are accepted.')
+        self.record.refresh_from_db()
+        self.assertNotEqual(self.record.email, 'luke@yahoo.com')
+
+    def test_clergy_email_is_required_on_profile(self):
+        post_data = {
+            'name': 'Fr. Luke Skywalker Updated',
+            'date_of_birth': '1980-05-15',
+            'gender': 'Male',
+            'civil_status': 'Single',
+            'baptism_date': '1980-06-01',
+            'confirmation_date': '1992-06-01',
+            'address': 'Bontoc, Mountain Province',
+            'email': '',
+        }
+        res = self.client.post(reverse('clergy:my_profile'), post_data)
+        self.assertContains(res, 'Email address is required.')
 
     def test_clergy_can_add_and_delete_deployments(self):
         # Add deployment
@@ -614,7 +660,7 @@ class EnhancedClergyProfileTests(TestCase):
                 'date_of_birth': '1980-05-10',
                 'place_of_birth': 'Bontoc',
                 'address': '123 Cathedral Rd',
-                'email': 'fr.quick@example.com',
+                'email': 'fr.quick@gmail.com',
                 'baptism_date': '1980-06-15',
                 'confirmation_date': '1992-05-20',
             },

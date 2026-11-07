@@ -261,6 +261,14 @@ class ClergyRecord(models.Model):
             errors['consecration_date'] = 'Bishop consecration date cannot be earlier than Priesthood ordination date.'
         if self.diaconate_date and self.consecration_date and self.diaconate_date > self.consecration_date:
             errors['consecration_date'] = 'Bishop consecration date cannot be earlier than Diaconate ordination date.'
+        if self.email:
+            email_val = self.email.strip()
+            if email_val:
+                parts = email_val.split('@')
+                if len(parts) != 2 or not parts[0] or parts[1].lower() != 'gmail.com':
+                    errors['email'] = 'Only Gmail addresses (@gmail.com) are accepted.'
+                else:
+                    self.email = f"{parts[0]}@gmail.com"
         if errors:
             raise ValidationError(errors)
 

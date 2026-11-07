@@ -230,6 +230,27 @@ class BlankFieldTests(TestCase):
         for field in blanks:
             self.assertIn(getattr(self.record, field), (None, ''), field)
 
+    def test_saving_valid_gmail_address(self):
+        res = self.client.post(reverse('registrar:record_detail', args=[self.record.id]), {
+            'name': 'Fr. New',
+            'status': 'Active',
+            'rank': 'postulancy',
+            'email': 'Fr.New@GMAIL.COM',
+        })
+        self.record.refresh_from_db()
+        self.assertEqual(self.record.email, 'Fr.New@gmail.com')
+
+    def test_saving_non_gmail_address_rejected(self):
+        res = self.client.post(reverse('registrar:record_detail', args=[self.record.id]), {
+            'name': 'Fr. New',
+            'status': 'Active',
+            'rank': 'postulancy',
+            'email': 'fr.new@yahoo.com',
+        }, follow=True)
+        self.assertContains(res, 'Only Gmail addresses (@gmail.com) are accepted.')
+        self.record.refresh_from_db()
+        self.assertNotEqual(self.record.email, 'fr.new@yahoo.com')
+
 
 class PerDeaneryReportTests(TestCase):
     def test_uses_record_deanery_fk_and_falls_back_to_parish_mapping_when_unset(self):
