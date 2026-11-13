@@ -247,6 +247,10 @@ def seed_one(index, r, parishes, special, used_emails, force):
 def run():
     dry = '--dry-run' in sys.argv
     force = '--force' in sys.argv
+    limit = 0
+    for a in sys.argv:
+        if a.startswith('--limit='):
+            limit = int(a.split('=', 1)[1])
 
     # Make sure the lookup data (deaneries, parishes, document types) exists.
     call_command('seed_deaneries')
@@ -265,18 +269,25 @@ def run():
 
     used_emails = set(ClergyRecord.objects.exclude(email__isnull=True).exclude(email='')
                       .exclude(id__in=[r.id for r in records]).values_list('email', flat=True))
-    skipped = 0
-    with transaction.atomic():
-        for i, r in enumerate(records):
-            if not hasattr(r, 'profile'):
-                print(f"SKIP {r.id} {r.name}: no clergy profile/login account linked yet")
-                skipped += 1
-                continue
-            print(seed_one(i, r, parishes, special, used_emails, force))
-        if dry:
-            transaction.set_rollback(True)
-            print('Dry run: rolled back, nothing saved.')
-    print(f"Done. Filled {len(records) - skipped}, skipped {skipped}.")
+    skipped = filled = 0
+    # Each record commits on its own, so a dropped console loses at most one record and
+    # a re-run continues where it stopped. --limit N fills only N records per run (a batch).
+    for i, r in enumerate(records):
+        if limit and filled >= limit:
+            break
+        if not hasattr(r, 'profile'):
+            print(f"SKIP {r.id} {r.name}: no clergy profile/login account linked yet")
+            skipped += 1
+            continue
+        with transaction.atomic():
+            print(seed_one(i, r, parishes, special, used_emails, force), flush=True)
+            filled += 1
+            if dry:
+                transaction.set_rollback(True)
+    if dry:
+        print('Dry run: rolled back, nothing saved.')
+    remaining = len(records) - filled - skipped
+    print(f"Done. Filled {filled}, skipped {skipped}, still unseeded {remaining if limit else 0}.")
 
 
 if __name__ == '__main__':
