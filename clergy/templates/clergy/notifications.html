@@ -46,10 +46,21 @@
       </div>
     </div>
 
-    <div class="page-tabs">
-      {% for value, label in tabs %}
-      <a class="{% if tab == value %}active{% endif %}" href="?tab={{ value }}">{{ label }}</a>
-      {% endfor %}
+    <div class="page-tabs-bar">
+      <div class="page-tabs">
+        {% for value, label in tabs %}
+        <a class="{% if tab == value %}active{% endif %}" href="?tab={{ value }}">{{ label }}</a>
+        {% endfor %}
+      </div>
+      <div class="page-tabs-search">
+        <div class="page-tabs-search-box">
+          <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+          <input type="text" class="page-search-input" id="notifSearchInput" placeholder="Search notifications..." aria-label="Search notifications" autocomplete="off">
+          <button type="button" class="search-clear" id="notifSearchClear" aria-label="Clear search" hidden>
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
     </div>
 
     <ul class="notif-list">
@@ -92,4 +103,63 @@
 
 {% block extra_js %}
 <script src="{% static 'clergy/js/notifications.js' %}"></script>
+<script>
+(function() {
+  const searchInput = document.getElementById('notifSearchInput');
+  const clearBtn = document.getElementById('notifSearchClear');
+  if (!searchInput) return;
+
+  const items = document.querySelectorAll('.notif-list li.notif');
+  const emptyLi = document.querySelector('.notif-list li.notif-empty');
+
+  function doSearch() {
+    const q = searchInput.value.trim().toLowerCase();
+    if (clearBtn) clearBtn.hidden = !q;
+
+    let matches = 0;
+    items.forEach(function(item) {
+      if (!q) {
+        item.style.display = '';
+        matches++;
+      } else {
+        const text = item.textContent.toLowerCase();
+        const ok = text.includes(q);
+        item.style.display = ok ? '' : 'none';
+        if (ok) matches++;
+      }
+    });
+
+    if (emptyLi) {
+      emptyLi.style.display = (items.length > 0 && matches === 0 && q) ? '' : (items.length === 0 ? '' : 'none');
+      if (matches === 0 && q) {
+        emptyLi.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> No notifications match "' + q + '".';
+      }
+    }
+  }
+
+  searchInput.addEventListener('input', doSearch);
+  searchInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      searchInput.value = '';
+      doSearch();
+      searchInput.blur();
+    }
+  });
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function() {
+      searchInput.value = '';
+      doSearch();
+      searchInput.focus();
+    });
+  }
+
+  // Handle incoming 'q' query parameter (e.g. from Dashboard global search)
+  var urlParams = new URLSearchParams(window.location.search);
+  var incomingQ = urlParams.get('q');
+  if (incomingQ) {
+    searchInput.value = incomingQ;
+    doSearch();
+  }
+})();
+</script>
 {% endblock %}

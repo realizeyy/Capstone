@@ -3,13 +3,50 @@
 {% block page_name %}My Dashboard{% endblock %}
 {% block page_name_heading %}My Dashboard{% endblock %}
 
+{% block top_actions %}
+<div class="dashboard-search-wrapper" id="dashboardSearchWrapper">
+  <div class="page-tabs-search-box dashboard-search-box">
+    <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+    <input type="text" class="page-search-input" id="dashboardSearchInput" placeholder="Search portal (docs, profile, actions)..." aria-label="Search across entire clergy portal" autocomplete="off">
+    <button type="button" class="search-clear" id="dashboardSearchClear" aria-label="Clear search" hidden>
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <!-- Global Portal Search Dropdown -->
+  <div id="dashboardGlobalSearchDropdown" class="global-search-dropdown" style="display:none;" role="listbox" aria-label="Portal search results">
+    <div class="global-search-header">
+      <span id="globalSearchResultCount">Portal Search Results</span>
+      <span><kbd>Esc</kbd> to close</span>
+    </div>
+    <div class="global-search-results-list" id="globalSearchResultsList">
+      <!-- Injected dynamically via JS from catalog -->
+    </div>
+    <div class="global-search-footer">
+      <div class="global-search-shortcuts">
+        <span><kbd>&uarr;</kbd><kbd>&darr;</kbd> Navigate</span>
+        <span><kbd>&crarr;</kbd> Select</span>
+      </div>
+      <div class="global-search-tag">Global Clergy Search</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
 {% block content %}
 <section class="page active">
 
-  <div class="welcome">
-    <h2>Welcome, {{ profile.full_name }}</h2>
-    <p>This portal is limited to your own clergy information and self-service transactions.</p>
+  {% if show_welcome %}
+  <div class="welcome" id="clergyWelcomeBanner" data-user-id="{{ request.user.id }}">
+    <div class="welcome-content">
+      <h2>Welcome, {{ profile.full_name }}</h2>
+      <p>This portal is limited to your own clergy information and self-service transactions.</p>
+    </div>
+    <button type="button" class="welcome-dismiss" id="welcomeDismissBtn" aria-label="Dismiss welcome message" title="Dismiss">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
   </div>
+  {% endif %}
 
   <div class="cards">
 
@@ -45,7 +82,7 @@
       <div class="info-grid">
         <div class="info"><label>Full Name</label><b>{{ profile.full_name }}</b></div>
         <div class="info"><label>Record ID</label><b>{{ profile.record.id|default:"Pending" }}</b></div>
-        <div class="info"><label>Current Rank</label><b>{{ profile.record.get_rank_display|default:"—" }}</b></div>
+        <div class="info"><label>Current Rank</label><b>{{ profile.record.get_rank_display|default:"-" }}</b></div>
         <div class="info"><label>Assignment</label><b>{{ profile.record.assignment|default:"Not assigned" }}</b></div>
         <div class="info"><label>Status</label><b>{{ profile.record.status|default:"Active" }}</b></div>
         <div class="info"><label>Contract End</label><b>{{ profile.record.contract_end|default:"Not yet assigned" }}</b></div>
@@ -61,12 +98,321 @@
         </div>
       </div>
       <div class="quick">
-        <a href="{% url 'clergy:my_requirements' %}"><b><i class="fa-solid fa-folder-open"></i> My Requirements &amp; Attachments</b><span>View and submit your required documents</span></a>
+        <a href="{% url 'clergy:my_requirements' %}"><b><i class="fa-solid fa-folder-open"></i> My Requirements &amp; Attachments</b><span>View and submit your required documents and ember letters</span></a>
+        <a href="{% url 'clergy:my_profile' %}"><b><i class="fa-solid fa-user-pen"></i> Update Profile &amp; Information</b><span>Edit personal details, education, family, and password</span></a>
+        <a href="{% url 'clergy:notifications' %}"><b><i class="fa-solid fa-bell"></i> Notifications &amp; Reminders</b><span>View alerts, expirations, and activity history</span></a>
         <a href="{% url 'clergy:print_own_record' %}" target="_blank"><b><i class="fa-solid fa-print"></i> Print Own Records</b><span>Print a copy of your own clergy record</span></a>
       </div>
     </div>
 
   </div>
 
+  <div id="dashboardSearchEmpty" class="search-empty-state" style="display:none;" aria-live="polite">
+    <div class="search-empty-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+    <div class="search-empty-title">No matching dashboard items found</div>
+    <p class="search-empty-text">No record fields, stats, or quick actions match "<span id="dashboardSearchQuery"></span>".</p>
+    <button type="button" class="btn secondary" id="dashboardSearchResetBtn"><i class="fa-solid fa-rotate-left"></i> Clear Search</button>
+  </div>
+
 </section>
+
+{{ portal_catalog|json_script:"portalSearchCatalogData" }}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 1. Welcome banner dismiss logic with localStorage persistence
+  var welcomeBanner = document.getElementById('clergyWelcomeBanner');
+  var welcomeDismissBtn = document.getElementById('welcomeDismissBtn');
+  if (welcomeBanner) {
+    var userId = welcomeBanner.getAttribute('data-user-id') || '0';
+    var storageKey = 'ednp_welcome_dismissed_' + userId;
+    if (localStorage.getItem(storageKey) === '1') {
+      welcomeBanner.style.display = 'none';
+    } else if (welcomeDismissBtn) {
+      welcomeDismissBtn.addEventListener('click', function() {
+        welcomeBanner.style.display = 'none';
+        try {
+          localStorage.setItem(storageKey, '1');
+        } catch (e) {}
+      });
+    }
+  }
+
+  // 2. Load Cross-Portal Search Catalog
+  var catalogEl = document.getElementById('portalSearchCatalogData');
+  var portalCatalog = catalogEl ? JSON.parse(catalogEl.textContent || '[]') : [];
+
+  var searchInput = document.getElementById('dashboardSearchInput');
+  var searchClear = document.getElementById('dashboardSearchClear');
+  var searchWrapper = document.getElementById('dashboardSearchWrapper');
+  var dropdown = document.getElementById('dashboardGlobalSearchDropdown');
+  var resultsList = document.getElementById('globalSearchResultsList');
+  var countSpan = document.getElementById('globalSearchResultCount');
+
+  // In-page dashboard elements
+  var emptyState = document.getElementById('dashboardSearchEmpty');
+  var searchQuerySpan = document.getElementById('dashboardSearchQuery');
+  var resetBtn = document.getElementById('dashboardSearchResetBtn');
+
+  var statCards = Array.from(document.querySelectorAll('.cards .stat'));
+  var infoRows = Array.from(document.querySelectorAll('.info-grid .info'));
+  var quickLinks = Array.from(document.querySelectorAll('.quick a'));
+  var gridPanels = Array.from(document.querySelectorAll('.grid .panel'));
+  var recordPanel = gridPanels[0] || null;
+  var quickPanel = gridPanels[1] || null;
+  var cardsContainer = document.querySelector('.cards');
+
+  var activeIndex = -1;
+  var currentResultItems = [];
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function highlightMatch(text, query) {
+    if (!text || !query) return escapeHtml(text);
+    var safeText = String(text);
+    var lowerText = safeText.toLowerCase();
+    var lowerQ = query.toLowerCase();
+    var idx = lowerText.indexOf(lowerQ);
+    if (idx === -1) return escapeHtml(safeText);
+    var before = safeText.substring(0, idx);
+    var matched = safeText.substring(idx, idx + query.length);
+    var after = safeText.substring(idx + query.length);
+    return escapeHtml(before) + '<mark>' + escapeHtml(matched) + '</mark>' + escapeHtml(after);
+  }
+
+  function updateActiveItem() {
+    currentResultItems.forEach(function(el, i) {
+      if (i === activeIndex) {
+        el.classList.add('active');
+        el.scrollIntoView({ block: 'nearest' });
+      } else {
+        el.classList.remove('active');
+      }
+    });
+  }
+
+  function renderGlobalResults(query) {
+    if (!dropdown || !resultsList) return;
+
+    if (!query) {
+      dropdown.style.display = 'none';
+      resultsList.innerHTML = '';
+      currentResultItems = [];
+      activeIndex = -1;
+      return;
+    }
+
+    var lowerQ = query.toLowerCase();
+
+    // Filter catalog
+    var matches = portalCatalog.filter(function(item) {
+      if (item.title && item.title.toLowerCase().indexOf(lowerQ) !== -1) return true;
+      if (item.subtitle && item.subtitle.toLowerCase().indexOf(lowerQ) !== -1) return true;
+      if (item.keywords && item.keywords.indexOf(lowerQ) !== -1) return true;
+      if (item.category && item.category.toLowerCase().indexOf(lowerQ) !== -1) return true;
+      return false;
+    });
+
+    if (matches.length === 0) {
+      countSpan.textContent = '0 results found';
+      resultsList.innerHTML = '<div class="search-dropdown-empty">' +
+        '<i class="fa-solid fa-magnifying-glass"></i>' +
+        '<p>No portal items match "<b>' + escapeHtml(query) + '</b>"</p>' +
+        '<small>Try searching for a document (e.g. "Birth", "Medical"), profile field ("Education", "Family"), or action.</small>' +
+        '</div>';
+      dropdown.style.display = 'flex';
+      currentResultItems = [];
+      activeIndex = -1;
+      return;
+    }
+
+    // Group by category
+    var groups = {};
+    matches.forEach(function(item) {
+      var cat = item.category || 'Other';
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(item);
+    });
+
+    countSpan.textContent = 'Found ' + matches.length + ' result' + (matches.length === 1 ? '' : 's') + ' across portal';
+    var html = '';
+    var itemIndex = 0;
+
+    Object.keys(groups).forEach(function(cat) {
+      html += '<div class="search-group-heading">' + escapeHtml(cat) + '</div>';
+      groups[cat].forEach(function(item) {
+        var highlightedTitle = highlightMatch(item.title, query);
+        var highlightedSubtitle = highlightMatch(item.subtitle, query);
+        var badgeHtml = item.badge ? '<span class="badge ' + (item.badge_class || 'slate') + '">' + escapeHtml(item.badge) + '</span>' : '';
+
+        html += '<a href="' + escapeHtml(item.url) + '" class="global-search-item' + (itemIndex === 0 ? ' active' : '') + '" data-item-idx="' + itemIndex + '">' +
+          '<div class="search-item-icon ' + (item.badge_class || 'slate') + '">' +
+          '<i class="' + escapeHtml(item.icon || 'fa-solid fa-arrow-right') + '"></i>' +
+          '</div>' +
+          '<div class="search-item-body">' +
+          '<div class="search-item-title-row">' +
+          '<span class="search-item-title">' + highlightedTitle + '</span>' +
+          badgeHtml +
+          '</div>' +
+          '<div class="search-item-subtitle">' + highlightedSubtitle + '</div>' +
+          '</div>' +
+          '<div class="search-item-action">' +
+          '<span>Jump</span> <i class="fa-solid fa-arrow-right"></i>' +
+          '</div>' +
+          '</a>';
+        itemIndex++;
+      });
+    });
+
+    resultsList.innerHTML = html;
+    dropdown.style.display = 'flex';
+
+    currentResultItems = Array.from(resultsList.querySelectorAll('.global-search-item'));
+    activeIndex = currentResultItems.length > 0 ? 0 : -1;
+  }
+
+  function filterInPageDashboard(query) {
+    if (!query) {
+      statCards.forEach(function(el) { el.style.display = ''; });
+      infoRows.forEach(function(el) { el.style.display = ''; });
+      quickLinks.forEach(function(el) { el.style.display = ''; });
+      if (cardsContainer) cardsContainer.style.display = '';
+      if (recordPanel) recordPanel.style.display = '';
+      if (quickPanel) quickPanel.style.display = '';
+      if (emptyState) emptyState.style.display = 'none';
+      return;
+    }
+
+    var lowerQ = query.toLowerCase();
+
+    var statMatches = 0;
+    statCards.forEach(function(el) {
+      var match = el.textContent.toLowerCase().indexOf(lowerQ) !== -1;
+      el.style.display = match ? '' : 'none';
+      if (match) statMatches++;
+    });
+    if (cardsContainer) {
+      cardsContainer.style.display = (statMatches > 0) ? '' : 'none';
+    }
+
+    var infoMatches = 0;
+    infoRows.forEach(function(el) {
+      var match = el.textContent.toLowerCase().indexOf(lowerQ) !== -1;
+      el.style.display = match ? '' : 'none';
+      if (match) infoMatches++;
+    });
+    if (recordPanel) {
+      recordPanel.style.display = (infoMatches > 0) ? '' : 'none';
+    }
+
+    var quickMatches = 0;
+    quickLinks.forEach(function(el) {
+      var match = el.textContent.toLowerCase().indexOf(lowerQ) !== -1;
+      el.style.display = match ? '' : 'none';
+      if (match) quickMatches++;
+    });
+    if (quickPanel) {
+      quickPanel.style.display = (quickMatches > 0) ? '' : 'none';
+    }
+
+    var totalMatches = statMatches + infoMatches + quickMatches;
+    if (emptyState) {
+      if (totalMatches === 0 && (!currentResultItems || currentResultItems.length === 0)) {
+        if (searchQuerySpan) searchQuerySpan.textContent = query;
+        emptyState.style.display = '';
+      } else {
+        emptyState.style.display = 'none';
+      }
+    }
+  }
+
+  function handleSearchInput() {
+    var query = (searchInput.value || '').trim();
+    if (searchClear) {
+      searchClear.hidden = !query;
+    }
+    renderGlobalResults(query);
+    filterInPageDashboard(query);
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', handleSearchInput);
+
+    searchInput.addEventListener('focus', function() {
+      var query = (searchInput.value || '').trim();
+      if (query) {
+        renderGlobalResults(query);
+      }
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowDown') {
+        if (currentResultItems.length > 0) {
+          e.preventDefault();
+          activeIndex = (activeIndex + 1) % currentResultItems.length;
+          updateActiveItem();
+        }
+      } else if (e.key === 'ArrowUp') {
+        if (currentResultItems.length > 0) {
+          e.preventDefault();
+          activeIndex = (activeIndex - 1 + currentResultItems.length) % currentResultItems.length;
+          updateActiveItem();
+        }
+      } else if (e.key === 'Enter') {
+        if (currentResultItems.length > 0 && activeIndex >= 0 && activeIndex < currentResultItems.length) {
+          e.preventDefault();
+          var href = currentResultItems[activeIndex].getAttribute('href');
+          if (href) window.location.href = href;
+        }
+      } else if (e.key === 'Escape') {
+        searchInput.value = '';
+        handleSearchInput();
+        if (dropdown) dropdown.style.display = 'none';
+        searchInput.blur();
+      }
+    });
+  }
+
+  // Close dropdown on click outside
+  document.addEventListener('click', function(e) {
+    if (searchWrapper && !searchWrapper.contains(e.target)) {
+      if (dropdown) dropdown.style.display = 'none';
+    }
+  });
+
+  if (searchClear) {
+    searchClear.addEventListener('click', function() {
+      searchInput.value = '';
+      searchInput.focus();
+      handleSearchInput();
+    });
+  }
+
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function() {
+      searchInput.value = '';
+      searchInput.focus();
+      handleSearchInput();
+    });
+  }
+
+  // Keyboard shortcut '/' to quickly focus search input when not typing in another input
+  document.addEventListener('keydown', function(e) {
+    if (e.key === '/' && document.activeElement !== searchInput && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
+      e.preventDefault();
+      searchInput.focus();
+    }
+  });
+});
+</script>
 {% endblock %}

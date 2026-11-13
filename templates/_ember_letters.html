@@ -1,9 +1,14 @@
 {% load static %}
 <div class="ember-root" id="emberLettersRoot">
-  <div class="notice">
-    Upload quarterly Ember Letters (Q1 to Q4) by year (3 to 4 years only). Select a year to unlock Q1; uploading or skipping a quarter unlocks the next.
-    <br>
-    Accepted formats: <b>PDF, JPG, or PNG</b> (maximum <b>5 MB</b> per file). Uploads run one at a time automatically.
+  <div class="notice" id="noticeEmberLetters">
+    <div class="notice-content">
+      Upload quarterly Ember Letters (Q1 to Q4) by year (3 to 4 years only). Select a year to unlock Q1; uploading or skipping a quarter unlocks the next.
+      <br>
+      Accepted formats: <b>PDF, JPG, or PNG</b> (maximum <b>5 MB</b> per file). Uploads run one at a time automatically.
+    </div>
+    <button type="button" class="notice-dismiss" data-dismiss-notice="noticeEmberLetters" aria-label="Dismiss notice" title="Dismiss">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
   </div>
 
   <div class="ember-header-bar">

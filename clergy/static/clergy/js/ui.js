@@ -243,9 +243,11 @@ if(profilePicInput){
    flex-direction: column;
    padding: 0 !important;
    overflow: hidden;
+   overscroll-behavior: contain;
   }
   #docPreviewModal {
-   z-index: 95 !important;
+   z-index: 105 !important;
+   overscroll-behavior: contain;
   }
   .toast {
    z-index: 120 !important;
@@ -416,72 +418,140 @@ if(profilePicInput){
   `;
   document.body.appendChild(modal);
 
-  function closePreview(){
-   modal.classList.remove('show');
-   const frame=document.getElementById('docPreviewFrame');
-   if(frame)frame.src='about:blank';
-   if(activePreviewTrigger){
-    const field=activePreviewTrigger.closest('.field, .edit-field, .doc-card');
-    if(field){
-     field.scrollIntoView({behavior:'smooth',block:'center'});
-    }
-    activePreviewTrigger.focus();
-   }
-  }
-
   modal.addEventListener('click',function(e){
    if(e.target===modal)closePreview();
   });
-  document.getElementById('docPreviewCloseTop')?.addEventListener('click',closePreview);
-  document.getElementById('docPreviewBackBtn')?.addEventListener('click',closePreview);
-  document.getElementById('docPreviewPrintBtn')?.addEventListener('click',function(){
+  modal.addEventListener('wheel',function(e){
+   if(e.target===modal)e.preventDefault();
+  },{passive:false});
+  modal.querySelector('#docPreviewCloseTop')?.addEventListener('click',closePreview);
+  modal.querySelector('#docPreviewBackBtn')?.addEventListener('click',closePreview);
+  modal.querySelector('#docPreviewPrintBtn')?.addEventListener('click',function(){
    if(activePreviewUrl)quickPrintFile(activePreviewUrl);
   });
-  document.getElementById('docPreviewConfirmBtn')?.addEventListener('click',function(){
+  modal.querySelector('#docPreviewConfirmBtn')?.addEventListener('click',function(){
    if(activePreviewTrigger){
-    const container=activePreviewTrigger.closest('.date-att-bar, .doc-card');
+    const container=activePreviewTrigger.closest('.date-att-bar, .doc-card, .doc-row, .doc-bar');
     if(container&&!container.querySelector('.preview-confirmed-tag')){
      const tag=document.createElement('span');
      tag.className='preview-confirmed-tag';
      tag.innerHTML='<i class="fa-solid fa-check"></i> Confirmed';
-     const statusEl=container.querySelector('.att-status, .doc-card-head');
+     const statusEl=container.querySelector('.att-status, .doc-card-head, .col-status');
      if(statusEl)statusEl.appendChild(tag);
     }
    }
    showToast(activePreviewTitle+' confirmed.','success');
    closePreview();
   });
-  document.addEventListener('keydown',function(e){
-   if(e.key==='Escape'&&modal.classList.contains('show'))closePreview();
-  });
   return modal;
  }
 
- document.addEventListener('click',function(e){
-  const viewLink=e.target.closest('a.att-btn.view, .doc-card .row-actions a[href*="/documents/"][href$="/view/"]');
-  if(!viewLink||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
-  const href=viewLink.getAttribute('href');
-  if(!href)return;
-  e.preventDefault();
-  e.stopImmediatePropagation();
-  activePreviewTrigger=viewLink;
-  activePreviewUrl=href;
-  const cardOrBar=viewLink.closest('[data-doc-title], .doc-card, .date-att-bar');
-  activePreviewTitle=
-   viewLink.dataset.docName||
-   (cardOrBar&&cardOrBar.dataset.docTitle)||
-   (cardOrBar&&cardOrBar.querySelector('.doc-card-head b')?.textContent)||
-   'Document Preview';
+ function closePreview(){
+  const modal=document.getElementById('docPreviewModal');
+  if(!modal)return;
+  modal.classList.remove('show', 'active');
+  modal.style.display='none';
+  if(typeof window.syncBodyScrollLock==='function'){
+   window.syncBodyScrollLock();
+  }else{
+   document.body.classList.remove('modal-open');
+  }
+  const frame=document.getElementById('docPreviewFrame');
+  if(frame)frame.src='about:blank';
+  if(activePreviewTrigger){
+   const field=activePreviewTrigger.closest('.field, .edit-field, .doc-card, .doc-row, .doc-bar');
+   if(field){
+    field.scrollIntoView({behavior:'smooth',block:'center'});
+   }
+   if(typeof activePreviewTrigger.focus==='function'){
+    activePreviewTrigger.focus();
+   }
+  }
+ }
+ window.closeDocPreview=closePreview;
+
+ function openDocPreview(url, title, triggerEl){
+  if(!url) return;
+  activePreviewTrigger=triggerEl||null;
+  activePreviewUrl=url;
+  activePreviewTitle=title||(triggerEl&&(
+   triggerEl.dataset.docName||
+   triggerEl.dataset.docTitle||
+   triggerEl.querySelector('.doc-table-link span, .col-name span, .doc-card-head b')?.textContent
+  ))||'Document Preview';
+
   const modal=ensurePreviewModal();
   const titleSpan=modal.querySelector('#docPreviewTitle span');
   if(titleSpan)titleSpan.textContent='Preview: '+activePreviewTitle;
   const frame=modal.querySelector('#docPreviewFrame');
-  if(frame)frame.src=href;
+  if(frame)frame.src=url;
   const newTabBtn=modal.querySelector('#docPreviewNewTabBtn');
-  if(newTabBtn)newTabBtn.href=href;
-  modal.classList.add('show');
-  document.getElementById('docPreviewConfirmBtn')?.focus();
+  if(newTabBtn)newTabBtn.href=url;
+  modal.classList.add('show', 'active');
+  modal.style.display='flex';
+  if(typeof window.syncBodyScrollLock==='function'){
+   window.syncBodyScrollLock();
+  }else{
+   document.body.classList.add('modal-open');
+  }
+  modal.querySelector('#docPreviewBackBtn')?.focus();
+ }
+ window.openDocPreview=openDocPreview;
+
+ document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){
+   const modal=document.getElementById('docPreviewModal');
+   if(modal&&(modal.classList.contains('show')||modal.style.display==='flex'))closePreview();
+  }
+ });
+
+ document.addEventListener('click',function(e){
+  // 1. In-app document view links (including .doc-table-link, .att-btn.view, and direct /documents/.../view/ links)
+  const viewLink=e.target.closest('a.att-btn.view, a.doc-table-link, .doc-card .row-actions a[href*="/documents/"][href$="/view/"], a[href*="/documents/"][href$="/view/"]');
+  if(viewLink&&!e.metaKey&&!e.ctrlKey&&!e.shiftKey&&!e.altKey){
+   const href=viewLink.getAttribute('href');
+   if(href&&href!=='#'&&!href.startsWith('javascript:')){
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    const cardOrBar=viewLink.closest('[data-doc-title], .doc-row, .doc-bar, .doc-card, .date-att-bar');
+    const title=
+     viewLink.dataset.docName||
+     (cardOrBar&&cardOrBar.dataset.docTitle)||
+     viewLink.querySelector('span')?.textContent||
+     (cardOrBar&&cardOrBar.querySelector('.doc-table-link span, .col-name span, .doc-card-head b')?.textContent)||
+     'Document Preview';
+    openDocPreview(href, title, viewLink);
+    return;
+   }
+  }
+
+  // 2. Table row click to preview document (excluding action buttons and interactive controls)
+  const row=e.target.closest('.doc-row[data-view-url], .doc-bar[data-view-url]');
+  if(row&&!e.target.closest('.col-actions, .doc-action-btn, .doc-bar-actions, button, a, input, form')){
+   const url=row.dataset.viewUrl;
+   if(url){
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    const title=row.dataset.docTitle||row.querySelector('.col-name span')?.textContent||'Document Preview';
+    openDocPreview(url, title, row);
+    return;
+   }
+  }
  },true);
+
+ document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'){
+   const row=document.activeElement;
+   if(row&&(row.classList.contains('doc-row')||row.classList.contains('doc-bar'))&&row.dataset.viewUrl){
+    if(!row.closest('#docPreviewModal')){
+     e.preventDefault();
+     const url=row.dataset.viewUrl;
+     const title=row.dataset.docTitle||row.querySelector('.col-name span')?.textContent||'Document Preview';
+     openDocPreview(url, title, row);
+    }
+   }
+  }
+ });
 
  // 3. Zero-Reload AJAX Uploads for Quick Attachment Modal, Requirement Cards & Profile Picture
  function highlightAndReturnToField(fieldEl){
@@ -742,4 +812,81 @@ if(profilePicInput){
    try{sessionStorage.setItem(SCROLL_KEY,String(window.scrollY));}catch(_){}
   }
  });
+
+ // 7. Dismissible Notices Engine with LocalStorage Persistence
+ function getNoticeStorageKey(id) {
+  const appEl = document.getElementById('app') || document.querySelector('.app');
+  const userId = (appEl && appEl.dataset && appEl.dataset.userId) ? appEl.dataset.userId : 'u';
+  return 'ednp_notice_dismissed_' + userId + '_' + id;
+ }
+
+ function initDismissibleNotices() {
+  // Hide previously dismissed notices on page load
+  document.querySelectorAll('.notice[id]').forEach(function(notice) {
+   if (notice.id) {
+    try {
+     if (localStorage.getItem(getNoticeStorageKey(notice.id)) === '1') {
+      notice.style.display = 'none';
+     }
+    } catch (_) {}
+   }
+  });
+
+  // Auto-inject dismiss button on static notice banners that lack one
+  document.querySelectorAll('.notice').forEach(function(notice) {
+   if (notice.classList.contains('notice-row')) return;
+   if (notice.closest('.modal') && !notice.closest('.section-quick-modal')) return;
+   if (notice.id && (notice.id.toLowerCase().includes('replace') || notice.id.toLowerCase().includes('status'))) return;
+   if (notice.style.display === 'none') return;
+
+   if (!notice.querySelector('.notice-dismiss')) {
+    let contentEl = notice.querySelector('.notice-content');
+    if (!contentEl) {
+     contentEl = document.createElement('div');
+     contentEl.className = 'notice-content';
+     while (notice.firstChild) {
+      contentEl.appendChild(notice.firstChild);
+     }
+     notice.appendChild(contentEl);
+    }
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'notice-dismiss';
+    btn.setAttribute('aria-label', 'Dismiss notice');
+    btn.title = 'Dismiss';
+    if (notice.id) btn.setAttribute('data-dismiss-notice', notice.id);
+    btn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+    notice.appendChild(btn);
+   }
+  });
+ }
+
+ // Delegated click listener for notice dismiss buttons
+ document.addEventListener('click', function(e) {
+  const dismissBtn = e.target.closest('.notice-dismiss, [data-dismiss-notice]');
+  if (!dismissBtn) return;
+  const targetId = dismissBtn.getAttribute('data-dismiss-notice');
+  const notice = (targetId ? document.getElementById(targetId) : null) || dismissBtn.closest('.notice');
+  if (!notice) return;
+
+  notice.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+  notice.style.opacity = '0';
+  notice.style.transform = 'translateY(-4px)';
+  setTimeout(function() {
+   notice.style.display = 'none';
+  }, 180);
+
+  const storageId = targetId || notice.id;
+  if (storageId) {
+   try {
+    localStorage.setItem(getNoticeStorageKey(storageId), '1');
+   } catch (_) {}
+  }
+ });
+
+ if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initDismissibleNotices);
+ } else {
+  initDismissibleNotices();
+ }
 })();

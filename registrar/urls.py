@@ -6,6 +6,7 @@ app_name = 'registrar'
 
 urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('api/parishes/', views.api_parishes, name='api_parishes'),
     path('clergy-records/', views.clergy_records, name='clergy_records'),
     path('clergy-records/create/', views.create_record, name='create_record'),
     path('clergy-records/bulk-accounts/', views.bulk_accounts, name='bulk_accounts'),

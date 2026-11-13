@@ -18,6 +18,8 @@
   border-radius: 6px;
   font-size: 12.5px;
   line-height: 1.35;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 .date-att-bar.uploaded {
   background: #f0fdf4;
@@ -25,18 +27,17 @@
   color: #166534;
 }
 .date-att-bar.missing {
-  background: #fffbeb;
-  border-color: #fef08a;
-  color: #854d0e;
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #475569;
 }
 .date-att-bar .att-status {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
+  flex: 1 1 200px;
 }
 .date-att-bar .att-actions {
   display: inline-flex;
@@ -115,12 +116,39 @@
     box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
   }
 }
+.section-nav-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.section-nav-wrapper .section-nav-inner {
+  flex: 1;
+  min-width: 0;
+}
+@media (max-width: 860px) {
+  .section-nav-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  #profileStepperControl {
+    align-self: flex-start;
+  }
+}
 .section-nav-inner {
   display: flex;
   align-items: center;
   gap: 6px;
   overflow-x: auto;
   scrollbar-width: thin;
+}
+@keyframes stageCardFlash {
+  0% { box-shadow: 0 0 0 4px rgba(47, 111, 237, 0.4); transform: scale(1.01); }
+  100% { box-shadow: none; transform: scale(1); }
+}
+.stage-card-flash {
+  animation: stageCardFlash 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .section-nav-label {
   font-size: 12.5px;
@@ -163,6 +191,16 @@
   animation: fieldFlashHighlight 1.8s ease-out;
   border-radius: 8px;
 }
+html {
+  scrollbar-gutter: stable;
+}
+body.modal-open {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+body.modal-open .stage-floating-elevator {
+  display: none !important;
+}
 .modal-bg.section-modal-active {
   position: fixed;
   inset: 0;
@@ -173,6 +211,7 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
+  overscroll-behavior: contain;
 }
 .modal.section-quick-modal {
   width: min(820px, 95vw);
@@ -183,6 +222,7 @@
   border-radius: 14px;
   box-shadow: 0 24px 48px rgba(15, 23, 42, 0.28);
   overflow: hidden;
+  overscroll-behavior: contain;
 }
 .section-quick-modal .modal-head {
   padding: 16px 20px;
@@ -194,6 +234,7 @@
   padding: 18px 20px;
   overflow-y: auto;
   flex: 1;
+  overscroll-behavior: contain;
 }
 .section-quick-modal .section-modal-body .section-card {
   border: none;
@@ -374,8 +415,20 @@
   color: #166534;
 }
 .hub-att-tag.missing {
-  background: #fef3c7;
-  color: #92400e;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+.btn.saved-success {
+  background: #065f46 !important;
+  color: #ffffff !important;
+  border-color: #065f46 !important;
+  transition: all 0.2s ease;
+}
+.badge.not-uploaded-b {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
 }
 .hub-hidden-sections {
   display: none !important;
@@ -395,9 +448,20 @@
 
   <div class="panel">
 
-    <div class="page-tabs">
-      <a class="{% if active_tab == 'personal' %}active{% endif %}" href="{% url 'clergy:my_profile' %}"><i class="fa-solid fa-user"></i> My Profile</a>
-      <a class="{% if active_tab == 'security' %}active{% endif %}" href="{% url 'clergy:my_profile' %}?tab=security"><i class="fa-solid fa-shield-halved"></i> Security</a>
+    <div class="page-tabs-bar">
+      <div class="page-tabs">
+        <a class="{% if active_tab == 'personal' %}active{% endif %}" href="{% url 'clergy:my_profile' %}"><i class="fa-solid fa-user"></i> My Profile</a>
+        <a class="{% if active_tab == 'security' %}active{% endif %}" href="{% url 'clergy:my_profile' %}?tab=security"><i class="fa-solid fa-shield-halved"></i> Security</a>
+      </div>
+      <div class="page-tabs-search">
+        <div class="page-tabs-search-box">
+          <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+          <input type="text" class="page-search-input" id="profileSearchInput" placeholder="Search profile info..." aria-label="Search profile info" autocomplete="off">
+          <button type="button" class="search-clear" id="profileSearchClear" aria-label="Clear profile search" hidden>
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
     </div>
 
     {% if active_tab == 'security' %}
@@ -407,22 +471,33 @@
 
     <p class="muted tab-intro">Your personal profile is available for viewing and updating. Click any card or section tab below to edit your information.</p>
 
-    <div class="notice">
-      You can access only your own clergy profile. Your official Clergy ID, ecclesiastical status, deployment assignment, and contract terms are displayed on your Dashboard and maintained by the Registrar.
+    <div class="notice" id="noticeClergyProfileScope">
+      <div class="notice-content">
+        You can access only your own clergy profile. Your official Clergy ID, ecclesiastical status, deployment assignment, and contract terms are displayed on your Dashboard and maintained by the Registrar.
+      </div>
+      <button type="button" class="notice-dismiss" data-dismiss-notice="noticeClergyProfileScope" aria-label="Dismiss notice" title="Dismiss">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
     </div>
 
     <nav class="section-nav-sticky" id="personalSectionNav" aria-label="Quick section navigation">
-      <div class="section-nav-inner">
-        <span class="section-nav-label"><i class="fa-solid fa-bolt" style="color:#2f6fed;"></i> Quick Edit:</span>
-        <a href="#sec-identity" class="nav-pill active" data-section-modal="sec-identity" data-section-title="Identity &amp; Basic Information"><i class="fa-solid fa-id-card"></i> Identity</a>
-        <a href="#sec-contact" class="nav-pill" data-section-modal="sec-contact" data-section-title="Contact &amp; Residential Information"><i class="fa-solid fa-address-book"></i> Contact</a>
-        <a href="#sec-sacraments" class="nav-pill" data-section-modal="sec-sacraments" data-section-title="Sacramental Records"><i class="fa-solid fa-water"></i> Sacraments</a>
-        <a href="#sec-orders" class="nav-pill" data-section-modal="sec-orders" data-section-title="Holy Orders &amp; Ordination History"><i class="fa-solid fa-church"></i> Holy Orders</a>
-        <a href="#marriageFamilyCard" class="nav-pill" data-section-modal="marriageFamilyCard" data-section-title="Marriage &amp; Family Information"><i class="fa-solid fa-people-roof"></i> Family</a>
-        <a href="#sec-education" class="nav-pill" data-section-modal="sec-education" data-section-title="Educational Background"><i class="fa-solid fa-graduation-cap"></i> Education</a>
-        <a href="#sec-gov-ids" class="nav-pill" data-section-modal="sec-gov-ids" data-section-title="Government IDs"><i class="fa-solid fa-id-card"></i> Gov IDs</a>
-        <a href="#sec-deployments" class="nav-pill" data-section-modal="sec-deployments" data-section-title="Deployments &amp; Station History"><i class="fa-solid fa-map-location-dot"></i> Deployments</a>
-        <a href="#sec-medical" class="nav-pill" data-section-modal="sec-medical" data-section-title="Medical / Psychiatric Status"><i class="fa-solid fa-notes-medical"></i> Medical</a>
+      <div class="section-nav-wrapper">
+        <div class="section-nav-inner">
+          <span class="section-nav-label"><i class="fa-solid fa-bolt" style="color:#2f6fed;"></i> Quick Edit:</span>
+          <a href="#sec-identity" class="nav-pill active" data-section-modal="sec-identity" data-section-title="Identity &amp; Basic Information"><i class="fa-solid fa-id-card"></i> Identity</a>
+          <a href="#sec-contact" class="nav-pill" data-section-modal="sec-contact" data-section-title="Contact &amp; Residential Information"><i class="fa-solid fa-address-book"></i> Contact</a>
+          <a href="#sec-sacraments" class="nav-pill" data-section-modal="sec-sacraments" data-section-title="Sacramental Records"><i class="fa-solid fa-water"></i> Sacraments</a>
+          <a href="#sec-orders" class="nav-pill" data-section-modal="sec-orders" data-section-title="Holy Orders &amp; Ordination History"><i class="fa-solid fa-church"></i> Holy Orders</a>
+          <a href="#marriageFamilyCard" class="nav-pill" data-section-modal="marriageFamilyCard" data-section-title="Marriage &amp; Family Information"><i class="fa-solid fa-people-roof"></i> Family</a>
+          <a href="#sec-education" class="nav-pill" data-section-modal="sec-education" data-section-title="Educational Background"><i class="fa-solid fa-graduation-cap"></i> Education</a>
+          <a href="#sec-gov-ids" class="nav-pill" data-section-modal="sec-gov-ids" data-section-title="Government IDs"><i class="fa-solid fa-id-card"></i> Gov IDs</a>
+          <a href="#sec-deployments" class="nav-pill" data-section-modal="sec-deployments" data-section-title="Deployments &amp; Station History"><i class="fa-solid fa-map-location-dot"></i> Deployments</a>
+          <a href="#sec-medical" class="nav-pill" data-section-modal="sec-medical" data-section-title="Medical / Psychiatric Status"><i class="fa-solid fa-notes-medical"></i> Medical</a>
+        </div>
+        <div class="stage-stepper-control" id="profileStepperControl" aria-live="polite" title="Current profile row">
+          <span class="stepper-count" id="profileStepperCount">1 / 5</span>
+          <span class="stepper-label" id="profileStepperLabel">Identity · Contact</span>
+        </div>
       </div>
     </nav>
 
@@ -464,21 +539,21 @@
           <span class="hub-edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</span>
         </div>
         <div class="hub-kv-grid">
-          <div class="hub-kv full"><span>Full Name</span><b data-hub-bind="name">{{ profile.record.name|default:"—" }}</b></div>
-          <div class="hub-kv"><span>Gender</span><b data-hub-bind="gender">{{ profile.record.gender|default:"—" }}</b></div>
-          <div class="hub-kv"><span>Civil Status</span><b data-hub-bind="civil_status">{{ profile.civil_status|default:"—" }}</b></div>
+          <div class="hub-kv full"><span>Full Name</span><b data-hub-bind="name">{{ profile.record.name|default:"-" }}</b></div>
+          <div class="hub-kv"><span>Gender</span><b data-hub-bind="gender">{{ profile.record.gender|default:"-" }}</b></div>
+          <div class="hub-kv"><span>Civil Status</span><b data-hub-bind="civil_status">{{ profile.civil_status|default:"-" }}</b></div>
           <div class="hub-kv">
             <span>Date of Birth</span>
-            <b data-hub-bind="date_of_birth">{{ profile.record.date_of_birth|date:"M d, Y"|default:"—" }}</b>
+            <b data-hub-bind="date_of_birth">{{ profile.record.date_of_birth|date:"M d, Y"|default:"-" }}</b>
             {% with att=profile.record.date_attachments_map.date_of_birth %}
               {% if att.is_uploaded %}
                 <span class="hub-att-tag ok" {% if att.doc_type %}data-hub-att-doc="{{ att.doc_type.id }}"{% endif %} data-hub-att-label="{{ att.name }}"><i class="fa-solid fa-circle-check"></i> {{ att.name }}</span>
               {% else %}
-                <span class="hub-att-tag missing" {% if att.doc_type %}data-hub-att-doc="{{ att.doc_type.id }}"{% endif %} data-hub-att-label="{{ att.name }}"><i class="fa-solid fa-circle-exclamation"></i> Missing {{ att.name }}</span>
+                <span class="hub-att-tag missing" {% if att.doc_type %}data-hub-att-doc="{{ att.doc_type.id }}"{% endif %} data-hub-att-label="{{ att.name }}"><i class="fa-solid fa-clock"></i> Not uploaded: {{ att.name }}</span>
               {% endif %}
             {% endwith %}
           </div>
-          <div class="hub-kv"><span>Place of Birth</span><b data-hub-bind="place_of_birth">{{ profile.place_of_birth|default:"—" }}</b></div>
+          <div class="hub-kv"><span>Place of Birth</span><b data-hub-bind="place_of_birth">{{ profile.place_of_birth|default:"-" }}</b></div>
         </div>
       </div>
 
@@ -489,9 +564,9 @@
           <span class="hub-edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</span>
         </div>
         <div class="hub-kv-grid">
-          <div class="hub-kv full"><span>Residential Address</span><b data-hub-bind="address">{{ profile.record.address|default:"—" }}</b></div>
-          <div class="hub-kv"><span>Contact Number</span><b>{{ profile.record.phone|default:"—" }}</b></div>
-          <div class="hub-kv"><span>Email Address</span><b data-hub-bind="email">{{ profile.record.email|default:"—" }}</b></div>
+          <div class="hub-kv full"><span>Residential Address</span><b data-hub-bind="address">{{ profile.record.address|default:"-" }}</b></div>
+          <div class="hub-kv"><span>Contact Number</span><b>{{ profile.record.phone|default:"-" }}</b></div>
+          <div class="hub-kv"><span>Email Address</span><b data-hub-bind="email">{{ profile.record.email|default:"-" }}</b></div>
         </div>
       </div>
 
@@ -504,28 +579,28 @@
         <div class="hub-kv-grid">
           <div class="hub-kv">
             <span>Date of Baptism</span>
-            <b data-hub-bind="baptism_date">{{ profile.record.baptism_date|date:"M d, Y"|default:"—" }}</b>
+            <b data-hub-bind="baptism_date">{{ profile.record.baptism_date|date:"M d, Y"|default:"-" }}</b>
             {% with att=profile.record.date_attachments_map.baptism_date %}
               {% if att.is_uploaded %}
                 <span class="hub-att-tag ok" {% if att.doc_type %}data-hub-att-doc="{{ att.doc_type.id }}"{% endif %} data-hub-att-label="Attached"><i class="fa-solid fa-circle-check"></i> Attached</span>
               {% else %}
-                <span class="hub-att-tag missing" {% if att.doc_type %}data-hub-att-doc="{{ att.doc_type.id }}"{% endif %} data-hub-att-label="Attached"><i class="fa-solid fa-circle-exclamation"></i> Missing Cert</span>
+                <span class="hub-att-tag missing" {% if att.doc_type %}data-hub-att-doc="{{ att.doc_type.id }}"{% endif %} data-hub-att-label="Attached"><i class="fa-solid fa-clock"></i> Cert not uploaded</span>
               {% endif %}
             {% endwith %}
           </div>
-          <div class="hub-kv"><span>Place of Baptism</span><b data-hub-bind="baptism_place">{{ profile.baptism_place|default:"—" }}</b></div>
+          <div class="hub-kv"><span>Place of Baptism</span><b data-hub-bind="baptism_place">{{ profile.baptism_place|default:"-" }}</b></div>
           <div class="hub-kv">
             <span>Date of Confirmation</span>
-            <b data-hub-bind="confirmation_date">{{ profile.record.confirmation_date|date:"M d, Y"|default:"—" }}</b>
+            <b data-hub-bind="confirmation_date">{{ profile.record.confirmation_date|date:"M d, Y"|default:"-" }}</b>
             {% with att=profile.record.date_attachments_map.confirmation_date %}
               {% if att.is_uploaded %}
                 <span class="hub-att-tag ok" {% if att.doc_type %}data-hub-att-doc="{{ att.doc_type.id }}"{% endif %} data-hub-att-label="Attached"><i class="fa-solid fa-circle-check"></i> Attached</span>
               {% else %}
-                <span class="hub-att-tag missing" {% if att.doc_type %}data-hub-att-doc="{{ att.doc_type.id }}"{% endif %} data-hub-att-label="Attached"><i class="fa-solid fa-circle-exclamation"></i> Missing Cert</span>
+                <span class="hub-att-tag missing" {% if att.doc_type %}data-hub-att-doc="{{ att.doc_type.id }}"{% endif %} data-hub-att-label="Attached"><i class="fa-solid fa-clock"></i> Cert not uploaded</span>
               {% endif %}
             {% endwith %}
           </div>
-          <div class="hub-kv"><span>Place of Confirmation</span><b data-hub-bind="confirmation_place">{{ profile.confirmation_place|default:"—" }}</b></div>
+          <div class="hub-kv"><span>Place of Confirmation</span><b data-hub-bind="confirmation_place">{{ profile.confirmation_place|default:"-" }}</b></div>
         </div>
       </div>
 
@@ -539,17 +614,17 @@
           <div class="muted">Registered in Postulancy (Lay Candidate). Ordination stages unlock upon ordination to the Diaconate.</div>
         {% else %}
           <div class="hub-kv-grid">
-            <div class="hub-kv"><span>Diaconate Ordination</span><b data-hub-bind="diaconate_date">{{ profile.record.diaconate_date|date:"M d, Y"|default:"—" }}</b></div>
-            <div class="hub-kv"><span>Diaconate Place</span><b data-hub-bind="diaconate_place">{{ profile.record.diaconate_place|default:"—" }}</b></div>
+            <div class="hub-kv"><span>Diaconate Ordination</span><b data-hub-bind="diaconate_date">{{ profile.record.diaconate_date|date:"M d, Y"|default:"-" }}</b></div>
+            <div class="hub-kv"><span>Diaconate Place</span><b data-hub-bind="diaconate_place">{{ profile.record.diaconate_place|default:"-" }}</b></div>
             {% if profile.record.can_have_priesthood %}
-            <div class="hub-kv"><span>Priesthood Ordination</span><b data-hub-bind="ordination_date">{{ profile.record.ordination_date|date:"M d, Y"|default:"—" }}</b></div>
-            <div class="hub-kv"><span>Priesthood Place</span><b data-hub-bind="ordination_place">{{ profile.record.ordination_place|default:"—" }}</b></div>
+            <div class="hub-kv"><span>Priesthood Ordination</span><b data-hub-bind="ordination_date">{{ profile.record.ordination_date|date:"M d, Y"|default:"-" }}</b></div>
+            <div class="hub-kv"><span>Priesthood Place</span><b data-hub-bind="ordination_place">{{ profile.record.ordination_place|default:"-" }}</b></div>
             {% endif %}
             {% if profile.record.can_have_consecration %}
-            <div class="hub-kv"><span>Bishop Consecration</span><b data-hub-bind="consecration_date">{{ profile.record.consecration_date|date:"M d, Y"|default:"—" }}</b></div>
+            <div class="hub-kv"><span>Bishop Consecration</span><b data-hub-bind="consecration_date">{{ profile.record.consecration_date|date:"M d, Y"|default:"-" }}</b></div>
             {% endif %}
-            <div class="hub-kv"><span>Admitted as Holy Order</span><b data-hub-bind="holy_orders_date">{{ profile.record.holy_orders_date|date:"M d, Y"|default:"—" }}</b></div>
-            <div class="hub-kv"><span>Ordaining Bishop</span><b data-hub-bind="bishop_name">{{ profile.record.bishop_name|default:"—" }}</b></div>
+            <div class="hub-kv"><span>Admitted as Holy Order</span><b data-hub-bind="holy_orders_date">{{ profile.record.holy_orders_date|date:"M d, Y"|default:"-" }}</b></div>
+            <div class="hub-kv"><span>Ordaining Bishop</span><b data-hub-bind="bishop_name">{{ profile.record.bishop_name|default:"-" }}</b></div>
           </div>
         {% endif %}
       </div>
@@ -561,9 +636,9 @@
           <span class="hub-edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</span>
         </div>
         <div class="hub-kv-grid">
-          <div class="hub-kv"><span>Name of Spouse</span><b data-hub-bind="spouse_name">{{ profile.spouse_name|default:"—" }}</b></div>
-          <div class="hub-kv"><span>Date Married</span><b data-hub-bind="marriage_date">{{ profile.marriage_date|date:"M d, Y"|default:"—" }}</b></div>
-          <div class="hub-kv"><span>Place of Marriage</span><b data-hub-bind="marriage_place">{{ profile.marriage_place|default:"—" }}</b></div>
+          <div class="hub-kv"><span>Name of Spouse</span><b data-hub-bind="spouse_name">{{ profile.spouse_name|default:"-" }}</b></div>
+          <div class="hub-kv"><span>Date Married</span><b data-hub-bind="marriage_date">{{ profile.marriage_date|date:"M d, Y"|default:"-" }}</b></div>
+          <div class="hub-kv"><span>Place of Marriage</span><b data-hub-bind="marriage_place">{{ profile.marriage_place|default:"-" }}</b></div>
           <div class="hub-kv"><span>Children Listed</span><b id="hubChildrenCount">{{ profile.children.count }} child{{ profile.children.count|pluralize:"ren" }}</b></div>
         </div>
       </div>
@@ -579,7 +654,7 @@
             <span>Degrees &amp; Graduations</span>
             <b id="hubEducationSummary">
               {% for edu in profile.educations.all %}
-                {{ edu.degree }} — {{ edu.institution }}{% if edu.year_graduated %} ({{ edu.year_graduated }}){% endif %}{% if not forloop.last %}<br>{% endif %}
+                {{ edu.degree }} - {{ edu.institution }}{% if edu.year_graduated %} ({{ edu.year_graduated }}){% endif %}{% if not forloop.last %}<br>{% endif %}
               {% empty %}
                 No structured degrees listed yet
               {% endfor %}
@@ -598,9 +673,9 @@
           <span class="hub-edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</span>
         </div>
         <div class="hub-kv-grid">
-          <div class="hub-kv"><span>SSS Number</span><b data-hub-bind="sss_number">{{ profile.sss_number|default:"—" }}</b></div>
-          <div class="hub-kv"><span>PhilHealth Number</span><b data-hub-bind="philhealth_number">{{ profile.philhealth_number|default:"—" }}</b></div>
-          <div class="hub-kv"><span>Pag-IBIG Number</span><b data-hub-bind="pagibig_number">{{ profile.pagibig_number|default:"—" }}</b></div>
+          <div class="hub-kv"><span>SSS Number</span><b data-hub-bind="sss_number">{{ profile.sss_number|default:"-" }}</b></div>
+          <div class="hub-kv"><span>PhilHealth Number</span><b data-hub-bind="philhealth_number">{{ profile.philhealth_number|default:"-" }}</b></div>
+          <div class="hub-kv"><span>Pag-IBIG Number</span><b data-hub-bind="pagibig_number">{{ profile.pagibig_number|default:"-" }}</b></div>
         </div>
       </div>
 
@@ -774,7 +849,10 @@
 
           <div class="field">
             <label>Place of Baptism</label>
-            <input name="baptism_place" value="{{ profile.baptism_place }}">
+            <div class="input-with-action">
+              <input name="baptism_place" id="baptismPlaceInput" value="{{ profile.baptism_place }}" placeholder="e.g. St. Andrew's Cathedral">
+              <button type="button" class="ph-picker-btn" data-ph-picker-target="baptismPlaceInput" data-picker-mode="parish" title="Select parish or place of baptism"><i class="fa-solid fa-church"></i></button>
+            </div>
           </div>
 
           <div class="field">
@@ -805,7 +883,10 @@
 
           <div class="field">
             <label>Place of Confirmation</label>
-            <input name="confirmation_place" value="{{ profile.confirmation_place }}">
+            <div class="input-with-action">
+              <input name="confirmation_place" id="confirmationPlaceInput" value="{{ profile.confirmation_place }}" placeholder="e.g. All Saints Cathedral, Bontoc">
+              <button type="button" class="ph-picker-btn" data-ph-picker-target="confirmationPlaceInput" data-picker-mode="parish" title="Select parish or place of confirmation"><i class="fa-solid fa-church"></i></button>
+            </div>
           </div>
 
         </div>
@@ -820,19 +901,29 @@
         </div>
 
         {% if profile.record.rank == 'postulancy' %}
-          <div class="notice" style="background: #f8fafc; border-color: #cbd5e1; color: #334155; margin-top: 10px;">
-            <i class="fa-solid fa-seedling" style="color: #0284c7;"></i>
-            <strong>Postulancy (Lay Candidate):</strong> You are currently registered in Postulancy as a candidate preparing for holy orders. Sacred ordination records (Diaconate, Priesthood, Episcopate) will be recorded here sequentially following your ordination to the Sacred Order of Deacons.
+          <div class="notice" id="noticeRankPostulancy" style="background: #f8fafc; border-color: #cbd5e1; color: #334155; margin-top: 10px;">
+            <div class="notice-content">
+              <i class="fa-solid fa-seedling" style="color: #0284c7;"></i>
+              <strong>Postulancy (Lay Candidate):</strong> You are currently registered in Postulancy as a candidate preparing for holy orders. Sacred ordination records (Diaconate, Priesthood, Episcopate) will be recorded here sequentially following your ordination to the Sacred Order of Deacons.
+            </div>
+            <button type="button" class="notice-dismiss" data-dismiss-notice="noticeRankPostulancy" aria-label="Dismiss notice" title="Dismiss">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
           </div>
         {% else %}
-          <div class="notice" style="margin-top: 10px;">
-            {% if profile.record.rank == 'deacon' %}
-              <i class="fa-solid fa-info-circle"></i> <strong>Order of Deacons:</strong> As an ordained Deacon, your record reflects the First Order of Ministry.
-            {% elif profile.record.rank == 'priest' %}
-              <i class="fa-solid fa-info-circle"></i> <strong>Order of Priests:</strong> Holy orders are cumulative — as an ordained Priest, your record preserves both your Diaconal ordination and your Priesthood ordination.
-            {% elif profile.record.rank == 'bishop' %}
-              <i class="fa-solid fa-info-circle"></i> <strong>The Episcopate:</strong> As a Bishop, your record reflects the complete three-fold progression of Holy Orders (Deacon, Priest, and Bishop).
-            {% endif %}
+          <div class="notice" id="noticeRankOrders" style="margin-top: 10px;">
+            <div class="notice-content">
+              {% if profile.record.rank == 'deacon' %}
+                <i class="fa-solid fa-info-circle"></i> <strong>Order of Deacons:</strong> As an ordained Deacon, your record reflects the First Order of Ministry.
+              {% elif profile.record.rank == 'priest' %}
+                <i class="fa-solid fa-info-circle"></i> <strong>Order of Priests:</strong> Holy orders are cumulative: as an ordained Priest, your record preserves both your Diaconal ordination and your Priesthood ordination.
+              {% elif profile.record.rank == 'bishop' %}
+                <i class="fa-solid fa-info-circle"></i> <strong>The Episcopate:</strong> As a Bishop, your record reflects the complete three-fold progression of Holy Orders (Deacon, Priest, and Bishop).
+              {% endif %}
+            </div>
+            <button type="button" class="notice-dismiss" data-dismiss-notice="noticeRankOrders" aria-label="Dismiss notice" title="Dismiss">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
           </div>
 
           <div class="form-grid">
@@ -866,7 +957,7 @@
               <label>Place of Diaconate Ordination</label>
               <div class="input-with-action">
                 <input name="diaconate_place" id="diaconatePlaceInput" value="{{ profile.record.diaconate_place|default:'' }}" placeholder="e.g. Cathedral of All Saints, Bontoc">
-                <button type="button" class="ph-picker-btn" data-ph-picker-target="diaconatePlaceInput" title="Choose from province / city / barangay list"><i class="fa-solid fa-location-dot"></i></button>
+                <button type="button" class="ph-picker-btn" data-ph-picker-target="diaconatePlaceInput" data-picker-mode="parish" title="Choose parish / place of ordination"><i class="fa-solid fa-church"></i></button>
               </div>
             </div>
 
@@ -901,7 +992,7 @@
               <label>Place of Priesthood Ordination</label>
               <div class="input-with-action">
                 <input name="ordination_place" id="ordinationPlaceInput" value="{{ profile.record.ordination_place|default:'' }}" placeholder="e.g. St. Andrew's Cathedral">
-                <button type="button" class="ph-picker-btn" data-ph-picker-target="ordinationPlaceInput" title="Choose from province / city / barangay list"><i class="fa-solid fa-location-dot"></i></button>
+                <button type="button" class="ph-picker-btn" data-ph-picker-target="ordinationPlaceInput" data-picker-mode="parish" title="Choose parish / place of ordination"><i class="fa-solid fa-church"></i></button>
               </div>
             </div>
             {% endif %}
@@ -971,7 +1062,12 @@
 
       <div class="section-card" id="marriageFamilyCard">
         <h3><i class="fa-solid fa-people-roof"></i> Marriage &amp; Family Information</h3>
-        <div class="notice">Family details filed by you are recorded in your official Clergy Record and Clerical Directory profile.</div>
+        <div class="notice" id="noticeMarriageFamily">
+          <div class="notice-content">Family details filed by you are recorded in your official Clergy Record and Clerical Directory profile.</div>
+          <button type="button" class="notice-dismiss" data-dismiss-notice="noticeMarriageFamily" aria-label="Dismiss notice" title="Dismiss">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
 
         <div id="singleCivilStatusNotice" class="notice" style="display:none;background:#f8fafc;border-left:4px solid #64748b;color:#334155;margin-top:12px;">
           <i class="fa-solid fa-circle-info"></i> Spouse and children records are not applicable for <b>Single</b> civil status. If you are married or have dependents, update your <b>Civil Status</b> under Personal Information to enable these fields.
@@ -987,7 +1083,7 @@
               <label>Place of Marriage</label>
               <div class="input-with-action">
                 <input name="marriage_place" id="marriagePlaceInput" value="{{ profile.marriage_place }}" placeholder="e.g. All Saints Cathedral, Bontoc">
-                <button type="button" class="ph-picker-btn" data-ph-picker-target="marriagePlaceInput" title="Choose from province / city / barangay list"><i class="fa-solid fa-location-dot"></i></button>
+                <button type="button" class="ph-picker-btn" data-ph-picker-target="marriagePlaceInput" data-picker-mode="parish" title="Select parish or place of marriage"><i class="fa-solid fa-church"></i></button>
               </div>
             </div>
             <div class="field"><label>Name of Spouse</label><input name="spouse_name" value="{{ profile.spouse_name }}" placeholder="Spouse full name"></div>
@@ -1037,7 +1133,12 @@
 
       <div class="section-card" id="sec-education" style="scroll-margin-top: 70px;">
         <h3><i class="fa-solid fa-graduation-cap"></i> Educational Background</h3>
-        <div class="notice">Record your academic qualifications and theological degrees for your official clerical directory entry.</div>
+        <div class="notice" id="noticeEducation">
+          <div class="notice-content">Record your academic qualifications and theological degrees for your official clerical directory entry.</div>
+          <button type="button" class="notice-dismiss" data-dismiss-notice="noticeEducation" aria-label="Dismiss notice" title="Dismiss">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
 
         <div class="form-grid">
           <div class="field full">
@@ -1115,7 +1216,12 @@
         </div>
         <button type="button" class="btn small secondary" onclick="openModal('addDeploymentModal')"><i class="fa-solid fa-plus"></i> Add Deployment</button>
       </div>
-      <div class="notice">Record the date and location of each parish assignment or mission deployment. Both you and the Registrar can manage this history.</div>
+      <div class="notice" id="noticeDeployments">
+        <div class="notice-content">Record the date and location of each parish assignment or mission deployment. Both you and the Registrar can manage this history.</div>
+        <button type="button" class="notice-dismiss" data-dismiss-notice="noticeDeployments" aria-label="Dismiss notice" title="Dismiss">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
       <table style="width:100%;border-collapse:collapse;margin-top:10px;">
         <thead>
           <tr style="border-bottom:2px solid #e3e8ef;text-align:left;font-size:11px;color:#64748b;">
@@ -1131,10 +1237,10 @@
           {% for dep in profile.record.deployments.all %}
           <tr style="border-bottom:1px solid #edf0f3;">
             <td style="padding:8px;"><b>{{ dep.station_name }}</b>{% if dep.notes %}<br><span class="muted" style="font-size:11px;">{{ dep.notes }}</span>{% endif %}</td>
-            <td style="padding:8px;">{{ dep.place_name|default:"—" }}</td>
+            <td style="padding:8px;">{{ dep.place_name|default:"-" }}</td>
             <td style="padding:8px;">{{ dep.role }}</td>
-            <td style="padding:8px;">{% if dep.start_date %}{{ dep.start_date|date:"M Y" }} to {% endif %}{% if dep.is_current %}<span class="badge active-b" style="background:#e9f7ef;color:#166534;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">Present</span>{% elif dep.end_date %}{% if not dep.start_date %}Ended {% endif %}{{ dep.end_date|date:"M Y" }}{% else %}—{% endif %}</td>
-            <td style="padding:8px;">{% if dep.is_current %}<span class="badge active-b" style="background:#e9f7ef;color:#166534;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">Current</span>{% else %}—{% endif %}</td>
+            <td style="padding:8px;">{% if dep.start_date %}{{ dep.start_date|date:"M Y" }} to {% endif %}{% if dep.is_current %}<span class="badge active-b" style="background:#e9f7ef;color:#166534;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">Present</span>{% elif dep.end_date %}{% if not dep.start_date %}Ended {% endif %}{{ dep.end_date|date:"M Y" }}{% else %}-{% endif %}</td>
+            <td style="padding:8px;">{% if dep.is_current %}<span class="badge active-b" style="background:#e9f7ef;color:#166534;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">Current</span>{% else %}-{% endif %}</td>
             <td style="padding:8px;text-align:center;">
               <form method="post" class="inline-form" data-confirm="Remove this deployment entry?">
                 {% csrf_token %}
@@ -1156,7 +1262,12 @@
         <h3><i class="fa-solid fa-notes-medical"></i> Medical / Psychiatric Status</h3>
         <a class="btn secondary small" href="{% url 'clergy:my_requirements' %}"><i class="fa-solid fa-arrow-right"></i> Manage in My Requirements</a>
       </div>
-      <div class="notice">Medical exam clearance and psychiatric evaluation submission status. Official psychiatric results are noted upon receipt by the Bishop without document upload.</div>
+      <div class="notice" id="noticeMedical">
+        <div class="notice-content">Medical exam clearance and psychiatric evaluation submission status. Official psychiatric results are noted upon receipt by the Bishop without document upload.</div>
+        <button type="button" class="notice-dismiss" data-dismiss-notice="noticeMedical" aria-label="Dismiss notice" title="Dismiss">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
       <div class="info-grid">
         {% for item in medical_psych %}
         <div class="info">
@@ -1168,14 +1279,14 @@
             {% else %}
               {% if item.status == 'Submitted' %}<span class="badge green">Valid</span>
               {% elif item.status == 'Expired' %}<span class="badge red">Expired</span>
-              {% else %}<span class="badge amber">Missing</span>{% endif %}
+              {% else %}<span class="badge not-uploaded-b">Not Uploaded</span>{% endif %}
             {% endif %}
           </b>
           {% if item.document %}
             {% if item.document_type.is_noted_only %}
               <div class="muted">Noted submitted {{ item.document.submitted_date }}</div>
             {% else %}
-              <div class="muted">Valid until {{ item.document.expiry_date|default:"—" }}</div>
+              <div class="muted">Valid until {{ item.document.expiry_date|default:"-" }}</div>
             {% endif %}
           {% endif %}
         </div>
@@ -1189,6 +1300,19 @@
     {% endif %}
 
   </div>
+
+  <!-- Floating Profile Elevator Dock (Right side) -->
+  <aside class="stage-floating-elevator" id="profileFloatingElevator" aria-label="Profile row navigation">
+    <button type="button" class="elevator-btn" id="profileElevatorUpBtn" aria-label="Scroll to previous profile row" title="Previous row (Up)">
+      <i class="fa-solid fa-chevron-up"></i>
+    </button>
+    <div class="elevator-info" title="Current profile row">
+      <span class="elevator-count" id="profileElevatorCount">1 / 5</span>
+    </div>
+    <button type="button" class="elevator-btn" id="profileElevatorDownBtn" aria-label="Scroll to next profile row" title="Next row (Down)">
+      <i class="fa-solid fa-chevron-down"></i>
+    </button>
+  </aside>
 
 </section>
 {% endblock %}
@@ -1290,8 +1414,11 @@
   <div class="modal section-quick-modal">
     <div class="modal-head">
       <div>
-        <h3 id="sectionQuickEditTitle"><i class="fa-solid fa-pen-to-square" style="color:#2f6fed;"></i> <span>Quick Edit Section</span></h3>
-        <span class="muted">Editing your record — changes here sync directly with the main form and can be saved immediately</span>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <h3 id="sectionQuickEditTitle" style="margin:0;"><i class="fa-solid fa-pen-to-square" style="color:#2f6fed;"></i> <span>Quick Edit Section</span></h3>
+          <span class="badge blue" id="sectionQuickEditStepBadge" style="font-size:11.5px;padding:3px 8px;">Step 1 of 9</span>
+        </div>
+        <span class="muted" style="margin-top:3px;display:block;">Changes save directly to your profile. Close when finished.</span>
       </div>
       <button class="close" type="button" aria-label="Close" id="sectionQuickEditCloseTop">
         <i class="fa-solid fa-xmark"></i>
@@ -1301,6 +1428,7 @@
     <div class="section-modal-foot">
       <div style="display:flex;gap:8px;align-items:center;">
         <button type="button" class="btn small secondary" id="sectionQuickEditPrevBtn"><i class="fa-solid fa-chevron-left"></i> Previous</button>
+        <span class="modal-step-indicator" id="sectionQuickEditStepIndicator" aria-live="polite">1 / 9</span>
         <button type="button" class="btn small secondary" id="sectionQuickEditNextBtn">Next <i class="fa-solid fa-chevron-right"></i></button>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
@@ -1313,7 +1441,8 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'clergy/js/address-picker.js' %}?v=6"></script>
+{{ deaneries_map|json_script:"deaneries-data" }}
+<script src="{% static 'clergy/js/address-picker.js' %}?v=10"></script>
 <script src="{% static 'clergy/js/required-field-indicator.js' %}?v=6"></script>
 <script src="{% static 'code-field.js' %}?v=6"></script>
 <script src="{% static 'password-guidelines.js' %}?v=14"></script>
@@ -1415,18 +1544,34 @@
     }
   });
 
+  function syncBodyScrollLock() {
+    const anyOpen = Array.from(document.querySelectorAll('.modal-bg')).some(function(m) {
+      if (!m) return false;
+      return (m.classList.contains('show') || m.classList.contains('active') ||
+              m.classList.contains('section-modal-active') || m.classList.contains('stage-modal-active') ||
+              m.style.display === 'flex') && m.style.display !== 'none';
+    });
+    document.body.classList.toggle('modal-open', anyOpen);
+  }
+  window.syncBodyScrollLock = syncBodyScrollLock;
+
   // Modal helpers for clergy portal
   window.openModal = function(id) {
     const el = document.getElementById(id);
     if (el) el.classList.add('show');
+    syncBodyScrollLock();
   };
   window.closeModal = function(id) {
     const el = document.getElementById(id);
     if (el) el.classList.remove('show');
+    syncBodyScrollLock();
   };
   document.addEventListener('click', function(e) {
     const closer = e.target.closest('[data-close-modal]');
-    if (closer) closeModal(closer.dataset.closeModal);
+    if (closer) {
+      closeModal(closer.dataset.closeModal);
+      syncBodyScrollLock();
+    }
   });
 
   // Dynamic toggle of Marriage & Family section based on Civil Status
@@ -1780,8 +1925,20 @@
     }
 
     const idx = sectionPills.indexOf(pill);
+    const total = sectionPills.length;
+    const currentStep = (idx >= 0 ? idx + 1 : 1);
+
+    const stepIndicator = document.getElementById('sectionQuickEditStepIndicator');
+    if (stepIndicator) {
+      stepIndicator.textContent = currentStep + ' / ' + total;
+    }
+    const stepBadge = document.getElementById('sectionQuickEditStepBadge');
+    if (stepBadge) {
+      stepBadge.textContent = 'Step ' + currentStep + ' of ' + total;
+    }
+
     if (sectionPrevBtn) sectionPrevBtn.disabled = idx <= 0;
-    if (sectionNextBtn) sectionNextBtn.disabled = idx === -1 || idx >= sectionPills.length - 1;
+    if (sectionNextBtn) sectionNextBtn.disabled = idx === -1 || idx >= total - 1;
     if (sectionSaveBtn) {
       sectionSaveBtn.style.display = READONLY_SECTIONS.has(sectionId) ? 'none' : '';
     }
@@ -1789,6 +1946,7 @@
     sectionModal.style.display = 'flex';
     sectionModal.classList.add('show', 'section-modal-active');
     sectionModalBody.scrollTop = 0;
+    syncBodyScrollLock();
 
     const firstInput = targetEl.querySelector('input:not([type="hidden"]):not([type="file"]):not([readonly]), select, textarea');
     if (firstInput) {
@@ -1807,14 +1965,13 @@
   });
 
   function syncHubCardsFromForm() {
-    if (!mainForm) return;
     document.querySelectorAll('[data-hub-bind]').forEach(function(el) {
       const fieldName = el.dataset.hubBind;
-      const input = mainForm.querySelector('[name="' + CSS.escape(fieldName) + '"]');
+      const input = document.querySelector('[name="' + CSS.escape(fieldName) + '"]');
       if (!input) return;
       const val = (input.value || '').trim();
       if (!val) {
-        el.textContent = '—';
+        el.textContent = '-';
         el.classList.add('empty');
       } else {
         el.classList.remove('empty');
@@ -1853,7 +2010,7 @@
         const inst = (tr.querySelector('[name="edu_institution"]')?.value || '').trim();
         const yr = (tr.querySelector('[name="edu_year"]')?.value || '').trim();
         if (deg || inst) {
-          lines.push((deg || 'Degree') + (inst ? ' — ' + inst : '') + (yr ? ' (' + yr + ')' : ''));
+          lines.push((deg || 'Degree') + (inst ? ' - ' + inst : '') + (yr ? ' (' + yr + ')' : ''));
         }
       });
       if (lines.length === 0) {
@@ -1876,6 +2033,7 @@
       sectionModal.classList.remove('show', 'section-modal-active');
       sectionModal.style.display = 'none';
     }
+    syncBodyScrollLock();
     if (highlightCard && lastId) {
       const card = document.querySelector('.hub-card[data-open-section="' + CSS.escape(lastId) + '"]') || document.getElementById(lastId);
       if (card && card.offsetParent !== null) {
@@ -1885,6 +2043,7 @@
         card.classList.add('field-highlight-flash');
       }
     }
+    setTimeout(function() { updateProfileStageIndicator(); }, 350);
   }
 
   sectionPills.forEach(function(pill) {
@@ -1912,10 +2071,18 @@
     });
   });
 
-  document.getElementById('sectionQuickEditCloseTop')?.addEventListener('click', function() { closeSectionModal(false); });
-  document.getElementById('sectionQuickEditDoneBtn')?.addEventListener('click', function() { closeSectionModal(false); });
+  document.getElementById('sectionQuickEditCloseTop')?.addEventListener('click', function() { closeSectionModal(true); });
+  document.getElementById('sectionQuickEditDoneBtn')?.addEventListener('click', function() { closeSectionModal(true); });
   sectionModal?.addEventListener('click', function(e) {
     if (e.target === sectionModal) closeSectionModal(false);
+  });
+  sectionModal?.addEventListener('wheel', function(e) {
+    if (e.target === sectionModal) e.preventDefault();
+  }, { passive: false });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && sectionModal && (sectionModal.classList.contains('section-modal-active') || sectionModal.style.display === 'flex')) {
+      closeSectionModal(true);
+    }
   });
 
   sectionPrevBtn?.addEventListener('click', function() {
@@ -1927,6 +2094,158 @@
     const idx = sectionPills.findIndex(function(p) { return p.dataset.sectionModal === activeSectionId; });
     if (idx >= 0 && idx < sectionPills.length - 1) openSectionInModal(sectionPills[idx + 1].dataset.sectionModal);
   });
+
+  // Profile Hub Row Navigation & Floating Elevator
+  const profileHubCards = Array.from(document.querySelectorAll('#clergySummaryHub .hub-card[data-open-section]'));
+
+  function getProfileHubRows() {
+    const visibleCards = profileHubCards.filter(function(card) {
+      return card.offsetParent !== null && card.style.display !== 'none';
+    });
+    if (!visibleCards.length) return [];
+
+    const rows = [];
+    for (let i = 0; i < visibleCards.length; i += 2) {
+      const rowCards = visibleCards.slice(i, i + 2);
+      const titles = rowCards.map(function(c) {
+        const fullTitle = (c.querySelector('.hub-card-title')?.textContent || '').trim();
+        if (fullTitle.includes('Identity')) return 'Identity';
+        if (fullTitle.includes('Contact')) return 'Contact';
+        if (fullTitle.includes('Sacramental')) return 'Sacraments';
+        if (fullTitle.includes('Holy Orders')) return 'Orders';
+        if (fullTitle.includes('Marriage') || fullTitle.includes('Family')) return 'Family';
+        if (fullTitle.includes('Education')) return 'Education';
+        if (fullTitle.includes('Government')) return 'Gov IDs';
+        if (fullTitle.includes('Deployments')) return 'Deployments';
+        if (fullTitle.includes('Medical')) return 'Medical';
+        return fullTitle.split(' ')[0] || ('Row ' + (rows.length + 1));
+      });
+      rows.push({
+        index: rows.length,
+        cards: rowCards,
+        label: titles.join(' · ') || ('Row ' + (rows.length + 1))
+      });
+    }
+    return rows;
+  }
+
+  function getCurrentProfileRowIndex() {
+    const rows = getProfileHubRows();
+    if (!rows.length) return 0;
+    const viewportAnchor = window.innerHeight * 0.35;
+    let closestRowIndex = 0;
+    let minDistance = Infinity;
+
+    rows.forEach(function(row, rIdx) {
+      const card = row.cards[0];
+      if (!card) return;
+      const rect = card.getBoundingClientRect();
+      const rowCenter = rect.top + rect.height / 2;
+      const dist = Math.abs(rowCenter - viewportAnchor);
+      if (dist < minDistance) {
+        minDistance = dist;
+        closestRowIndex = rIdx;
+      }
+    });
+
+    return closestRowIndex;
+  }
+
+  function updateProfileStageIndicator(rowIndex) {
+    const rows = getProfileHubRows();
+    const total = rows.length || 5;
+    const elevatorUp = document.getElementById('profileElevatorUpBtn');
+    const elevatorDown = document.getElementById('profileElevatorDownBtn');
+    const elevatorCount = document.getElementById('profileElevatorCount');
+    const stepperCount = document.getElementById('profileStepperCount');
+    const stepperLabel = document.getElementById('profileStepperLabel');
+
+    if (!rows.length) {
+      if (elevatorUp) elevatorUp.disabled = true;
+      if (elevatorDown) elevatorDown.disabled = true;
+      return;
+    }
+
+    const safeRowIndex = Math.max(0, Math.min(total - 1, (rowIndex !== undefined ? rowIndex : getCurrentProfileRowIndex())));
+    const currentStep = safeRowIndex + 1;
+    const currentRow = rows[safeRowIndex];
+
+    if (elevatorCount) elevatorCount.textContent = currentStep + ' / ' + total;
+    if (stepperCount) stepperCount.textContent = currentStep + ' / ' + total;
+    if (stepperLabel && currentRow) stepperLabel.textContent = currentRow.label;
+
+    if (elevatorUp) elevatorUp.disabled = (safeRowIndex <= 0);
+    if (elevatorDown) elevatorDown.disabled = (safeRowIndex >= total - 1);
+  }
+
+  function scrollProfileRow(delta) {
+    const rows = getProfileHubRows();
+    const total = rows.length || 5;
+    if (total === 0) return;
+
+    let currentRowIndex = getCurrentProfileRowIndex();
+    let nextRowIndex = currentRowIndex + delta;
+
+    if (nextRowIndex < 0) nextRowIndex = 0;
+    if (nextRowIndex >= total) nextRowIndex = total - 1;
+
+    const targetRow = rows[nextRowIndex];
+    if (!targetRow || !targetRow.cards.length) return;
+
+    const navSticky = document.getElementById('personalSectionNav');
+    const stickyHeight = navSticky ? navSticky.offsetHeight : 90;
+    const firstCard = targetRow.cards[0];
+    const cardRect = firstCard.getBoundingClientRect();
+    const targetScrollY = window.pageYOffset + cardRect.top - stickyHeight - 16;
+
+    window.scrollTo({
+      top: Math.max(0, targetScrollY),
+      behavior: 'smooth'
+    });
+
+    targetRow.cards.forEach(function(card) {
+      card.classList.remove('stage-card-flash');
+      void card.offsetWidth;
+      card.classList.add('stage-card-flash');
+    });
+
+    updateProfileStageIndicator(nextRowIndex);
+  }
+
+  document.getElementById('profileElevatorUpBtn')?.addEventListener('click', function() {
+    scrollProfileRow(-1);
+  });
+  document.getElementById('profileElevatorDownBtn')?.addEventListener('click', function() {
+    scrollProfileRow(1);
+  });
+
+  let profileScrollRaf = null;
+  window.addEventListener('scroll', function() {
+    if (document.body.classList.contains('modal-open')) return;
+    if (profileScrollRaf) return;
+    profileScrollRaf = requestAnimationFrame(function() {
+      updateProfileStageIndicator();
+      profileScrollRaf = null;
+    });
+  }, { passive: true });
+
+  document.addEventListener('keydown', function(e) {
+    if (document.body.classList.contains('modal-open')) return;
+    const tag = (e.target && e.target.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (e.target && e.target.isContentEditable)) return;
+
+    if (e.key === 'PageDown') {
+      e.preventDefault();
+      scrollProfileRow(1);
+    } else if (e.key === 'PageUp') {
+      e.preventDefault();
+      scrollProfileRow(-1);
+    }
+  });
+
+  setTimeout(function() {
+    updateProfileStageIndicator(0);
+  }, 100);
 
   mainForm?.addEventListener('submit', function() {
     returnSectionToPage();
@@ -1993,16 +2312,91 @@
         showToast(data.message || 'Changes saved successfully.', 'success');
       }
       syncHubCardsFromForm();
-      closeSectionModal(true);
+      sectionSaveBtn.classList.add('saved-success');
+      sectionSaveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
+      setTimeout(function() {
+        if (sectionSaveBtn) {
+          sectionSaveBtn.classList.remove('saved-success');
+          sectionSaveBtn.innerHTML = origHtml;
+        }
+      }, 2200);
     } catch (_err) {
       if (typeof showToast === 'function') {
         showToast('Network error while saving. Please try again.', 'error');
       }
     } finally {
       sectionSaveBtn.disabled = false;
-      sectionSaveBtn.innerHTML = origHtml;
+      if (!sectionSaveBtn.classList.contains('saved-success')) {
+        sectionSaveBtn.innerHTML = origHtml;
+      }
     }
   });
+
+  // Global Profile Search Filter
+  (function initProfileSearch() {
+    const searchInput = document.getElementById('profileSearchInput');
+    const clearBtn = document.getElementById('profileSearchClear');
+    if (!searchInput) return;
+
+    const sections = document.querySelectorAll('.card-collapsible, .profile-section-card, [id^="sec-"], #marriageFamilyCard, .security-panel, .active-sessions-card, .trusted-devices-card');
+    const navPills = document.querySelectorAll('#personalSectionNav .nav-pill');
+
+    function doSearch() {
+      const q = searchInput.value.trim().toLowerCase();
+      if (clearBtn) clearBtn.hidden = !q;
+
+      if (!q) {
+        sections.forEach(function(s) { s.style.display = ''; });
+        navPills.forEach(function(p) { p.style.opacity = ''; p.style.pointerEvents = ''; });
+        return;
+      }
+
+      sections.forEach(function(sec) {
+        const secText = sec.textContent.toLowerCase();
+        const isMatch = secText.includes(q);
+        sec.style.display = isMatch ? '' : 'none';
+
+        const secId = sec.id;
+        navPills.forEach(function(pill) {
+          const href = pill.getAttribute('href') || '';
+          const modalTarget = pill.dataset.sectionModal || '';
+          if (href === '#' + secId || modalTarget === secId) {
+            pill.style.opacity = isMatch ? '1' : '0.35';
+          }
+        });
+      });
+    }
+
+    searchInput.addEventListener('input', doSearch);
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        searchInput.value = '';
+        doSearch();
+        searchInput.blur();
+      }
+    });
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function() {
+        searchInput.value = '';
+        doSearch();
+        searchInput.focus();
+      });
+    }
+
+    // Handle incoming 'q' query parameter (e.g. from Dashboard global search)
+    var urlParams = new URLSearchParams(window.location.search);
+    var incomingQ = urlParams.get('q');
+    if (incomingQ) {
+      searchInput.value = incomingQ;
+      doSearch();
+      setTimeout(function() {
+        var firstMatch = document.querySelector('.card-collapsible:not([style*="display: none"]), .profile-section-card:not([style*="display: none"])');
+        if (firstMatch) {
+          firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 200);
+    }
+  })();
 })();
 </script>
 

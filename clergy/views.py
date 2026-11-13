@@ -1,4 +1,5 @@
 from datetime import date
+import urllib.parse
 
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -12,7 +13,7 @@ from django.utils import timezone
 from accounts.views import security_context
 from registrar.forms import ClergyDeploymentForm, DocumentUploadForm, ProfilePictureForm, first_error
 from registrar.models import ClergyDeployment, delete_profile_picture, save_document, save_profile_picture
-from registrar.views import build_ember_context, handle_ember_upload
+from registrar.views import build_ember_context, handle_ember_upload, _build_deaneries_map
 
 from .decorators import clergy_required
 from .forms import ClergyProfileForm, ClergyRecordSelfServiceForm
@@ -26,6 +27,227 @@ def _get_or_create_profile(user):
     return profile
 
 
+def _build_portal_search_catalog(profile, user):
+    """Compile a cross-portal search catalog for the Clergy Dashboard.
+    Enables instant jumping to document requirements, profile sections,
+    notifications, and self-service actions with zero latency."""
+    catalog = []
+    record = profile.record if profile else None
+
+    # 1. Documents & Requirements Checklist
+    if record:
+        try:
+            checklist = record.document_checklist()
+            for item in checklist:
+                doc_type = item.get('document_type')
+                if not doc_type:
+                    continue
+                doc_name = doc_type.name
+                status = item.get('status', 'Not Uploaded')
+                badge_class = 'green' if status == 'Submitted' else ('blue' if status == 'Not Uploaded' else 'red')
+
+                stage_name = 'Document Requirement'
+                req_rank = getattr(doc_type, 'required_from_rank', '')
+                if req_rank == 'postulancy':
+                    stage_name = 'Postulancy Formation'
+                elif req_rank == 'deacon':
+                    stage_name = 'Diaconate Ordination'
+                elif req_rank == 'priest':
+                    stage_name = 'Priesthood Ordination'
+                elif req_rank == 'vital':
+                    stage_name = 'Vital & Canonical Records'
+                elif getattr(doc_type, 'uploaded_by', '') == 'registrar':
+                    stage_name = 'Official Diocesan Filings'
+
+                catalog.append({
+                    'category': 'Requirements & Documents',
+                    'icon': 'fa-solid fa-file-lines',
+                    'title': doc_name,
+                    'subtitle': f'{stage_name} : Document requirement ({status})',
+                    'badge': status,
+                    'badge_class': badge_class,
+                    'keywords': f'{doc_name} {stage_name} {status} checklist requirement document upload file attachment'.lower(),
+                    'url': reverse('clergy:my_requirements') + '?q=' + urllib.parse.quote(doc_name),
+                })
+        except Exception:
+            pass
+
+    # 2. Ember Letters
+    catalog.append({
+        'category': 'Requirements & Documents',
+        'icon': 'fa-solid fa-envelope-open-text',
+        'title': 'Ember Letters',
+        'subtitle': 'Quarterly canonical reflection letters to the Bishop (Spring, Summer, Fall, Winter)',
+        'badge': 'Letters',
+        'badge_class': 'blue',
+        'keywords': 'ember letters quarterly reflection bishop pastoral spring summer fall winter ember week'.lower(),
+        'url': reverse('clergy:my_requirements') + '?tab=ember',
+    })
+
+    # 3. Profile Information Sections
+    full_name = profile.full_name if profile else (user.get_full_name() or user.username)
+    rank_disp = record.get_rank_display() if (record and hasattr(record, 'get_rank_display')) else 'Clergy'
+    assignment = record.assignment if (record and record.assignment) else 'Not assigned'
+
+    catalog.append({
+        'category': 'Profile & Information',
+        'icon': 'fa-solid fa-id-card',
+        'title': 'Personal Information & Identity',
+        'subtitle': f'{full_name} : Civil status, date of birth, contact details, residence',
+        'badge': 'Biodata',
+        'badge_class': 'slate',
+        'keywords': f'personal information identity biodata name birth date place address contact residence civil status gender {full_name}'.lower(),
+        'url': reverse('clergy:my_profile') + '?q=identity#sec-identity',
+    })
+
+    catalog.append({
+        'category': 'Profile & Information',
+        'icon': 'fa-solid fa-cross',
+        'title': 'Holy Orders & Sacraments',
+        'subtitle': f'Baptism, Confirmation, Diaconate & Priesthood ordinations ({rank_disp})',
+        'badge': 'Sacraments',
+        'badge_class': 'slate',
+        'keywords': f'sacraments holy orders baptism confirmation deacon priest ordination ordaining bishop church parish {rank_disp}'.lower(),
+        'url': reverse('clergy:my_profile') + '?q=sacraments#sec-sacraments',
+    })
+
+    spouse_desc = f'Spouse: {profile.spouse_name}' if (profile and profile.spouse_name) else 'Spouse and children records'
+    catalog.append({
+        'category': 'Profile & Information',
+        'icon': 'fa-solid fa-people-roof',
+        'title': 'Marriage & Family Record',
+        'subtitle': spouse_desc,
+        'badge': 'Family',
+        'badge_class': 'slate',
+        'keywords': f'marriage family spouse children dependents wedding civil status {profile.spouse_name if profile and profile.spouse_name else ""}'.lower(),
+        'url': reverse('clergy:my_profile') + '?q=family#marriageFamilyCard',
+    })
+
+    if profile:
+        try:
+            for child in profile.children.all():
+                if child.name:
+                    catalog.append({
+                        'category': 'Profile & Information',
+                        'icon': 'fa-solid fa-child',
+                        'title': f'Child: {child.name}',
+                        'subtitle': f'Family Record (Born: {child.birth_date or "on file"})',
+                        'badge': 'Dependent',
+                        'badge_class': 'slate',
+                        'keywords': f'child dependent family {child.name}'.lower(),
+                        'url': reverse('clergy:my_profile') + '?q=family#marriageFamilyCard',
+                    })
+        except Exception:
+            pass
+
+    edu_count = profile.educations.count() if profile else 0
+    edu_desc = f'{edu_count} academic degree(s) and seminary training on file' if edu_count > 0 else 'Seminary and academic degree records'
+    catalog.append({
+        'category': 'Profile & Information',
+        'icon': 'fa-solid fa-user-graduate',
+        'title': 'Educational Background',
+        'subtitle': edu_desc,
+        'badge': 'Education',
+        'badge_class': 'slate',
+        'keywords': 'education degree seminary college university bachelor master theology study graduation school'.lower(),
+        'url': reverse('clergy:my_profile') + '?q=education#sec-education',
+    })
+
+    if profile:
+        try:
+            for edu in profile.educations.all():
+                if edu.degree or edu.institution:
+                    title_str = f'{edu.degree or "Degree"} : {edu.institution or "Institution"}'
+                    catalog.append({
+                        'category': 'Profile & Information',
+                        'icon': 'fa-solid fa-graduation-cap',
+                        'title': title_str,
+                        'subtitle': f'Academic Record ({edu.year_graduated or "Completed"})',
+                        'badge': 'Degree',
+                        'badge_class': 'slate',
+                        'keywords': f'education degree school seminary {edu.degree} {edu.institution} {edu.year_graduated}'.lower(),
+                        'url': reverse('clergy:my_profile') + '?q=' + urllib.parse.quote(edu.degree or edu.institution or 'education') + '#sec-education',
+                    })
+        except Exception:
+            pass
+
+    catalog.append({
+        'category': 'Profile & Information',
+        'icon': 'fa-solid fa-church',
+        'title': 'Deployments & Ministry Assignments',
+        'subtitle': f'Current assignment: {assignment}',
+        'badge': 'Deployments',
+        'badge_class': 'slate',
+        'keywords': f'deployment ministry assignment parish transfer appointment rector vicar priest {assignment}'.lower(),
+        'url': reverse('clergy:my_profile') + '?q=deployment#sec-deployments',
+    })
+
+    if record:
+        try:
+            for dep in record.deployments.all():
+                if dep.station_name:
+                    catalog.append({
+                        'category': 'Profile & Information',
+                        'icon': 'fa-solid fa-church',
+                        'title': f'{dep.role or "Clergy Assignment"} : {dep.station_name}',
+                        'subtitle': f'Deployment Record ({dep.start_date or "Assigned"})',
+                        'badge': 'Parish',
+                        'badge_class': 'slate',
+                        'keywords': f'{dep.role} {dep.station_name} deployment assignment parish {dep.place_name or ""}'.lower(),
+                        'url': reverse('clergy:my_profile') + '?q=' + urllib.parse.quote(dep.station_name) + '#sec-deployments',
+                    })
+        except Exception:
+            pass
+
+    catalog.append({
+        'category': 'Profile & Information',
+        'icon': 'fa-solid fa-address-card',
+        'title': 'Government IDs & Tax Numbers',
+        'subtitle': 'TIN, SSS, PhilHealth, Pag-IBIG identification numbers',
+        'badge': 'Gov IDs',
+        'badge_class': 'slate',
+        'keywords': 'government ids tax numbers tin sss philhealth pagibig pag-ibig registration'.lower(),
+        'url': reverse('clergy:my_profile') + '?q=government#sec-government',
+    })
+
+    catalog.append({
+        'category': 'Profile & Information',
+        'icon': 'fa-solid fa-shield-halved',
+        'title': 'Account Security & Password',
+        'subtitle': 'Change password, verified mobile phone number, trusted devices & sessions',
+        'badge': 'Security',
+        'badge_class': 'slate',
+        'keywords': 'security password change pin phone mobile sms devices session login credentials'.lower(),
+        'url': reverse('clergy:my_profile') + '?tab=security',
+    })
+
+    # 4. Notifications & Alerts
+    catalog.append({
+        'category': 'Notifications & Alerts',
+        'icon': 'fa-solid fa-bell',
+        'title': 'Notifications & Reminders',
+        'subtitle': 'System alerts, expiry reminders, and account activity log',
+        'badge': 'Activity',
+        'badge_class': 'blue',
+        'keywords': 'notifications activity reminders alerts deadlines expiry sign-in unread'.lower(),
+        'url': reverse('clergy:notifications'),
+    })
+
+    # 5. Quick Actions & Self-Service
+    catalog.append({
+        'category': 'Quick Actions',
+        'icon': 'fa-solid fa-print',
+        'title': 'Print Own Records',
+        'subtitle': 'Generate and download an official clergy summary sheet (PDF)',
+        'badge': 'PDF Print',
+        'badge_class': 'blue',
+        'keywords': 'print record pdf summary official sheet download export'.lower(),
+        'url': reverse('clergy:print_own_record'),
+    })
+
+    return catalog
+
+
 @clergy_required
 def dashboard(request):
     profile = _get_or_create_profile(request.user)
@@ -35,10 +257,29 @@ def dashboard(request):
     days_left = None
     if profile.record and profile.record.contract_end:
         days_left = (profile.record.contract_end - date.today()).days
+
+    # Only show the welcome onboarding banner during the first 14 days of account activation
+    show_welcome = False
+    try:
+        activated_at = None
+        if hasattr(request.user, 'security') and request.user.security and request.user.security.activated_at:
+            activated_at = request.user.security.activated_at
+        elif request.user.date_joined:
+            activated_at = request.user.date_joined
+        if activated_at:
+            account_age_days = (timezone.now() - activated_at).days
+            show_welcome = (account_age_days <= 14)
+    except Exception:
+        show_welcome = False
+
+    portal_catalog = _build_portal_search_catalog(profile, request.user)
+
     return render(request, 'clergy/dashboard.html', {
         'active_page': 'dashboard',
         'profile': profile,
         'days_left': days_left,
+        'show_welcome': show_welcome,
+        'portal_catalog': portal_catalog,
     })
 
 
@@ -52,14 +293,14 @@ MEDICAL_PSYCH_DOCUMENT_NAMES = (
 
 @clergy_required
 def my_profile(request):
-    """My Record & Profile — one merged page: the Registrar-controlled
+    """My Record & Profile :  one merged page: the Registrar-controlled
     Clergy Record + Ordination history (view-only here, edited from the
     Registrar's record-detail page), alongside the clergy-editable Personal
     Information, Marriage/Family, Government ID and Account sections."""
     profile = _get_or_create_profile(request.user)
 
     if not profile.record:
-        messages.error(request, 'Your account is not yet linked to an official clergy record — ask the Registrar to link one before editing your profile.')
+        messages.error(request, 'Your account is not yet linked to an official clergy record :  ask the Registrar to link one before editing your profile.')
         return redirect('clergy:dashboard')
 
     profile.record.record_expired_contract()
@@ -114,12 +355,12 @@ def my_profile(request):
     if request.method == 'POST' and request.POST.get('action') == 'upload_attachment':
         form = DocumentUploadForm(request.POST, request.FILES)
         if form.is_valid() and form.cleaned_data['document_type'].is_noted_only:
-            err = 'That requirement does not accept document uploads — it is noted directly by the Registrar.'
+            err = 'That requirement does not accept document uploads :  it is noted directly by the Registrar.'
             if is_ajax:
                 return JsonResponse({'ok': False, 'error': err}, status=400)
             messages.error(request, err)
         elif form.is_valid() and form.cleaned_data['document_type'].uploaded_by == 'registrar':
-            err = 'That document is provided by the Registrar — you cannot upload it yourself.'
+            err = 'That document is provided by the Registrar :  you cannot upload it yourself.'
             if is_ajax:
                 return JsonResponse({'ok': False, 'error': err}, status=400)
             messages.error(request, err)
@@ -280,6 +521,7 @@ def my_profile(request):
         'record_form': record_form,
         'days_left': days_left,
         'medical_psych': medical_psych,
+        'deaneries_map': _build_deaneries_map(),
     }
     if active_tab == 'security':
         context.update(security_context(request))
@@ -288,39 +530,59 @@ def my_profile(request):
 
 @clergy_required
 def print_own_record(request):
-    """A letterhead-style printable copy of the clergy member's own record —
+    """A letterhead-style printable copy of the clergy member's own record: 
     opened in a new tab, with its own Print button and a Download PDF link.
     Deliberately not persisted anywhere (unlike the Registrar's Generate
     Report history); it's a point-in-time personal copy, not an official
     archived document."""
     profile = _get_or_create_profile(request.user)
     if not profile.record:
-        messages.error(request, 'Your account is not yet linked to an official clergy record — ask the Registrar to link one first.')
+        messages.error(request, 'Your account is not yet linked to an official clergy record: ask the Registrar to link one first.')
         return redirect('clergy:dashboard')
     profile.record.record_expired_contract()
+
+    checklist_grouped = profile.record.document_checklist_grouped()
+    doc_summary = profile.record.document_summary()
+    total_reqs = doc_summary.get('total', 0)
+    submitted_reqs = doc_summary.get('submitted', 0)
+    percent_complete = round((submitted_reqs / total_reqs * 100)) if total_reqs else 0
 
     return render(request, 'clergy/print-record.html', {
         'profile': profile,
         'checklist': profile.record.document_checklist(),
+        'checklist_grouped': checklist_grouped,
+        'doc_summary': doc_summary,
+        'percent_complete': percent_complete,
         'download_url': reverse('clergy:download_own_record'),
+        'generated_at': timezone.now(),
     })
 
 
 @clergy_required
 def download_own_record(request):
     """Same template as print_own_record, rendered to a real PDF via
-    WeasyPrint instead of the browser's print dialog — generated fresh on
+    WeasyPrint instead of the browser's print dialog: generated fresh on
     every request, not persisted, same point-in-time-copy philosophy."""
     profile = _get_or_create_profile(request.user)
     if not profile.record:
-        messages.error(request, 'Your account is not yet linked to an official clergy record — ask the Registrar to link one first.')
+        messages.error(request, 'Your account is not yet linked to an official clergy record: ask the Registrar to link one first.')
         return redirect('clergy:dashboard')
 
     from ednp.pdf import PdfGenerationError, html_to_pdf
 
+    checklist_grouped = profile.record.document_checklist_grouped()
+    doc_summary = profile.record.document_summary()
+    total_reqs = doc_summary.get('total', 0)
+    submitted_reqs = doc_summary.get('submitted', 0)
+    percent_complete = round((submitted_reqs / total_reqs * 100)) if total_reqs else 0
+
     html = render_to_string('clergy/print-record.html', {
         'profile': profile,
         'checklist': profile.record.document_checklist(),
+        'checklist_grouped': checklist_grouped,
+        'doc_summary': doc_summary,
+        'percent_complete': percent_complete,
+        'generated_at': timezone.now(),
     })
     try:
         pdf_bytes = html_to_pdf(html)
@@ -387,7 +649,7 @@ def my_requirements(request):
     profile = _get_or_create_profile(request.user)
 
     if not profile.record:
-        messages.error(request, 'Your account is not yet linked to an official clergy record — ask the Registrar to link one before uploading documents.')
+        messages.error(request, 'Your account is not yet linked to an official clergy record :  ask the Registrar to link one before uploading documents.')
         return redirect('clergy:dashboard')
 
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
@@ -395,12 +657,12 @@ def my_requirements(request):
     if request.method == 'POST':
         form = DocumentUploadForm(request.POST, request.FILES)
         if form.is_valid() and form.cleaned_data['document_type'].is_noted_only:
-            err = 'That requirement does not accept document uploads — it is noted directly by the Registrar.'
+            err = 'That requirement does not accept document uploads :  it is noted directly by the Registrar.'
             if is_ajax:
                 return JsonResponse({'ok': False, 'error': err}, status=400)
             messages.error(request, err)
         elif form.is_valid() and form.cleaned_data['document_type'].uploaded_by == 'registrar':
-            err = 'That document is provided by the Registrar — you cannot upload it yourself.'
+            err = 'That document is provided by the Registrar :  you cannot upload it yourself.'
             if is_ajax:
                 return JsonResponse({'ok': False, 'error': err}, status=400)
             messages.error(request, err)
@@ -441,7 +703,7 @@ def my_requirements(request):
         'active_page': 'my_requirements',
         'profile': profile,
         'checklist': profile.record.document_checklist_grouped(),
-        'active_tab': request.GET.get('tab', 'checklist'),
+        'active_tab': request.GET.get('tab', 'checklist') if request.GET.get('tab') in ('checklist', 'ember') else 'checklist',
         **build_ember_context(profile.record, ember_upload_url),
     })
 

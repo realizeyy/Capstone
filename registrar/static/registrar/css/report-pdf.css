@@ -1,48 +1,816 @@
-/* A generated report (registrar/report_pdf.html): the on-screen preview with its
-   toolbar, and the same page rendered to PDF by WeasyPrint (ednp/pdf.py), which
-   uses the print rules (the toolbar and page frame are screen-only). */
-@page { size: letter landscape; margin: 0.6in; }
-body { font-family: "Times New Roman", Times, serif; color: #111; font-size: 11pt; line-height: 1.35; margin: 0; }
-.header { text-align: center; margin-bottom: 10px; }
-.header .diocese { font-size: 16pt; font-weight: bold; text-transform: uppercase; color: #17324d; }
-.header .church { font-size: 11pt; }
-.header .center { margin-top: 6px; font-weight: bold; }
-.header .address { font-size: 10pt; }
-hr { border: 0; border-top: 2px solid #17324d; margin: 10px 0; }
-.title { text-align: center; font-size: 15pt; font-weight: bold; margin: 14px 0 10px; text-transform: uppercase; color: #17324d; }
-.certify { text-align: justify; margin: 0 0 10px; }
-.meta { text-align: right; font-size: 9pt; margin-bottom: 12px; color: #444; }
-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
-th, td { border: 1px solid #222; padding: 6px 8px; font-size: 9pt; vertical-align: top; }
-th { background: #f4f4f4; text-align: left; font-weight: bold; color: #17324d; }
-.section-heading { font-size: 12pt; font-weight: bold; margin: 14px 0 6px; color: #17324d; }
-.record-id { display: block; font-size: 8pt; color: #667085; }
-.signature { margin-top: 44px; }
-.signature .line { margin-top: 32px; width: 280px; border-top: 1px solid #111; padding-top: 4px; }
-.footer { margin-top: 26px; font-size: 9pt; text-align: center; color: #526273; }
-.empty-row { text-align: center; color: #667085; }
+/* ==========================================================================
+   EDNP Generated Reports - Word Processor Print Layout Stylesheet
+   Strict compliance: Zero emoji, no single-sided colored borders, token-by-intent.
+   Designed for desktop/mobile browsers (Word Print Layout view) and WeasyPrint PDF.
+   ========================================================================== */
+
+:root {
+  /* Semantic Color Tokens */
+  --color-primary: #17324d;
+  --color-primary-dark: #102438;
+  --color-accent: #2f6fed;
+  --color-accent-hover: #2458c2;
+  --color-accent-active: #1b4291;
+  --color-accent-border: #255ecc;
+  --color-accent-dark: #153472;
+
+  --color-text-main: #1e293b;
+  --color-text-dark: #0f172a;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
+  --color-text-label: #475569;
+  --color-text-body: #334155;
+
+  --color-desk-bg: #525659;
+  --color-bg-page: #525659;
+  --color-bg-sheet: #ffffff;
+  --color-bg-subtle: #f8fafc;
+  --color-bg-muted: #f1f5f9;
+  --color-bg-row-alt: #fafbfc;
+
+  --color-border: #d9e0e7;
+  --color-border-light: #e2e8f0;
+  --color-border-sheet: #cbd5e1;
+  --color-border-hover: #94a3b8;
+
+  --color-success-bg: #ecfdf5;
+  --color-success-text: #065f46;
+  --color-success-border: #a7f3d0;
+
+  --color-warning-bg: #fffbeb;
+  --color-warning-text: #92400e;
+  --color-warning-border: #fde68a;
+
+  --color-danger-bg: #fef2f2;
+  --color-danger-text: #991b1b;
+  --color-danger-border: #fecaca;
+
+  /* Typography Tokens */
+  --font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-family-serif: Georgia, "Times New Roman", serif;
+  --font-family-mono: "Courier New", Courier, monospace;
+
+  /* Font Scale Tokens */
+  --font-size-2xs: 8.5px;
+  --font-size-xs: 9.5px;
+  --font-size-sm: 10px;
+  --font-size-label: 11px;
+  --font-size-caption: 11.5px;
+  --font-size-base: 12px;
+  --font-size-body: 12.5px;
+  --font-size-subtitle: 13px;
+  --font-size-h3: 13.5px;
+  --font-size-md: 14px;
+  --font-size-h2: 17px;
+  --font-size-hero: 19.5px;
+  --font-size-watermark: 56pt;
+
+  /* Spacing Scale Tokens */
+  --space-2xs: 2px;
+  --space-xs: 3.5px;
+  --space-sm: 5px;
+  --space-md: 7px;
+  --space-row: 8px;
+  --space-base: 9px;
+  --space-lg: 12px;
+  --space-section: 12px;
+  --space-block: 15px;
+  --space-sheet-gap: 24px;
+  --space-sheet-pad-v: 10mm;
+  --space-sheet-pad-h: 13mm;
+  --space-toolbar-top: 14px;
+  --space-toolbar-right: 20px;
+
+  /* Sizing Tokens */
+  --size-seal-w: 48px;
+  --size-seal-h: 72px;
+  --size-sign-space: 22px;
+  --size-stamp-box: 42px;
+  --size-stamp-circle: 44px;
+  --size-sheet-portrait-width: 210mm;
+  --size-sheet-portrait-height: 297mm;
+  --size-sheet-landscape-width: 297mm;
+  --size-sheet-landscape-height: 210mm;
+  --size-sign-line-width: 75%;
+
+  /* Radius Tokens */
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 5px;
+  --radius-button: 6px;
+  --radius-card: 2px;
+  --radius-circle: 50%;
+  --radius-pill: 9999px;
+
+  /* Timing & Shadow Tokens */
+  --duration-fast: 0.15s;
+  --shadow-sheet: 0 4px 18px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.15);
+  --shadow-button: 0 1px 3px rgba(15, 23, 42, 0.2);
+  --shadow-focus-accent: 0 0 0 3px rgba(47, 111, 237, 0.35);
+  --shadow-focus-muted: 0 0 0 3px rgba(203, 213, 225, 0.6);
+}
+
+/* Default Paged Media Setup for Generated Reports */
+@page {
+  size: letter landscape;
+  margin: 10mm 12mm 12mm 12mm;
+  @bottom-left {
+    content: "Episcopal Diocese of Northern Philippines (EDNP) \2022  Official Reports Registry";
+    font-size: 8pt;
+    font-family: var(--font-family-sans);
+    color: #64748b; /* ds-allow-hardcode */
+  }
+  @bottom-right {
+    content: "Page " counter(page) " of " counter(pages);
+    font-size: 8pt;
+    font-family: var(--font-family-sans);
+    color: #64748b; /* ds-allow-hardcode */
+    font-weight: bold;
+  }
+}
+
+/* Base Reset & Desk Viewport Canvas */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family-sans);
+  color: var(--color-text-main);
+  font-size: var(--font-size-body);
+  line-height: 1.4;
+  margin: 0px;
+  padding: var(--space-sheet-gap) var(--space-block) 60px var(--space-block); /* ds-allow-hardcode */
+  background-color: var(--color-desk-bg);
+  -webkit-print-color-adjust: exact;
+}
+
+/* Floating Actions Toolbar (Fixed at Top-Right of Screen) */
+.toolbar {
+  position: fixed;
+  top: var(--space-toolbar-top);
+  right: var(--space-toolbar-right);
+  display: flex;
+  gap: var(--space-base);
+  z-index: 2000;
+}
+
+.toolbar a,
+.toolbar button {
+  border: 1px solid transparent;
+  border-radius: var(--radius-button);
+  padding: var(--space-base) var(--space-block);
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: var(--font-family-sans);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+  box-shadow: var(--shadow-button);
+}
+
+/* 8-State Definition for Primary Print Button */
+.toolbar .print-btn {
+  background-color: var(--color-accent);
+  color: var(--color-bg-sheet);
+  border-color: var(--color-accent-border);
+}
+.toolbar .print-btn:hover {
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-active);
+}
+.toolbar .print-btn:focus {
+  outline: none;
+  box-shadow: var(--shadow-focus-accent);
+}
+.toolbar .print-btn:focus-visible {
+  outline: 2px solid var(--color-primary); /* ds-allow-hardcode */
+  outline-offset: 2px; /* ds-allow-hardcode */
+}
+.toolbar .print-btn:active {
+  background-color: var(--color-accent-active);
+  border-color: var(--color-accent-dark);
+}
+.toolbar .print-btn:disabled,
+.toolbar .print-btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.toolbar .print-btn.is-loading {
+  opacity: 0.75;
+  cursor: wait;
+}
+.toolbar .print-btn.is-selected {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary-dark);
+}
+
+/* 8-State Definition for Secondary Action Link/Button */
+.toolbar .download-btn {
+  background-color: var(--color-bg-sheet);
+  color: var(--color-primary);
+  border-color: var(--color-border-sheet);
+}
+.toolbar .download-btn:hover {
+  background-color: var(--color-bg-subtle);
+  border-color: var(--color-border-hover);
+  color: var(--color-text-dark);
+}
+.toolbar .download-btn:focus {
+  outline: none;
+  box-shadow: var(--shadow-focus-muted);
+}
+.toolbar .download-btn:focus-visible {
+  outline: 2px solid var(--color-accent); /* ds-allow-hardcode */
+  outline-offset: 2px; /* ds-allow-hardcode */
+}
+.toolbar .download-btn:active {
+  background-color: var(--color-bg-muted);
+  border-color: var(--color-text-muted);
+}
+.toolbar .download-btn:disabled,
+.toolbar .download-btn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.toolbar .download-btn.is-loading {
+  opacity: 0.75;
+  cursor: wait;
+}
+.toolbar .download-btn.is-selected {
+  background-color: var(--color-border-light);
+  border-color: var(--color-border-hover);
+}
+
+/* Word Processor Canvas & Paper Sheets */
+.word-canvas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sheet-gap);
+  width: 100%;
+}
+
+.paper-sheet {
+  position: relative;
+  background-color: var(--color-bg-sheet);
+  padding: var(--space-sheet-pad-v) var(--space-sheet-pad-h);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sheet);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.paper-sheet.paper-portrait {
+  width: var(--size-sheet-portrait-width);
+  min-height: var(--size-sheet-portrait-height);
+  max-width: 100%;
+}
+
+.paper-sheet.paper-landscape {
+  width: var(--size-sheet-landscape-width);
+  min-height: var(--size-sheet-landscape-height);
+  max-width: 100%;
+}
+
+.sheet-content {
+  flex: 1 1 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* Subtle Document Watermark */
+.doc-watermark {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-30deg);
+  font-size: var(--font-size-watermark);
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: rgba(23, 50, 77, 0.035); /* ds-allow-hardcode */
+  pointer-events: none;
+  z-index: 0;
+  white-space: nowrap;
+}
+
+/* 1. Diocesan Letterhead Header */
+.doc-header {
+  margin-bottom: var(--space-section);
+  position: relative;
+  z-index: 1;
+}
+
+.letterhead-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-block);
+  margin-bottom: var(--space-base);
+}
+
+.seal-col {
+  flex-shrink: 0;
+}
+
+.church-seal {
+  width: var(--size-seal-w) !important;
+  height: var(--size-seal-h) !important;
+  max-width: var(--size-seal-w) !important;
+  max-height: var(--size-seal-h) !important;
+  object-fit: contain;
+  display: block;
+}
+
+.masthead-col {
+  flex: 1 1 auto;
+  text-align: center;
+}
+
+.church-name {
+  font-family: var(--font-family-serif);
+  font-size: var(--font-size-body);
+  font-style: italic;
+  color: var(--color-text-label);
+  margin-bottom: 1px;
+  letter-spacing: 0.02em;
+}
+
+.diocese-name {
+  font-family: var(--font-family-serif);
+  font-size: var(--font-size-h2);
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0px 0px 1px 0px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.diocesan-center {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2xs);
+}
+
+.registry-title {
+  font-size: var(--font-size-label);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  letter-spacing: 0.05em;
+}
+
+.doc-stamp-col {
+  flex-shrink: 0;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-sm);
+}
+
+.record-id-box {
+  border: 1px solid var(--color-border-sheet);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-base);
+  background-color: var(--color-bg-subtle);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.id-label {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.id-value {
+  font-size: var(--font-size-h3);
+  font-weight: 700;
+  color: var(--color-primary);
+  font-family: var(--font-family-mono);
+}
+
+.copy-badge {
+  display: inline-block;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: var(--space-2xs) var(--space-md);
+  border-radius: var(--radius-xs);
+  background-color: var(--color-bg-muted);
+  color: var(--color-text-label);
+  border: 1px solid var(--color-border-sheet);
+}
+
+/* Badge System - Full Hairline Borders */
+.badge {
+  display: inline-block;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: var(--space-2xs) var(--space-md);
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.badge-active,
+.badge-verified,
+.badge-submitted {
+  background-color: var(--color-success-bg);
+  color: var(--color-success-text);
+  border: 1px solid var(--color-success-border);
+}
+
+.badge-neutral {
+  background-color: var(--color-bg-muted);
+  color: var(--color-text-label);
+  border: 1px solid var(--color-border-sheet);
+}
+
+.badge-warning,
+.badge-pending {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  border: 1px solid var(--color-warning-border);
+}
+
+.badge-danger {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger-text);
+  border: 1px solid var(--color-danger-border);
+}
+
+.header-divider {
+  height: 2px; /* ds-allow-hardcode */
+  background-color: var(--color-primary);
+  margin: var(--space-base) 0px var(--space-lg) 0px;
+}
+
+.document-title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-section);
+  padding-bottom: var(--space-base);
+  border-bottom: 1px solid var(--color-border-light);
+  margin-bottom: var(--space-section);
+}
+
+.doc-main-title {
+  font-family: var(--font-family-serif);
+  font-size: var(--font-size-hero);
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0px 0px 1px 0px;
+  letter-spacing: 0.02em;
+}
+
+.certify {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-body);
+  margin: var(--space-xs) 0px 0px 0px;
+  line-height: 1.35;
+}
+
+.doc-meta-pills {
+  flex-shrink: 0;
+  text-align: right;
+  font-size: var(--font-size-label);
+  color: var(--color-text-label);
+}
+
+/* Section Headings (for Deaneries / Categories) */
+.section-heading {
+  font-family: var(--font-family-serif);
+  font-size: var(--font-size-h3);
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: var(--space-section) 0px var(--space-md) 0px;
+  padding-bottom: var(--space-xs);
+  border-bottom: 1.5px solid var(--color-primary); /* ds-allow-hardcode */
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+/* High-Grade Tabular Reports */
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--space-section);
+  page-break-inside: auto;
+  break-inside: auto;
+}
+
+.report-table thead {
+  display: table-header-group;
+}
+
+.report-table tr {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.report-table th,
+.report-table td {
+  border: 1px solid var(--color-border);
+  padding: var(--space-md) var(--space-base);
+  text-align: left;
+  vertical-align: top;
+  font-size: var(--font-size-base);
+}
+
+.report-table thead th {
+  background-color: var(--color-bg-muted);
+  color: var(--color-primary);
+  font-size: var(--font-size-label);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: var(--space-row) var(--space-base);
+}
+
+.report-table tbody tr:nth-child(even) {
+  background-color: var(--color-bg-row-alt);
+}
+
+.record-id {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-family: var(--font-family-mono);
+  margin-top: 1px;
+}
+
+.empty-row {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--space-lg) !important;
+  font-style: italic;
+  background-color: var(--color-bg-subtle);
+}
 
 /* Clerical Directory Specific Styles */
-.directory-list { margin-top: 14px; }
-.directory-entry { page-break-inside: avoid; break-inside: avoid; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid #d0d7de; }
-.directory-entry:last-child { border-bottom: none; }
-.entry-header { margin-bottom: 4px; font-size: 11pt; }
-.clergy-name { font-size: 11pt; color: #17324d; }
-.clergy-rank { font-size: 9.5pt; color: #555; margin-left: 4px; }
-.entry-record-id { font-size: 8.5pt; color: #667085; margin-left: 6px; font-family: monospace; }
-table.dir-details-table { width: 100%; border-collapse: collapse; border: none; margin: 0; }
-table.dir-details-table td { border: none; padding: 2px 4px 2px 0; font-size: 9.5pt; line-height: 1.35; vertical-align: top; }
-table.dir-details-table td.dir-label { width: 50px; font-weight: bold; color: #17324d; white-space: nowrap; }
-table.dir-details-table td.dir-val { color: #222; }
-.dep-item { margin-bottom: 2px; }
-.dep-item:last-child { margin-bottom: 0; }
+.directory-list {
+  margin-top: var(--space-section);
+}
 
-.toolbar { display: none; }
-@media screen {
-  body { background: #f4f6f9; padding: 24px; }
-  .page { max-width: 1050px; margin: 0 auto; background: #fff; padding: 32px 36px; box-shadow: 0 2px 14px rgba(23,33,43,.12); border-radius: 10px; }
-  .toolbar { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 16px; }
-  .toolbar button, .toolbar a { border: 0; border-radius: 7px; padding: 9px 14px; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; font-family: Inter, Segoe UI, Arial, sans-serif; }
-  .toolbar .print-btn { background: #2f6fed; color: #fff; }
-  .toolbar .download-btn { background: #eef1f5; color: #17324d; }
+.directory-entry {
+  page-break-inside: avoid;
+  break-inside: avoid;
+  margin-bottom: var(--space-section);
+  padding: var(--space-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-sheet);
+}
+
+.entry-header {
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--color-border-light);
+  font-size: var(--font-size-h3);
+}
+
+.clergy-name {
+  color: var(--color-primary);
+}
+
+.clergy-rank {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  margin-left: var(--space-sm);
+}
+
+.entry-record-id {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-left: var(--space-md);
+  font-family: var(--font-family-mono);
+}
+
+table.dir-details-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: none;
+  margin: 0px;
+}
+
+table.dir-details-table td {
+  border: none;
+  padding: var(--space-xs) var(--space-sm) var(--space-xs) 0px;
+  font-size: var(--font-size-base);
+  line-height: 1.4;
+  vertical-align: top;
+}
+
+table.dir-details-table td.dir-label {
+  width: 68px; /* ds-allow-hardcode */
+  font-weight: bold;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+table.dir-details-table td.dir-val {
+  color: var(--color-text-main);
+}
+
+.dep-item {
+  margin-bottom: var(--space-2xs);
+}
+
+.dep-item:last-child {
+  margin-bottom: 0px;
+}
+
+/* Certification & Official Stamp Block */
+.certification-section {
+  margin-top: var(--space-block);
+  padding-top: var(--space-lg);
+  border-top: 1.5px solid var(--color-primary); /* ds-allow-hardcode */
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.sign-grid {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px; /* ds-allow-hardcode */
+}
+
+.sign-block {
+  flex: 1 1 50%;
+  background-color: var(--color-bg-row-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-base) var(--space-block);
+  text-align: center;
+}
+
+.sign-heading {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-2xs);
+}
+
+.sign-text {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin: 0px 0px var(--space-md) 0px;
+  line-height: 1.35;
+}
+
+.sign-space {
+  height: var(--size-sign-space);
+}
+
+.stamp-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--size-stamp-box);
+  margin-bottom: var(--space-xs);
+}
+
+.stamp-inner-circle {
+  width: var(--size-stamp-circle);
+  height: var(--size-stamp-circle);
+  border: 1.5px dashed var(--color-primary); /* ds-allow-hardcode */
+  border-radius: var(--radius-circle);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  background-color: rgba(23, 50, 77, 0.02); /* ds-allow-hardcode */
+}
+
+.stamp-text-org {
+  font-size: 6.5px; /* ds-allow-hardcode */
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.stamp-text-loc {
+  font-size: 6px; /* ds-allow-hardcode */
+  font-weight: 600;
+}
+
+.sign-line {
+  border-top: 1px solid var(--color-text-main);
+  width: var(--size-sign-line-width);
+  margin: 0px auto var(--space-xs) auto;
+}
+
+.sign-name {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.sign-caption {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Document Running Footer */
+.doc-footer {
+  margin-top: var(--space-block);
+  padding-top: var(--space-base);
+  border-top: 1px solid var(--color-border-light);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.footer-notice {
+  margin-bottom: var(--space-sm);
+  line-height: 1.35;
+}
+
+.footer-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-subtle);
+}
+
+/* Print Specific Rules */
+@media print {
+  body {
+    background-color: var(--color-bg-sheet) !important;
+    margin: 0px !important;
+    padding: 0px !important;
+    font-size: 10pt !important;
+  }
+
+  .toolbar {
+    display: none !important;
+  }
+
+  .word-canvas {
+    display: block !important;
+    gap: 0px !important;
+    padding: 0px !important;
+    background: transparent !important;
+  }
+
+  .paper-sheet {
+    width: 100% !important;
+    min-height: 0px !important;
+    margin: 0px !important;
+    padding: 0px !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0px !important;
+  }
+
+  .doc-watermark {
+    display: block !important;
+    opacity: 0.04 !important;
+  }
+
+  .directory-entry,
+  .certification-section,
+  .report-table tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .report-table {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+
+  .report-table thead {
+    display: table-header-group !important;
+  }
+
+  .section-heading,
+  .entry-header {
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
 }

@@ -37,7 +37,7 @@ def _fmt_date(value):
 
 def _build_clerical_directory():
     records = (
-        ClergyRecord.objects.all()
+        ClergyRecord.objects.exclude(rank='postulancy')
         .select_related('profile', 'deanery')
         .prefetch_related('deployments', 'profile__children', 'profile__educations')
         .order_by('name')
@@ -160,7 +160,7 @@ def _build_clerical_directory():
 
 
 def _build_status_report():
-    records = ClergyRecord.objects.all().order_by('name')
+    records = ClergyRecord.objects.exclude(rank='postulancy').order_by('name')
     columns = ['Name', 'Status', 'Leave Reason', 'Current Deployment']
     rows = []
     for r in records:
@@ -171,7 +171,7 @@ def _build_status_report():
 
 def _build_per_deanery_report():
     mapping = _assignment_to_deanery_map()
-    records = ClergyRecord.objects.select_related('deanery').order_by('name')
+    records = ClergyRecord.objects.exclude(rank='postulancy').select_related('deanery').order_by('name')
     groups = {}
     for r in records:
         deanery = (
@@ -189,12 +189,13 @@ def _build_per_deanery_report():
 
 
 def _build_ordination_documents_report():
-    required_types = list(DocumentType.objects.filter(is_required=True))
-    records = ClergyRecord.objects.prefetch_related('documents__document_type').order_by('name')
+    required_types = list(DocumentType.objects.filter(is_required=True).exclude(required_from_rank='postulancy'))
+    records = ClergyRecord.objects.exclude(rank='postulancy').prefetch_related('documents__document_type').order_by('name')
     columns = ['Name', 'Rank', 'Current Deployment', 'Status', 'Documents Submitted', 'Documents Missing']
     rows = []
     for r in records:
         checklist = r.document_checklist(required_types=required_types)
+        checklist = [c for c in checklist if getattr(c.get('document_type'), 'required_from_rank', '') != 'postulancy']
         missing = [c['document_type'].name for c in checklist if c['status'] in ('Missing', 'Expired')]
         submitted_count = len(checklist) - len(missing)
         rows.append([

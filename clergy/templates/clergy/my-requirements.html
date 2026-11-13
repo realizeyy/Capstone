@@ -5,6 +5,304 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'ember-letters.css' %}?v=8">
+<style>
+/* Stages Summary Hub (Overview Cards on the Page) */
+.stages-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 14px;
+}
+@media (max-width: 820px) {
+  .stages-hub-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.stage-hub-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 13px;
+  padding: 16px 20px 18px;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.18s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+.stage-hub-card:hover,
+.stage-hub-card:focus-visible {
+  border-color: #2f6fed;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+  transform: translateY(-2px);
+  outline: none;
+}
+.stage-hub-card:focus-visible {
+  box-shadow: 0 0 0 3px rgba(47, 111, 237, 0.2), 0 14px 30px rgba(15, 23, 42, 0.12);
+}
+.stage-hub-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.stage-hub-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+.stage-hub-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #2f6fed;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.stage-hub-title {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #17324d;
+  margin: 0;
+  line-height: 1.3;
+}
+.stage-hub-desc {
+  font-size: 12px;
+  color: #64748b;
+  margin: 2px 0 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.stage-hub-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.stage-hub-open-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  transition: all 0.15s ease;
+}
+.stage-hub-card:hover .stage-hub-open-btn {
+  background: #2f6fed;
+  color: #ffffff;
+  border-color: #2f6fed;
+}
+.stage-hub-progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stage-hub-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11.5px;
+  color: #64748b;
+}
+.stage-hub-progress-track {
+  height: 6px;
+  background: #f1f5f9;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+.stage-hub-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+  background: var(--blue, #2f6fed);
+}
+.stage-hub-progress-fill.complete {
+  background: #059669;
+}
+.stage-hub-items-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 10px 12px;
+  border: 1px solid #f1f5f9;
+}
+.stage-preview-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+.stage-preview-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+.stage-preview-dot {
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+.stage-preview-dot.ok {
+  color: #059669;
+}
+.stage-preview-dot.pending {
+  color: #94a3b8;
+}
+.stage-preview-name {
+  color: #334155;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stage-preview-status {
+  font-size: 11px;
+  padding: 1px 6px;
+  flex-shrink: 0;
+}
+.stage-preview-more {
+  font-size: 11.5px;
+  color: #64748b;
+  text-align: right;
+  padding-top: 2px;
+}
+.stage-hub-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #64748b;
+  padding-top: 4px;
+  border-top: 1px dashed #e2e8f0;
+}
+.stage-hub-card:hover .stage-hub-card-foot {
+  color: #2f6fed;
+}
+@keyframes stageCardFlash {
+  0% { box-shadow: 0 0 0 4px rgba(47, 111, 237, 0.4); transform: scale(1.01); }
+  100% { box-shadow: none; transform: scale(1); }
+}
+.stage-card-flash {
+  animation: stageCardFlash 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Hidden Repository for Form & Section Containers */
+.hub-hidden-sections {
+  display: none !important;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+body.modal-open {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+body.modal-open .stage-floating-elevator {
+  display: none !important;
+}
+
+/* Stage Quick-View Modal */
+.modal-bg.stage-modal-active {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overscroll-behavior: contain;
+}
+.modal.stage-quick-modal {
+  width: min(980px, 96vw);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.28);
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+.stage-quick-modal .modal-head {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.stage-quick-modal .stage-modal-body {
+  padding: 18px 20px;
+  overflow-y: auto;
+  flex: 1;
+  overscroll-behavior: contain;
+}
+.stage-quick-modal .stage-modal-body .doc-stage-section {
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0 !important;
+}
+.stage-quick-modal .stage-modal-body .doc-stage-header {
+  display: none;
+}
+.stage-quick-modal .stage-modal-foot {
+  padding: 12px 20px;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.stage-step-indicator {
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+  padding: 2px 8px;
+  background: #e2e8f0;
+  border-radius: 6px;
+}
+#clergyUploadModal {
+  z-index: 85 !important;
+}
+#docPreviewModal {
+  z-index: 90 !important;
+}
+</style>
 {% endblock %}
 
 {% block content %}
@@ -14,150 +312,498 @@
     <div class="panel-head">
       <div>
         <h3><i class="fa-solid fa-folder-open"></i> My Requirements &amp; Attachments</h3>
-        <span class="muted">Required documents for your current rank ({{ profile.record.get_rank_display }}), cumulative from Postulancy.</span>
+        <span class="muted">Required documents for your current rank ({{ profile.record.get_rank_display }}), cumulative across ranks.</span>
       </div>
       <span class="badge blue">Own Record Only</span>
     </div>
 
-    <div class="page-tabs" data-active-tab="{{ active_tab }}">
-      <button type="button" id="tabBtnChecklist" data-tab="checklist" data-target="tabChecklist">
-        <i class="fa-solid fa-list-check"></i> Requirements Checklist
-      </button>
-      <button type="button" id="tabBtnEmber" data-tab="ember" data-target="tabEmber">
-        <i class="fa-solid fa-envelope-open-text"></i> Ember Letters
-        <span class="badge blue" data-ember-tab-badge>{{ ember_summary.uploaded }}/{{ ember_summary.target }}</span>
-      </button>
+    <div class="page-tabs-bar">
+      <div class="page-tabs" data-active-tab="{{ active_tab }}">
+        <button type="button" id="tabBtnChecklist" data-tab="checklist" data-target="tabChecklist">
+          <i class="fa-solid fa-list-check"></i> Requirements Checklist
+        </button>
+        <button type="button" id="tabBtnEmber" data-tab="ember" data-target="tabEmber">
+          <i class="fa-solid fa-envelope-open-text"></i> Ember Letters
+          <span class="badge blue" data-ember-tab-badge>{{ ember_summary.uploaded }}/{{ ember_summary.target }}</span>
+        </button>
+      </div>
+      <div class="page-tabs-search">
+        <div class="page-tabs-search-box">
+          <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+          <input type="text" class="page-search-input" id="docSearchInput" placeholder="Search requirements &amp; letters..." aria-label="Search document requirements or ember letters" autocomplete="off">
+          <button type="button" class="search-clear" id="docSearchClear" aria-label="Clear search" hidden>
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
     </div>
 
     <div id="tabChecklist" class="tab-content">
-      <div class="notice">You can view and submit documents attached to <b>your own clergy record only</b>. You cannot search, view, edit, or access another clergy member's records.</div>
-      <p class="muted form-note">PDF files can be up to 5 MB. Photos and scans (JPG or PNG) can be up to 10 MB, and are made smaller automatically before they are stored.</p>
-
-      <h3 class="doc-section-title"><i class="fa-solid fa-user"></i>Own Requirements &amp; Ordination Attachments</h3>
-      <div class="doc-grid">
-      {% for item in checklist.clergy %}
-      <div class="doc-card" id="doc-card-{{ item.document_type.id }}" data-doc-card-type="{{ item.document_type.id }}" data-doc-title="{{ item.document_type.name }}">
-        <div class="doc-card-head">
-          <b>{{ item.document_type.name }}</b>
-          {% if item.document_type.is_noted_only %}
-            {% if item.status == 'Submitted' %}<span class="badge green">Submitted</span>
-            {% else %}<span class="badge amber">Not Submitted</span>{% endif %}
-          {% else %}
-            {% if item.status == 'Submitted' %}<span class="badge green">Submitted</span>
-            {% elif item.status == 'Expired' %}<span class="badge red">Expired</span>
-            {% else %}<span class="badge amber">Missing</span>{% endif %}
-          {% endif %}
-        </div>
-        <div class="doc-card-body">
-          {% if item.document_type.notes %}<div class="doc-card-note">{{ item.document_type.notes }}</div>{% endif %}
-          {% if item.document_type.is_noted_only %}
-            <div class="doc-card-file doc-card-file-noted"><i class="fa-solid fa-shield-halved"></i> Noted upon receipt by the Bishop. No document upload required.</div>
-            {% if item.document %}
-            <div class="doc-card-file"><i class="fa-solid fa-circle-check"></i> Noted as submitted on {{ item.document.submitted_date }}{% if item.document.notes %}<br>{{ item.document.notes }}{% endif %}</div>
-            {% else %}
-            <div class="doc-card-file doc-card-file-empty"><i class="fa-solid fa-clock"></i> Awaiting Bishop receipt confirmation</div>
-            {% endif %}
-          {% else %}
-            {% if item.document and item.document.file %}
-            <div class="doc-card-file"><i class="fa-solid fa-file-lines"></i> Submitted {{ item.document.submitted_date }}{% if item.document.notes %}<br>{{ item.document.notes }}{% endif %}</div>
-            <div class="row-actions">
-              <a class="btn secondary small" href="{% url 'registrar:view_document' item.document.id %}" target="_blank" rel="noopener"><i class="fa-solid fa-eye"></i> View</a>
-              <a class="btn secondary small" href="{% url 'registrar:download_document' item.document.id %}"><i class="fa-solid fa-download"></i> Download</a>
-              <button type="button" class="btn secondary small" data-print-url="{% url 'registrar:view_document' item.document.id %}"><i class="fa-solid fa-print"></i> Print</button>
-            </div>
-            {% else %}
-            <div class="doc-card-file doc-card-file-empty"><i class="fa-solid fa-clock"></i> No document uploaded yet</div>
-            <div class="row-actions is-empty" aria-hidden="true">
-              <span class="btn secondary small disabled" aria-disabled="true"><i class="fa-solid fa-eye"></i> View</span>
-              <span class="btn secondary small disabled" aria-disabled="true"><i class="fa-solid fa-download"></i> Download</span>
-              <span class="btn secondary small disabled" aria-disabled="true"><i class="fa-solid fa-print"></i> Print</span>
-            </div>
-            {% endif %}
-          {% endif %}
-        </div>
-        {% if not item.document_type.is_noted_only %}
-        <form method="post" enctype="multipart/form-data" class="doc-card-upload">
-          {% csrf_token %}
-          <input type="hidden" name="document_type" value="{{ item.document_type.id }}">
-          <input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png" required>
-          <input type="text" name="notes" placeholder="Notes (optional)">
-          <button class="btn small" {% if item.document and item.document.file %}data-confirm="Replace the existing document for {{ item.document_type.name }}? The previous file will be overwritten."{% endif %}>{% if item.document and item.document.file %}<i class="fa-solid fa-rotate"></i> Replace{% else %}<i class="fa-solid fa-upload"></i> Upload{% endif %}</button>
-        </form>
-        {% endif %}
-      </div>
-      {% empty %}
-      <p class="empty">No requirements configured yet.</p>
-      {% endfor %}
+      <div class="doc-info-strip">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>Documents attached to your clergy record. Maximum 5 MB for PDF files, 10 MB for images (auto-compressed).</span>
       </div>
 
-      <h3 class="doc-section-title"><i class="fa-solid fa-building-columns"></i>Registrar / Official Documents</h3>
-      <div class="notice">These are provided and maintained by the Registrar (view-only from your portal).</div>
-      <div class="doc-grid">
-      {% for item in checklist.registrar %}
-      <div class="doc-card">
-        <div class="doc-card-head">
-          <b>{{ item.document_type.name }}</b>
-          {% if item.document_type.is_noted_only %}
-            {% if item.status == 'Submitted' %}<span class="badge green">Submitted</span>
-            {% else %}<span class="badge amber">Not Submitted</span>{% endif %}
-          {% else %}
-            {% if item.status == 'Submitted' %}<span class="badge green">Submitted</span>
-            {% elif item.status == 'Expired' %}<span class="badge red">Expired</span>
-            {% else %}<span class="badge amber">Pending</span>{% endif %}
-          {% endif %}
-        </div>
-        <div class="doc-card-body">
-          {% if item.document_type.notes %}<div class="doc-card-note">{{ item.document_type.notes }}</div>{% endif %}
-          {% if item.document_type.is_noted_only %}
-            <div class="doc-card-file doc-card-file-noted"><i class="fa-solid fa-shield-halved"></i> Noted upon receipt by the Bishop. No document upload required.</div>
-            {% if item.document %}
-            <div class="doc-card-file"><i class="fa-solid fa-circle-check"></i> Noted as submitted on {{ item.document.submitted_date }}{% if item.document.notes %}<br>{{ item.document.notes }}{% endif %}</div>
+      <!-- Sticky Quick Navigation Bar for Documents -->
+      <nav class="doc-nav-sticky" id="documentsSectionNav" aria-label="Quick document stage navigation">
+        <!-- Row 1: Stage Jump Carousel -->
+        <div class="doc-nav-row doc-nav-stages-row">
+          <span class="doc-nav-label"><i class="fa-solid fa-compass" style="color:var(--blue);"></i> Stages:</span>
+          <button type="button" class="doc-nav-scroll-btn doc-nav-scroll-left" id="docNavScrollLeft" aria-label="Scroll stages left">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <div class="doc-nav-pills" id="docNavPills">
+            {% if checklist.stages %}
+              {% for stage in checklist.stages %}
+              <a href="#sec-doc-{{ stage.slug }}" class="doc-nav-pill{% if forloop.first %} active{% endif %}" data-stage-modal="sec-doc-{{ stage.slug }}" data-doc-target="sec-doc-{{ stage.slug }}" data-stage-slug="{{ stage.slug }}" data-stage-title="{{ stage.title }}">
+                <i class="fa-solid {{ stage.icon }}"></i> {{ stage.title }}
+                {% if stage.is_complete %}
+                  <span class="badge stage-complete-b"><i class="fa-solid fa-check"></i> Complete</span>
+                {% else %}
+                  <span class="badge pending-b">{{ stage.submitted }}/{{ stage.total }}</span>
+                {% endif %}
+              </a>
+              {% endfor %}
             {% else %}
-            <div class="doc-card-file doc-card-file-empty"><i class="fa-solid fa-clock"></i> Awaiting Bishop receipt confirmation</div>
+              <a href="#sec-doc-clergy" class="doc-nav-pill active" data-stage-modal="sec-doc-clergy" data-doc-target="sec-doc-clergy" data-stage-title="Own Requirements"><i class="fa-solid fa-user"></i> Own Requirements</a>
+              <a href="#sec-doc-registrar" class="doc-nav-pill" data-stage-modal="sec-doc-registrar" data-doc-target="sec-doc-registrar" data-stage-title="Official Documents"><i class="fa-solid fa-building-columns"></i> Official Documents</a>
             {% endif %}
-          {% else %}
-            {% if item.document and item.document.file %}
-            <div class="doc-card-file"><i class="fa-solid fa-file-lines"></i> Submitted {{ item.document.submitted_date }}{% if item.document.notes %}<br>{{ item.document.notes }}{% endif %}</div>
-            <div class="row-actions">
-              <a class="btn secondary small" href="{% url 'registrar:view_document' item.document.id %}" target="_blank" rel="noopener"><i class="fa-solid fa-eye"></i> View</a>
-              <a class="btn secondary small" href="{% url 'registrar:download_document' item.document.id %}"><i class="fa-solid fa-download"></i> Download</a>
-              <button type="button" class="btn secondary small" data-print-url="{% url 'registrar:view_document' item.document.id %}"><i class="fa-solid fa-print"></i> Print</button>
-            </div>
-            {% else %}
-            <div class="doc-card-file doc-card-file-empty"><i class="fa-solid fa-clock"></i> Not yet provided by the Registrar</div>
-            <div class="row-actions is-empty" aria-hidden="true">
-              <span class="btn secondary small disabled" aria-disabled="true"><i class="fa-solid fa-eye"></i> View</span>
-              <span class="btn secondary small disabled" aria-disabled="true"><i class="fa-solid fa-download"></i> Download</span>
-              <span class="btn secondary small disabled" aria-disabled="true"><i class="fa-solid fa-print"></i> Print</span>
-            </div>
-            {% endif %}
-          {% endif %}
-        </div>
-      </div>
-      {% empty %}
-      <p class="empty">No registrar-provided documents configured yet.</p>
-      {% endfor %}
-      </div>
-
-      <h3 class="doc-section-title"><i class="fa-solid fa-envelope-open-text"></i>Ember Letters</h3>
-      <div class="doc-grid">
-        <div class="doc-card ember-summary-card">
-          <div class="doc-card-head">
-            <b>Ember Letters (Quarterly)</b>
-            <span class="badge blue" data-ember-card-badge>{{ ember_summary.uploaded }} of {{ ember_summary.target }} uploaded</span>
+            <a href="#sec-doc-ember" class="doc-nav-pill" data-stage-modal="sec-doc-ember" data-doc-target="sec-doc-ember" data-stage-slug="ember" data-stage-title="Ember Letters">
+              <i class="fa-solid fa-envelope-open-text"></i> Ember Letters
+              <span class="badge blue">{{ ember_summary.uploaded }}/{{ ember_summary.target }}</span>
+            </a>
           </div>
-          <div class="doc-card-body">
-            <div class="muted">Quarterly Ember Letters grouped by year (Q1 to Q4). Informational: does not block checklist completion.</div>
-            <div class="doc-card-file" data-ember-card-detail>
-              {% if ember_summary.uploaded %}
-                <i class="fa-solid fa-file-lines"></i> {{ ember_summary.uploaded }} of {{ ember_summary.target }} quarterly letters uploaded across {{ ember_summary.years }} year{{ ember_summary.years|pluralize }}.
-              {% else %}
-                No quarterly Ember letters uploaded yet.
+          <button type="button" class="doc-nav-scroll-btn doc-nav-scroll-right" id="docNavScrollRight" aria-label="Scroll stages right">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <!-- Row 2: Filter and Focus Mode Tools -->
+        <div class="doc-nav-row doc-nav-tools-row">
+          <div class="doc-filter-pills" role="group" aria-label="Filter documents by status">
+            <button type="button" class="filter-pill active" data-doc-filter="all">All</button>
+            <button type="button" class="filter-pill" data-doc-filter="not-uploaded">Not Uploaded</button>
+            <button type="button" class="filter-pill" data-doc-filter="submitted">Submitted</button>
+          </div>
+
+          <div class="doc-tools-right">
+            <!-- Stage Group Progress Indicator: Synchronized with scroll and elevator -->
+            <div class="stage-stepper-control" id="stageStepperControl" aria-live="polite" title="Current stage group">
+              <span class="stepper-count" id="stageStepperCount">1 / 3</span>
+              <span class="stepper-label" id="stageStepperLabel">Postulancy · Diaconate</span>
+            </div>
+
+            <button type="button" class="btn-focus-toggle" id="btnFocusMode" aria-pressed="false" title="Hide stages and requirements that are already 100% complete">
+              <i class="fa-solid fa-filter"></i> <span>Hide Complete</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Search Feedback Banner -->
+        <div class="doc-search-feedback" id="docSearchFeedback" hidden>
+          <span id="docSearchFeedbackText">Found 0 matching documents</span>
+          <button type="button" class="doc-search-reset-btn" id="docSearchResetBtn">Clear search</button>
+        </div>
+      </nav>
+
+      <!-- Stages Summary Hub (Click any card or quick jump pill to open the stage's full document table in a modal dialog) -->
+      <div class="stages-hub-grid" id="stagesSummaryHub" role="region" aria-label="Document Stages Overview">
+        {% if checklist.stages %}
+          {% for stage in checklist.stages %}
+          <div class="stage-hub-card" data-open-stage="sec-doc-{{ stage.slug }}" role="button" tabindex="0" aria-label="Open {{ stage.title }} requirements">
+            <div class="stage-hub-head">
+              <div class="stage-hub-title-wrap">
+                <span class="stage-hub-icon"><i class="fa-solid {{ stage.icon }}"></i></span>
+                <div>
+                  <h4 class="stage-hub-title">{{ stage.title }}</h4>
+                  <p class="stage-hub-desc">{{ stage.description }}</p>
+                </div>
+              </div>
+              <div class="stage-hub-actions">
+                {% if stage.is_complete %}
+                  <span class="badge stage-complete-b"><i class="fa-solid fa-check"></i> Complete</span>
+                {% else %}
+                  <span class="badge pending-b">{{ stage.submitted }}/{{ stage.total }}</span>
+                {% endif %}
+                <span class="stage-hub-open-btn"><i class="fa-solid fa-folder-open"></i> Open</span>
+              </div>
+            </div>
+
+            <div class="stage-hub-progress-wrap">
+              <div class="stage-hub-progress-meta">
+                <span>Progress</span>
+                <b>{% if stage.total > 0 %}{% widthratio stage.submitted stage.total 100 %}%{% else %}0%{% endif %} ({{ stage.submitted }} of {{ stage.total }})</b>
+              </div>
+              <div class="stage-hub-progress-track">
+                <div class="stage-hub-progress-fill{% if stage.is_complete %} complete{% endif %}" style="width:{% if stage.total > 0 %}{% widthratio stage.submitted stage.total 100 %}%{% else %}0%{% endif %};"></div>
+              </div>
+            </div>
+
+            <div class="stage-hub-items-preview">
+              {% for item in stage.items|slice:":3" %}
+              <div class="stage-preview-row">
+                <div class="stage-preview-name-wrap">
+                  <span class="stage-preview-dot {% if item.status == 'Submitted' %}ok{% else %}pending{% endif %}">
+                    <i class="fa-solid {% if item.status == 'Submitted' %}fa-circle-check{% else %}fa-circle-dot{% endif %}"></i>
+                  </span>
+                  <span class="stage-preview-name" title="{{ item.document_type.name }}">{{ item.document_type.name }}</span>
+                </div>
+                <span class="stage-preview-status badge {% if item.status == 'Submitted' %}active-b{% elif item.status == 'Expired' %}inactive-b{% else %}pending-b{% endif %}">
+                  {% if item.status == 'Submitted' %}Submitted{% elif item.status == 'Expired' %}Expired{% else %}Not Uploaded{% endif %}
+                </span>
+              </div>
+              {% endfor %}
+              {% if stage.total > 3 %}
+              <div class="stage-preview-more">
+                <span>+ {{ stage.total|add:"-3" }} more requirement{{ stage.total|add:"-3"|pluralize }}</span>
+              </div>
               {% endif %}
             </div>
-            <div class="row-actions" style="margin-top:auto;">
-              <button type="button" class="btn small" data-open-tab="ember"><i class="fa-solid fa-folder-open"></i> Open Ember Letters</button>
+
+            <div class="stage-hub-card-foot">
+              <span>Click to view and manage stage documents <i class="fa-solid fa-arrow-right"></i></span>
             </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="stage-hub-card" data-open-stage="sec-doc-clergy" role="button" tabindex="0" aria-label="Open Own Requirements">
+            <div class="stage-hub-head">
+              <div class="stage-hub-title-wrap">
+                <span class="stage-hub-icon"><i class="fa-solid fa-user"></i></span>
+                <div>
+                  <h4 class="stage-hub-title">Own Requirements</h4>
+                  <p class="stage-hub-desc">Personal clergy requirements and ordination attachments</p>
+                </div>
+              </div>
+              <div class="stage-hub-actions">
+                <span class="stage-hub-open-btn"><i class="fa-solid fa-folder-open"></i> Open</span>
+              </div>
+            </div>
+            <div class="stage-hub-card-foot">
+              <span>Click to view and upload requirements <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+          </div>
+          <div class="stage-hub-card" data-open-stage="sec-doc-registrar" role="button" tabindex="0" aria-label="Open Official Documents">
+            <div class="stage-hub-head">
+              <div class="stage-hub-title-wrap">
+                <span class="stage-hub-icon"><i class="fa-solid fa-building-columns"></i></span>
+                <div>
+                  <h4 class="stage-hub-title">Official Documents</h4>
+                  <p class="stage-hub-desc">Official diocesan filings and evaluations</p>
+                </div>
+              </div>
+              <div class="stage-hub-actions">
+                <span class="stage-hub-open-btn"><i class="fa-solid fa-folder-open"></i> Open</span>
+              </div>
+            </div>
+            <div class="stage-hub-card-foot">
+              <span>Click to view official diocesan documents <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- Ember Letters Stage Card -->
+        <div class="stage-hub-card" data-open-stage="sec-doc-ember" role="button" tabindex="0" aria-label="Open Ember Letters">
+          <div class="stage-hub-head">
+            <div class="stage-hub-title-wrap">
+              <span class="stage-hub-icon"><i class="fa-solid fa-envelope-open-text"></i></span>
+              <div>
+                <h4 class="stage-hub-title">Ember Letters</h4>
+                <p class="stage-hub-desc">Quarterly Ember Letters grouped by year (Q1 to Q4)</p>
+              </div>
+            </div>
+            <div class="stage-hub-actions">
+              <span class="badge blue">{{ ember_summary.uploaded }}/{{ ember_summary.target }}</span>
+              <span class="stage-hub-open-btn"><i class="fa-solid fa-folder-open"></i> Open</span>
+            </div>
+          </div>
+
+          <div class="stage-hub-progress-wrap">
+            <div class="stage-hub-progress-meta">
+              <span>Submission Rate</span>
+              <b>{% if ember_summary.target > 0 %}{% widthratio ember_summary.uploaded ember_summary.target 100 %}%{% else %}0%{% endif %} ({{ ember_summary.uploaded }} of {{ ember_summary.target }})</b>
+            </div>
+            <div class="stage-hub-progress-track">
+              <div class="stage-hub-progress-fill{% if ember_summary.uploaded >= ember_summary.target and ember_summary.target > 0 %} complete{% endif %}" style="width:{% if ember_summary.target > 0 %}{% widthratio ember_summary.uploaded ember_summary.target 100 %}%{% else %}0%{% endif %};"></div>
+            </div>
+          </div>
+
+          <div class="stage-hub-items-preview">
+            <div class="stage-preview-row">
+              <div class="stage-preview-name-wrap">
+                <span class="stage-preview-dot {% if ember_summary.uploaded > 0 %}ok{% else %}pending{% endif %}">
+                  <i class="fa-solid {% if ember_summary.uploaded > 0 %}fa-circle-check{% else %}fa-circle-dot{% endif %}"></i>
+                </span>
+                <span class="stage-preview-name">Active Ember Years ({{ ember_summary.years }} year{{ ember_summary.years|pluralize }})</span>
+              </div>
+              <span class="stage-preview-status badge blue">{{ ember_summary.uploaded }} uploaded</span>
+            </div>
+          </div>
+
+          <div class="stage-hub-card-foot">
+            <span>Click to view Ember Letters summary or open tab <i class="fa-solid fa-arrow-right"></i></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hidden Form / Section Repository (individual stages pop into #stageDocumentsModal when clicked) -->
+      <div id="stageSectionsRepository" class="hub-hidden-sections">
+        {% if checklist.stages %}
+          {% for stage in checklist.stages %}
+          <div class="doc-stage-section" id="sec-doc-{{ stage.slug }}" data-stage-slug="{{ stage.slug }}" data-stage-title="{{ stage.title }}" data-stage-icon="{{ stage.icon }}" data-stage-desc="{{ stage.description }}" data-stage-submitted="{{ stage.submitted }}" data-stage-total="{{ stage.total }}" data-stage-complete="{% if stage.is_complete %}1{% else %}0{% endif %}">
+            <div class="doc-stage-header">
+              <div class="doc-stage-title-wrap">
+                <h4 class="doc-stage-title"><i class="fa-solid {{ stage.icon }}"></i> {{ stage.title }}</h4>
+                <p class="doc-stage-desc">{{ stage.description }}</p>
+              </div>
+              <span class="badge {% if stage.is_complete %}active-b{% else %}pending-b{% endif %}">
+                {% if stage.is_complete %}<i class="fa-solid fa-check"></i> All {{ stage.total }} on file{% else %}{{ stage.submitted }} of {{ stage.total }} uploaded{% endif %}
+              </span>
+            </div>
+            <div class="doc-table-wrap">
+              <table class="doc-table">
+                <thead>
+                  <tr>
+                    <th class="col-name">Document Name</th>
+                    <th class="col-date">Date Recorded</th>
+                    <th class="col-status">Status</th>
+                    <th class="col-notes">Notes / Guidance</th>
+                    <th class="col-actions">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in stage.items %}
+                  <tr class="doc-row{% if item.document and item.document.file %} has-file{% endif %}"
+                      id="doc-row-{{ item.document_type.id }}"
+                      data-doc-row-type="{{ item.document_type.id }}"
+                      data-doc-title="{{ item.document_type.name }}"
+                      data-doc-status="{% if item.status == 'Submitted' %}submitted{% elif item.status == 'Expired' %}expired{% else %}not-uploaded{% endif %}"
+                      {% if item.document and item.document.file %}
+                        data-view-url="{% url 'registrar:view_document' item.document.id %}"
+                        tabindex="0"
+                        role="link"
+                        title="Click to view {{ item.document_type.name }}"
+                      {% endif %}>
+                    <td class="col-name">
+                      {% if item.document and item.document.file %}
+                        <a href="{% url 'registrar:view_document' item.document.id %}" target="_blank" rel="noopener" class="doc-table-link" title="Click to view document">
+                          <span>{{ item.document_type.name }}</span>
+                          <i class="fa-solid fa-arrow-up-right-from-square doc-link-ext" aria-hidden="true"></i>
+                        </a>
+                      {% else %}
+                        <span class="doc-table-name">{{ item.document_type.name }}</span>
+                      {% endif %}
+                      {% if item.document_type.uploaded_by == 'registrar' %}
+                        <span class="badge retired-b" style="font-size:10.5px; padding:1px 6px; margin-left:6px;" title="Registrar filing (view-only)">Diocesan</span>
+                      {% endif %}
+                    </td>
+                    <td class="col-date">
+                      {% if item.document and item.document.submitted_date %}
+                        {{ item.document.submitted_date|date:"M d, Y" }}
+                      {% else %}
+                        <span class="text-muted">-</span>
+                      {% endif %}
+                    </td>
+                    <td class="col-status">
+                      {% if item.status == 'Submitted' %}
+                        <span class="badge active-b">Submitted</span>
+                      {% elif item.status == 'Expired' %}
+                        <span class="badge inactive-b">Expired</span>
+                      {% else %}
+                        <span class="badge pending-b">Not Uploaded</span>
+                      {% endif %}
+                    </td>
+                    <td class="col-notes">
+                      {% if item.document_type.is_noted_only %}
+                        {% if item.document %}
+                          <span class="text-muted">Confirmed by Bishop on {{ item.document.submitted_date|date:"M d, Y" }}</span>
+                        {% else %}
+                          <span class="text-muted">Noted upon receipt by Bishop</span>
+                        {% endif %}
+                      {% else %}
+                        {% if item.document and item.document.notes %}
+                          <span title="{{ item.document.notes }}">{{ item.document.notes|truncatechars:45 }}</span>
+                        {% elif item.document_type.notes %}
+                          <span class="text-muted" title="{{ item.document_type.notes }}">{{ item.document_type.notes|truncatechars:45 }}</span>
+                        {% else %}
+                          <span class="text-muted">-</span>
+                        {% endif %}
+                      {% endif %}
+                    </td>
+                    <td class="col-actions">
+                      {% if item.document and item.document.file %}
+                        <a class="doc-action-btn" href="{% url 'registrar:download_document' item.document.id %}" download title="Download file">
+                          <i class="fa-solid fa-download"></i>
+                        </a>
+                        <button type="button" class="doc-action-btn" data-print-url="{% url 'registrar:view_document' item.document.id %}" title="Print document">
+                          <i class="fa-solid fa-print"></i>
+                        </button>
+                        {% if not item.document_type.is_noted_only and item.document_type.uploaded_by == 'clergy' %}
+                          <button type="button" class="doc-action-btn" data-open-upload="{{ item.document_type.id }}" data-doc-title="{{ item.document_type.name }}" data-is-replace="1" title="Replace file">
+                            <i class="fa-solid fa-rotate"></i>
+                          </button>
+                        {% endif %}
+                      {% else %}
+                        {% if not item.document_type.is_noted_only and item.document_type.uploaded_by == 'clergy' %}
+                          <button type="button" class="btn small" style="padding: 3px 10px; font-size: 11.5px; height: 28px;" data-open-upload="{{ item.document_type.id }}" data-doc-title="{{ item.document_type.name }}" data-is-replace="0">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Upload
+                          </button>
+                        {% else %}
+                          <span class="text-muted" style="font-size: 11.5px;">View only</span>
+                        {% endif %}
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="doc-stage-section" id="sec-doc-clergy" data-stage-slug="clergy" data-stage-title="Own Requirements" data-stage-icon="fa-user" data-stage-desc="Own Requirements and Ordination Attachments">
+            <h3 class="doc-section-title"><i class="fa-solid fa-user"></i>Own Requirements &amp; Ordination Attachments</h3>
+            <div class="doc-table-wrap">
+              <table class="doc-table">
+                <thead>
+                  <tr>
+                    <th class="col-name">Document Name</th>
+                    <th class="col-date">Date Recorded</th>
+                    <th class="col-status">Status</th>
+                    <th class="col-notes">Notes / Guidance</th>
+                    <th class="col-actions">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in checklist.clergy %}
+                  <tr class="doc-row{% if item.document and item.document.file %} has-file{% endif %}"
+                      id="doc-row-{{ item.document_type.id }}"
+                      data-doc-row-type="{{ item.document_type.id }}"
+                      data-doc-title="{{ item.document_type.name }}"
+                      data-doc-status="{% if item.status == 'Submitted' %}submitted{% elif item.status == 'Expired' %}expired{% else %}not-uploaded{% endif %}"
+                      {% if item.document and item.document.file %}
+                        data-view-url="{% url 'registrar:view_document' item.document.id %}"
+                        tabindex="0"
+                        role="link"
+                        title="Click to view {{ item.document_type.name }}"
+                      {% endif %}>
+                    <td class="col-name">
+                      {% if item.document and item.document.file %}
+                        <a href="{% url 'registrar:view_document' item.document.id %}" target="_blank" rel="noopener" class="doc-table-link" title="Click to view document">
+                          <span>{{ item.document_type.name }}</span>
+                          <i class="fa-solid fa-arrow-up-right-from-square doc-link-ext" aria-hidden="true"></i>
+                        </a>
+                      {% else %}
+                        <span class="doc-table-name">{{ item.document_type.name }}</span>
+                      {% endif %}
+                    </td>
+                    <td class="col-date">
+                      {% if item.document and item.document.submitted_date %}
+                        {{ item.document.submitted_date|date:"M d, Y" }}
+                      {% else %}
+                        <span class="text-muted">-</span>
+                      {% endif %}
+                    </td>
+                    <td class="col-status">
+                      {% if item.status == 'Submitted' %}
+                        <span class="badge active-b">Submitted</span>
+                      {% elif item.status == 'Expired' %}
+                        <span class="badge inactive-b">Expired</span>
+                      {% else %}
+                        <span class="badge pending-b">Not Uploaded</span>
+                      {% endif %}
+                    </td>
+                    <td class="col-notes">
+                      {% if item.document and item.document.notes %}
+                        <span title="{{ item.document.notes }}">{{ item.document.notes|truncatechars:45 }}</span>
+                      {% else %}
+                        <span class="text-muted">-</span>
+                      {% endif %}
+                    </td>
+                    <td class="col-actions">
+                      {% if item.document and item.document.file %}
+                        <a class="doc-action-btn" href="{% url 'registrar:download_document' item.document.id %}" download title="Download file">
+                          <i class="fa-solid fa-download"></i>
+                        </a>
+                        <button type="button" class="doc-action-btn" data-print-url="{% url 'registrar:view_document' item.document.id %}" title="Print document">
+                          <i class="fa-solid fa-print"></i>
+                        </button>
+                        <button type="button" class="doc-action-btn" data-open-upload="{{ item.document_type.id }}" data-doc-title="{{ item.document_type.name }}" data-is-replace="1" title="Replace file">
+                          <i class="fa-solid fa-rotate"></i>
+                        </button>
+                      {% else %}
+                        <button type="button" class="btn small" style="padding: 3px 10px; font-size: 11.5px; height: 28px;" data-open-upload="{{ item.document_type.id }}" data-doc-title="{{ item.document_type.name }}" data-is-replace="0">
+                          <i class="fa-solid fa-cloud-arrow-up"></i> Upload
+                        </button>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- Ember Letters Section -->
+        <div class="doc-stage-section" id="sec-doc-ember" data-stage-slug="ember" data-stage-title="Ember Letters" data-stage-icon="fa-envelope-open-text" data-stage-desc="Quarterly Ember Letters grouped by year (Q1 to Q4). Informational: does not block checklist completion." data-stage-submitted="{{ ember_summary.uploaded }}" data-stage-total="{{ ember_summary.target }}">
+          <div class="doc-stage-header">
+            <div class="doc-stage-title-wrap">
+              <h4 class="doc-stage-title"><i class="fa-solid fa-envelope-open-text"></i> Ember Letters</h4>
+              <p class="doc-stage-desc">Quarterly Ember Letters grouped by year (Q1 to Q4). Informational: does not block checklist completion.</p>
+            </div>
+            <span class="badge blue">{{ ember_summary.uploaded }} of {{ ember_summary.target }} uploaded</span>
+          </div>
+          <div class="doc-table-wrap">
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th class="col-name">Document Name</th>
+                  <th class="col-date">Years Filed</th>
+                  <th class="col-status">Status</th>
+                  <th class="col-notes">Notes / Guidance</th>
+                  <th class="col-actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="doc-row ember-summary-row"
+                    id="doc-row-ember"
+                    data-doc-title="Quarterly Ember Letters"
+                    data-doc-status="{% if ember_summary.uploaded >= ember_summary.target %}submitted{% else %}not-uploaded{% endif %}"
+                    data-open-tab="ember"
+                    style="cursor: pointer;"
+                    tabindex="0"
+                    role="button"
+                    title="Click to open Ember Letters">
+                  <td class="col-name">
+                    <a href="javascript:void(0)" class="doc-table-link" data-open-tab="ember">
+                      <span>Quarterly Ember Letters</span>
+                      <i class="fa-solid fa-arrow-right doc-link-ext" aria-hidden="true"></i>
+                    </a>
+                  </td>
+                  <td class="col-date">
+                    <span class="text-muted">{{ ember_summary.years }} Year{{ ember_summary.years|pluralize }}</span>
+                  </td>
+                  <td class="col-status">
+                    <span class="badge blue" data-ember-card-badge>{{ ember_summary.uploaded }} of {{ ember_summary.target }} uploaded</span>
+                  </td>
+                  <td class="col-notes">
+                    <span class="text-muted">
+                      {% if ember_summary.uploaded %}
+                        {{ ember_summary.uploaded }} of {{ ember_summary.target }} quarterly letters uploaded across {{ ember_summary.years }} year{{ ember_summary.years|pluralize }}.
+                      {% else %}
+                        No quarterly Ember letters uploaded yet.
+                      {% endif %}
+                    </span>
+                  </td>
+                  <td class="col-actions">
+                    <button type="button" class="btn small" style="padding: 3px 10px; font-size: 11.5px; height: 28px;" data-open-tab="ember">
+                      <i class="fa-solid fa-folder-open"></i> Open Tab
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -168,9 +814,928 @@
     </div>
   </div>
 
+  <!-- Floating Stage Elevator Dock (Right side) -->
+  <aside class="stage-floating-elevator" id="stageFloatingElevator" aria-label="Stage group navigation">
+    <button type="button" class="elevator-btn" id="elevatorUpBtn" aria-label="Scroll to previous stage group" title="Previous stage group (Up)">
+      <i class="fa-solid fa-chevron-up"></i>
+    </button>
+    <div class="elevator-info" title="Current stage group">
+      <span class="elevator-count" id="elevatorCount">1 / 3</span>
+    </div>
+    <button type="button" class="elevator-btn" id="elevatorDownBtn" aria-label="Scroll to next stage group" title="Next stage group (Down)">
+      <i class="fa-solid fa-chevron-down"></i>
+    </button>
+  </aside>
 </section>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'ember-letters.js' %}?v=8"></script>
+<script src="{% static 'ember-letters.js' %}?v=9"></script>
+<script>
+(function() {
+  const container = document.getElementById('tabChecklist') || document.getElementById('tabDocuments');
+  if (!container) return;
+
+  const nav = document.getElementById('documentsSectionNav');
+  if (!nav) return;
+
+  const pillsContainer = document.getElementById('docNavPills');
+  const scrollLeftBtn = document.getElementById('docNavScrollLeft');
+  const scrollRightBtn = document.getElementById('docNavScrollRight');
+  const navPills = Array.from(nav.querySelectorAll('.doc-nav-pill'));
+  const searchInput = document.getElementById('docSearchInput');
+  const searchClearBtn = document.getElementById('docSearchClear');
+  const searchFeedback = document.getElementById('docSearchFeedback');
+  const searchFeedbackText = document.getElementById('docSearchFeedbackText');
+  const searchResetBtn = document.getElementById('docSearchResetBtn');
+  const filterPills = nav.querySelectorAll('.filter-pill');
+  const btnFocusMode = document.getElementById('btnFocusMode');
+
+  // Stage Quick-View Modal Elements
+  const stageModal = document.getElementById('stageDocumentsModal');
+  const stageModalBody = document.getElementById('stageDocumentsBody');
+  const stageModalTitle = document.getElementById('stageDocumentsModalTitle');
+  const stageModalDesc = document.getElementById('stageDocumentsModalDesc');
+  const stageStepBadge = document.getElementById('stageDocumentsStepBadge');
+  const stageProgressBadge = document.getElementById('stageDocumentsProgressBadge');
+  const stagePrevBtn = document.getElementById('stagePrevBtn');
+  const stageNextBtn = document.getElementById('stageNextBtn');
+  const stageStepIndicator = document.getElementById('stageStepIndicator');
+
+  const stageSections = Array.from(container.querySelectorAll('.doc-stage-section'));
+  const stageHubCards = Array.from(document.querySelectorAll('#stagesSummaryHub .stage-hub-card'));
+
+  let activeFilter = 'all';
+  let searchQuery = '';
+  let focusMode = false;
+
+  let activeStageNode = null;
+  let activeStagePlaceholder = null;
+  let activeStageId = '';
+
+  const REOPEN_STAGE_KEY = 'ednp_reopen_stage_' + window.location.pathname;
+
+  function syncBodyScrollLock() {
+    const anyOpen = Array.from(document.querySelectorAll('.modal-bg')).some(function(m) {
+      if (!m) return false;
+      return (m.classList.contains('show') || m.classList.contains('active') ||
+              m.classList.contains('stage-modal-active') || m.classList.contains('section-modal-active') ||
+              m.style.display === 'flex') && m.style.display !== 'none';
+    });
+    document.body.classList.toggle('modal-open', anyOpen);
+  }
+  window.syncBodyScrollLock = syncBodyScrollLock;
+
+  // 1. Stage Carousel Controls (Left/Right + Scroll update + Wheel tilt)
+  function updateScrollButtons() {
+    if (!pillsContainer || !scrollLeftBtn || !scrollRightBtn) return;
+    const scrollLeft = pillsContainer.scrollLeft;
+    const maxScroll = pillsContainer.scrollWidth - pillsContainer.clientWidth;
+    scrollLeftBtn.disabled = scrollLeft <= 3;
+    scrollRightBtn.disabled = scrollLeft >= maxScroll - 3;
+  }
+
+  if (pillsContainer) {
+    pillsContainer.addEventListener('scroll', updateScrollButtons, { passive: true });
+    pillsContainer.addEventListener('wheel', function(e) {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && pillsContainer.scrollWidth > pillsContainer.clientWidth) {
+        e.preventDefault();
+        pillsContainer.scrollLeft += e.deltaY;
+      }
+    }, { passive: false });
+    setTimeout(updateScrollButtons, 100);
+  }
+
+  if (scrollLeftBtn && pillsContainer) {
+    scrollLeftBtn.addEventListener('click', function() {
+      pillsContainer.scrollBy({ left: -220, behavior: 'smooth' });
+    });
+  }
+  if (scrollRightBtn && pillsContainer) {
+    scrollRightBtn.addEventListener('click', function() {
+      pillsContainer.scrollBy({ left: 220, behavior: 'smooth' });
+    });
+  }
+
+  // 2. Stage Documents Modal Engine (DOM Reparenting Pattern)
+  function returnStageToRepository() {
+    if (activeStageNode && activeStagePlaceholder && activeStagePlaceholder.parentNode) {
+      activeStagePlaceholder.parentNode.insertBefore(activeStageNode, activeStagePlaceholder);
+      activeStagePlaceholder.remove();
+    }
+    activeStageNode = null;
+    activeStagePlaceholder = null;
+  }
+
+  function openStageInModal(stageId) {
+    if (!stageId) return;
+    const targetEl = document.getElementById(stageId);
+    if (!targetEl || !stageModal || !stageModalBody) return;
+
+    if (activeStageNode && activeStageId !== stageId) {
+      returnStageToRepository();
+    }
+
+    if (!activeStageNode) {
+      activeStagePlaceholder = document.createElement('div');
+      activeStagePlaceholder.style.display = 'none';
+      targetEl.parentNode.insertBefore(activeStagePlaceholder, targetEl);
+      stageModalBody.appendChild(targetEl);
+      activeStageNode = targetEl;
+    }
+    activeStageId = stageId;
+
+    // Find corresponding pill
+    const pill = navPills.find(function(p) {
+      return (p.dataset.stageModal === stageId) ||
+             (p.dataset.docTarget === stageId) ||
+             (p.getAttribute('href') === '#' + stageId);
+    });
+
+    navPills.forEach(function(p) { p.classList.toggle('active', p === pill); });
+    if (pill) {
+      pill.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+    }
+
+    // Step calculation
+    const idx = navPills.indexOf(pill);
+    const total = navPills.length;
+    const currentStep = (idx >= 0 ? idx + 1 : 1);
+
+    // Read attributes
+    const titleText = targetEl.dataset.stageTitle || pill?.dataset.stageTitle || pill?.textContent.trim() || 'Requirements';
+    const iconClass = targetEl.dataset.stageIcon || (pill?.querySelector('i')?.className) || 'fa-folder-open';
+    const descText = targetEl.dataset.stageDesc || targetEl.querySelector('.doc-stage-desc')?.textContent || 'Stage requirements and endorsements';
+    const submittedCount = targetEl.dataset.stageSubmitted || '0';
+    const totalCount = targetEl.dataset.stageTotal || '0';
+    const isComplete = targetEl.dataset.stageComplete === '1';
+
+    if (stageModalTitle) {
+      stageModalTitle.innerHTML = '<i class="fa-solid ' + escapeHtml(iconClass) + '" style="color:var(--blue);"></i> <span>' + escapeHtml(titleText) + '</span>';
+    }
+    if (stageModalDesc) {
+      stageModalDesc.textContent = descText;
+    }
+    if (stageStepBadge) {
+      stageStepBadge.textContent = 'Stage ' + currentStep + ' of ' + total;
+    }
+    if (stageStepIndicator) {
+      stageStepIndicator.textContent = currentStep + ' / ' + total;
+    }
+    if (stageProgressBadge) {
+      if (isComplete) {
+        stageProgressBadge.className = 'badge stage-complete-b';
+        stageProgressBadge.innerHTML = '<i class="fa-solid fa-check"></i> Complete';
+      } else {
+        stageProgressBadge.className = 'badge pending-b';
+        stageProgressBadge.textContent = submittedCount + ' of ' + totalCount + ' uploaded';
+      }
+    }
+
+    if (stagePrevBtn) stagePrevBtn.disabled = idx <= 0;
+    if (stageNextBtn) stageNextBtn.disabled = idx === -1 || idx >= total - 1;
+
+    // Update sticky toolbar stage indicator
+    const stepperCount = document.getElementById('stageStepperCount');
+    const stepperLabel = document.getElementById('stageStepperLabel');
+    if (stepperCount) stepperCount.textContent = currentStep + ' / ' + total;
+    if (stepperLabel) stepperLabel.textContent = getStageShortName(targetEl);
+
+    const elevatorCount = document.getElementById('elevatorCount');
+    const elevatorUp = document.getElementById('elevatorUpBtn');
+    const elevatorDown = document.getElementById('elevatorDownBtn');
+    if (elevatorCount) elevatorCount.textContent = currentStep + ' / ' + total;
+    if (elevatorUp) elevatorUp.disabled = (idx <= 0);
+    if (elevatorDown) elevatorDown.disabled = (idx >= total - 1);
+
+    stageModal.style.display = 'flex';
+    stageModal.classList.add('show', 'stage-modal-active');
+    stageModalBody.scrollTop = 0;
+    syncBodyScrollLock();
+
+    applyRowFiltersToModal(targetEl);
+  }
+
+  function closeStageModal(highlightCard) {
+    const lastId = activeStageId;
+    returnStageToRepository();
+    activeStageId = '';
+    if (stageModal) {
+      stageModal.classList.remove('show', 'stage-modal-active');
+      stageModal.style.display = 'none';
+    }
+    syncBodyScrollLock();
+    if (highlightCard && lastId) {
+      const card = document.querySelector('.stage-hub-card[data-open-stage="' + CSS.escape(lastId) + '"]');
+      if (card && card.offsetParent !== null) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.classList.remove('stage-card-flash');
+        void card.offsetWidth;
+        card.classList.add('stage-card-flash');
+      }
+    }
+    updatePageStageIndicator();
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+
+  // Hook navigation pills to modal
+  navPills.forEach(function(pill) {
+    pill.addEventListener('click', function(e) {
+      e.preventDefault();
+      const targetId = pill.dataset.stageModal || pill.dataset.docTarget || (pill.getAttribute('href') ? pill.getAttribute('href').substring(1) : '');
+      openStageInModal(targetId);
+    });
+  });
+
+  // Hook hub cards to modal
+  stageHubCards.forEach(function(card) {
+    card.addEventListener('click', function(e) {
+      if (e.target.closest('a, button')) return;
+      openStageInModal(card.dataset.openStage);
+    });
+    card.querySelector('.stage-hub-open-btn')?.addEventListener('click', function(e) {
+      e.stopPropagation();
+      openStageInModal(card.dataset.openStage);
+    });
+    card.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openStageInModal(card.dataset.openStage);
+      }
+    });
+  });
+
+  // Modal foot controls
+  stagePrevBtn?.addEventListener('click', function() {
+    const idx = navPills.findIndex(function(p) {
+      return (p.dataset.stageModal === activeStageId) ||
+             (p.dataset.docTarget === activeStageId) ||
+             (p.getAttribute('href') === '#' + activeStageId);
+    });
+    if (idx > 0) {
+      const prevTarget = navPills[idx - 1].dataset.stageModal || navPills[idx - 1].dataset.docTarget || navPills[idx - 1].getAttribute('href').substring(1);
+      openStageInModal(prevTarget);
+    }
+  });
+
+  stageNextBtn?.addEventListener('click', function() {
+    const idx = navPills.findIndex(function(p) {
+      return (p.dataset.stageModal === activeStageId) ||
+             (p.dataset.docTarget === activeStageId) ||
+             (p.getAttribute('href') === '#' + activeStageId);
+    });
+    if (idx >= 0 && idx < navPills.length - 1) {
+      const nextTarget = navPills[idx + 1].dataset.stageModal || navPills[idx + 1].dataset.docTarget || navPills[idx + 1].getAttribute('href').substring(1);
+      openStageInModal(nextTarget);
+    }
+  });
+
+  document.getElementById('stageDocumentsCloseTop')?.addEventListener('click', function() { closeStageModal(true); });
+  document.getElementById('stageDocumentsDoneBtn')?.addEventListener('click', function() { closeStageModal(true); });
+  stageModal?.addEventListener('click', function(e) {
+    if (e.target === stageModal) closeStageModal(false);
+  });
+  stageModal?.addEventListener('wheel', function(e) {
+    if (e.target === stageModal) e.preventDefault();
+  }, { passive: false });
+
+  // 3. Helper Functions and Steppers
+  function getStageShortName(section) {
+    if (!section) return '';
+    const title = section.dataset?.stageTitle || section.querySelector('.doc-stage-title')?.textContent || '';
+    const fullText = title.trim();
+    if (fullText.includes('Postulancy')) return 'Postulancy';
+    if (fullText.includes('Diaconate')) return 'Diaconate';
+    if (fullText.includes('Priesthood')) return 'Priesthood';
+    if (fullText.includes('Episcopate')) return 'Episcopate';
+    if (fullText.includes('Vital')) return 'Vital';
+    if (fullText.includes('Official')) return 'Diocesan';
+    if (fullText.includes('Ember')) return 'Ember';
+    return fullText.split(' ')[0] || fullText.substring(0, 10);
+  }
+
+  function getStageHubRows() {
+    const visibleCards = stageHubCards.filter(function(card) {
+      return card.offsetParent !== null && card.style.display !== 'none';
+    });
+    if (!visibleCards.length) return [];
+
+    const rows = [];
+    for (let i = 0; i < visibleCards.length; i += 2) {
+      const rowCards = visibleCards.slice(i, i + 2);
+      const titles = rowCards.map(function(c) {
+        const fullTitle = (c.querySelector('.stage-hub-title')?.textContent || '').trim();
+        if (fullTitle.includes('Postulancy')) return 'Postulancy';
+        if (fullTitle.includes('Diaconate')) return 'Diaconate';
+        if (fullTitle.includes('Priesthood')) return 'Priesthood';
+        if (fullTitle.includes('Vital') || fullTitle.includes('Canonical')) return 'Canonical';
+        if (fullTitle.includes('Official') || fullTitle.includes('Diocesan')) return 'Diocesan';
+        if (fullTitle.includes('Ember')) return 'Ember';
+        return fullTitle.split(' ')[0] || ('Stage ' + (rows.length + 1));
+      });
+      rows.push({
+        index: rows.length,
+        cards: rowCards,
+        label: titles.join(' · ') || ('Row ' + (rows.length + 1))
+      });
+    }
+    return rows;
+  }
+
+  function getCurrentStageRowIndex() {
+    const rows = getStageHubRows();
+    if (!rows.length) return 0;
+    const viewportAnchor = window.innerHeight * 0.35;
+    let closestRowIndex = 0;
+    let minDistance = Infinity;
+
+    rows.forEach(function(row, rIdx) {
+      const card = row.cards[0];
+      if (!card) return;
+      const rect = card.getBoundingClientRect();
+      const rowCenter = rect.top + rect.height / 2;
+      const dist = Math.abs(rowCenter - viewportAnchor);
+      if (dist < minDistance) {
+        minDistance = dist;
+        closestRowIndex = rIdx;
+      }
+    });
+
+    return closestRowIndex;
+  }
+
+  function updatePageStageIndicator(rowIndex) {
+    const rows = getStageHubRows();
+    const total = rows.length || 3;
+    if (!rows.length) {
+      const elevatorUp = document.getElementById('elevatorUpBtn');
+      const elevatorDown = document.getElementById('elevatorDownBtn');
+      if (elevatorUp) elevatorUp.disabled = true;
+      if (elevatorDown) elevatorDown.disabled = true;
+      return;
+    }
+
+    const safeRowIndex = Math.max(0, Math.min(total - 1, (rowIndex !== undefined ? rowIndex : getCurrentStageRowIndex())));
+    const currentStep = safeRowIndex + 1;
+    const currentRow = rows[safeRowIndex];
+
+    const elevatorCount = document.getElementById('elevatorCount');
+    const elevatorUp = document.getElementById('elevatorUpBtn');
+    const elevatorDown = document.getElementById('elevatorDownBtn');
+    if (elevatorCount) elevatorCount.textContent = currentStep + ' / ' + total;
+    if (elevatorUp) elevatorUp.disabled = (safeRowIndex <= 0);
+    if (elevatorDown) elevatorDown.disabled = (safeRowIndex >= total - 1);
+
+    const stepperCount = document.getElementById('stageStepperCount');
+    const stepperLabel = document.getElementById('stageStepperLabel');
+    if (stepperCount) stepperCount.textContent = currentStep + ' / ' + total;
+    if (stepperLabel && currentRow) {
+      stepperLabel.textContent = currentRow.label || ('Row ' + currentStep);
+    }
+
+    if (currentRow && currentRow.cards) {
+      const rowStageIds = new Set(currentRow.cards.map(function(c) { return c.dataset.openStage; }));
+      navPills.forEach(function(pill) {
+        const stageId = pill.dataset.stageModal || pill.dataset.docTarget || (pill.getAttribute('href') ? pill.getAttribute('href').substring(1) : '');
+        const isMatch = rowStageIds.has(stageId);
+        pill.classList.toggle('active', isMatch);
+      });
+      const firstPill = navPills.find(function(p) {
+        const sId = p.dataset.stageModal || p.dataset.docTarget || (p.getAttribute('href') ? p.getAttribute('href').substring(1) : '');
+        return rowStageIds.has(sId);
+      });
+      firstPill?.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+    }
+  }
+
+  function scrollStage(delta) {
+    const rows = getStageHubRows();
+    const total = rows.length || 3;
+    if (total === 0) return;
+
+    let currentRowIndex = getCurrentStageRowIndex();
+    let nextRowIndex = currentRowIndex + delta;
+
+    if (nextRowIndex < 0) nextRowIndex = 0;
+    if (nextRowIndex >= total) nextRowIndex = total - 1;
+
+    const targetRow = rows[nextRowIndex];
+    if (!targetRow || !targetRow.cards.length) return;
+
+    const navSticky = document.getElementById('documentsSectionNav');
+    const stickyHeight = navSticky ? navSticky.offsetHeight : 100;
+    const firstCard = targetRow.cards[0];
+    const cardRect = firstCard.getBoundingClientRect();
+    const targetScrollY = window.pageYOffset + cardRect.top - stickyHeight - 16;
+
+    window.scrollTo({
+      top: Math.max(0, targetScrollY),
+      behavior: 'smooth'
+    });
+
+    targetRow.cards.forEach(function(card) {
+      card.classList.remove('stage-card-flash');
+      void card.offsetWidth;
+      card.classList.add('stage-card-flash');
+    });
+
+    updatePageStageIndicator(nextRowIndex);
+  }
+
+  document.getElementById('elevatorUpBtn')?.addEventListener('click', function() { scrollStage(-1); });
+  document.getElementById('elevatorDownBtn')?.addEventListener('click', function() { scrollStage(1); });
+
+  // 4. Search, Status Filter & Focus Mode Engine
+  function applyFilters() {
+    const query = searchQuery.trim().toLowerCase();
+    let totalMatchedDocs = 0;
+
+    const allSections = document.querySelectorAll('#stageSectionsRepository .doc-stage-section, #stageDocumentsBody .doc-stage-section');
+
+    allSections.forEach(function(sec) {
+      const stageId = sec.id;
+      const rows = sec.querySelectorAll('.doc-table tbody tr.doc-row');
+      let stageMatchCount = 0;
+
+      rows.forEach(function(row) {
+        if (row.classList.contains('ember-summary-row')) {
+          let emberMatch = true;
+          if (query) {
+            const text = row.textContent.toLowerCase();
+            emberMatch = text.includes(query) || 'ember letters'.includes(query);
+          }
+          row.style.display = emberMatch ? '' : 'none';
+          if (emberMatch) stageMatchCount++;
+          return;
+        }
+
+        const status = row.dataset.docStatus || '';
+        const title = (row.dataset.docTitle || '').toLowerCase();
+        const rowText = row.textContent.toLowerCase();
+
+        let statusOk = true;
+        if (activeFilter === 'not-uploaded') {
+          statusOk = (status === 'not-uploaded' || status === 'expired');
+        } else if (activeFilter === 'submitted') {
+          statusOk = (status === 'submitted');
+        }
+
+        let queryOk = true;
+        if (query) {
+          queryOk = title.includes(query) || rowText.includes(query);
+        }
+
+        let focusOk = true;
+        if (focusMode && status === 'submitted') {
+          focusOk = false;
+        }
+
+        const isVisible = statusOk && queryOk && focusOk;
+        row.style.display = isVisible ? '' : 'none';
+        if (isVisible) stageMatchCount++;
+      });
+
+      totalMatchedDocs += stageMatchCount;
+
+      // Filter corresponding Hub Card
+      const hubCard = document.querySelector('.stage-hub-card[data-open-stage="' + CSS.escape(stageId) + '"]');
+      if (hubCard) {
+        if (query.length > 0 || activeFilter !== 'all' || focusMode) {
+          hubCard.style.display = (stageMatchCount === 0) ? 'none' : '';
+        } else {
+          hubCard.style.display = '';
+        }
+      }
+
+      // Filter corresponding nav pill
+      const pill = navPills.find(function(p) {
+        return (p.dataset.stageModal === stageId) ||
+               (p.dataset.docTarget === stageId) ||
+               (p.getAttribute('href') === '#' + stageId);
+      });
+      if (pill) {
+        if (query.length > 0 || activeFilter !== 'all' || focusMode) {
+          pill.style.opacity = (stageMatchCount === 0) ? '0.35' : '1';
+        } else {
+          pill.style.opacity = '';
+        }
+      }
+    });
+
+    // Also filter Ember Letters tab container when query is entered
+    const emberContainer = document.getElementById('emberYearsContainer');
+    if (emberContainer) {
+      const emberCards = emberContainer.querySelectorAll('.ember-year-card, .ember-quarter-item, tr');
+      if (emberCards.length > 0) {
+        emberCards.forEach(function(el) {
+          if (!query) {
+            el.style.display = '';
+          } else {
+            const match = el.textContent.toLowerCase().includes(query);
+            el.style.display = match ? '' : 'none';
+          }
+        });
+      }
+    }
+
+    if (query.length > 0) {
+      if (searchFeedback && searchFeedbackText) {
+        searchFeedback.hidden = false;
+        searchFeedbackText.textContent = 'Found ' + totalMatchedDocs + ' document requirement' + (totalMatchedDocs === 1 ? '' : 's') + ' matching "' + searchQuery + '"';
+      }
+      if (searchClearBtn) searchClearBtn.hidden = false;
+    } else {
+      if (searchFeedback) searchFeedback.hidden = true;
+      if (searchClearBtn) searchClearBtn.hidden = true;
+    }
+    updatePageStageIndicator();
+  }
+
+  function applyRowFiltersToModal(targetEl) {
+    if (!targetEl) return;
+    const rows = targetEl.querySelectorAll('.doc-table tbody tr.doc-row');
+    const query = searchQuery.trim().toLowerCase();
+
+    rows.forEach(function(row) {
+      if (row.classList.contains('ember-summary-row')) {
+        let emberMatch = true;
+        if (query) {
+          const text = row.textContent.toLowerCase();
+          emberMatch = text.includes(query) || 'ember letters'.includes(query);
+        }
+        row.style.display = emberMatch ? '' : 'none';
+        return;
+      }
+
+      const status = row.dataset.docStatus || '';
+      const title = (row.dataset.docTitle || '').toLowerCase();
+      const rowText = row.textContent.toLowerCase();
+
+      let statusOk = true;
+      if (activeFilter === 'not-uploaded') {
+        statusOk = (status === 'not-uploaded' || status === 'expired');
+      } else if (activeFilter === 'submitted') {
+        statusOk = (status === 'submitted');
+      }
+
+      let queryOk = true;
+      if (query) {
+        queryOk = title.includes(query) || rowText.includes(query);
+      }
+
+      let focusOk = true;
+      if (focusMode && status === 'submitted') {
+        focusOk = false;
+      }
+
+      row.style.display = (statusOk && queryOk && focusOk) ? '' : 'none';
+    });
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      searchQuery = this.value;
+      applyFilters();
+      if (activeStageNode) applyRowFiltersToModal(activeStageNode);
+    });
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        this.value = '';
+        searchQuery = '';
+        applyFilters();
+        if (activeStageNode) applyRowFiltersToModal(activeStageNode);
+        this.blur();
+      }
+    });
+  }
+
+  if (searchClearBtn) {
+    searchClearBtn.addEventListener('click', function() {
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.focus();
+      }
+      searchQuery = '';
+      applyFilters();
+      if (activeStageNode) applyRowFiltersToModal(activeStageNode);
+    });
+  }
+
+  if (searchResetBtn) {
+    searchResetBtn.addEventListener('click', function() {
+      if (searchInput) searchInput.value = '';
+      searchQuery = '';
+      applyFilters();
+      if (activeStageNode) applyRowFiltersToModal(activeStageNode);
+    });
+  }
+
+  // Handle incoming 'q' query parameter (e.g. from Dashboard global search)
+  var urlParams = new URLSearchParams(window.location.search);
+  var incomingQ = urlParams.get('q');
+  if (incomingQ && searchInput) {
+    searchInput.value = incomingQ;
+    searchQuery = incomingQ;
+    applyFilters();
+  }
+
+  filterPills.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      filterPills.forEach(function(b) { b.classList.toggle('active', b === btn); });
+      activeFilter = btn.dataset.docFilter || 'all';
+      applyFilters();
+      if (activeStageNode) applyRowFiltersToModal(activeStageNode);
+    });
+  });
+
+  if (btnFocusMode) {
+    btnFocusMode.addEventListener('click', function() {
+      focusMode = !focusMode;
+      this.classList.toggle('active', focusMode);
+      this.setAttribute('aria-pressed', focusMode ? 'true' : 'false');
+      const labelSpan = this.querySelector('span');
+      if (labelSpan) {
+        labelSpan.textContent = focusMode ? 'Showing Incomplete Only' : 'Hide Complete';
+      }
+      applyFilters();
+      if (activeStageNode) applyRowFiltersToModal(activeStageNode);
+    });
+  }
+
+  // Sync elevator visibility with active tab
+  function syncElevatorWithActiveTab() {
+    const checklistTab = document.getElementById('tabChecklist');
+    const isChecklistActive = checklistTab && !checklistTab.hidden &&
+      (checklistTab.classList.contains('active') || checklistTab.style.display !== 'none');
+    const elevator = document.getElementById('stageFloatingElevator');
+    const stepperCtrl = document.getElementById('stageStepperControl');
+
+    if (elevator) {
+      if (isChecklistActive) {
+        elevator.style.display = 'flex';
+        elevator.style.opacity = '1';
+        elevator.style.pointerEvents = 'auto';
+        elevator.style.transform = 'translateY(-50%)';
+      } else {
+        elevator.style.display = 'none';
+        elevator.style.opacity = '0';
+        elevator.style.pointerEvents = 'none';
+      }
+    }
+    if (stepperCtrl) {
+      stepperCtrl.style.display = isChecklistActive ? '' : 'none';
+    }
+  }
+
+  document.querySelectorAll('.page-tabs [data-tab], [data-open-tab]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      setTimeout(syncElevatorWithActiveTab, 50);
+    });
+  });
+
+  const origSelectTab = window.selectTab;
+  if (typeof origSelectTab === 'function') {
+    window.selectTab = function() {
+      origSelectTab.apply(this, arguments);
+      syncElevatorWithActiveTab();
+    };
+  }
+
+  // Keyboard shortcut: Escape, PageUp / ArrowLeft, PageDown / ArrowRight
+  document.addEventListener('keydown', function(e) {
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+
+    if (e.key === 'Escape') {
+      const uploadModal = document.getElementById('clergyUploadModal');
+      if (uploadModal && (uploadModal.classList.contains('show') || uploadModal.style.display === 'flex')) {
+        uploadModal.classList.remove('active', 'show');
+        uploadModal.style.display = 'none';
+        syncBodyScrollLock();
+        return;
+      }
+      if (stageModal && stageModal.classList.contains('stage-modal-active')) {
+        closeStageModal(true);
+      }
+    } else if (stageModal && stageModal.classList.contains('stage-modal-active')) {
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        stagePrevBtn?.click();
+      } else if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+        e.preventDefault();
+        stageNextBtn?.click();
+      }
+    } else if (e.key === 'PageDown' || (e.altKey && e.key === 'ArrowDown')) {
+      e.preventDefault();
+      scrollStage(1);
+    } else if (e.key === 'PageUp' || (e.altKey && e.key === 'ArrowUp')) {
+      e.preventDefault();
+      scrollStage(-1);
+    }
+  });
+
+  // 5. In-App Document Preview Modal Interception
+  document.addEventListener('click', function(e) {
+    const row = e.target.closest('.doc-row[data-view-url], .doc-bar[data-view-url]');
+    if (!row) return;
+    if (e.target.closest('.col-actions, .doc-action-btn, .doc-bar-actions, button, a, input, form')) return;
+    const url = row.dataset.viewUrl;
+    if (url) {
+      const title = row.dataset.docTitle || row.querySelector('.col-name span')?.textContent || 'Document Preview';
+      if (typeof window.openDocPreview === 'function') {
+        window.openDocPreview(url, title, row);
+      } else {
+        window.open(url, '_blank', 'noopener');
+      }
+    }
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      const row = document.activeElement;
+      if (row && (row.classList.contains('doc-row') || row.classList.contains('doc-bar')) && row.dataset.viewUrl) {
+        if (!row.closest('#docPreviewModal')) {
+          e.preventDefault();
+          const url = row.dataset.viewUrl;
+          const title = row.dataset.docTitle || row.querySelector('.col-name span')?.textContent || 'Document Preview';
+          if (typeof window.openDocPreview === 'function') {
+            window.openDocPreview(url, title, row);
+          } else {
+            window.open(url, '_blank', 'noopener');
+          }
+        }
+      }
+    }
+  });
+
+  // 6. Upload Modal Trigger and Form Persistence
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('[data-open-upload]');
+    if (!btn) return;
+    const docTypeId = btn.dataset.openUpload;
+    const docTitle = btn.dataset.docTitle || '';
+    const isReplace = btn.dataset.isReplace === '1';
+    const input = document.getElementById('clergyUploadDocTypeId');
+    const titleEl = document.getElementById('clergyUploadModalTitle');
+    const replaceAlert = document.getElementById('clergyUploadReplaceAlert');
+    const submitBtn = document.getElementById('clergyUploadSubmitBtn');
+    if (input) input.value = docTypeId;
+    if (titleEl) {
+      const span = titleEl.querySelector('span');
+      if (span) span.textContent = (isReplace ? 'Replace: ' : 'Upload: ') + docTitle;
+    }
+    if (replaceAlert) replaceAlert.style.display = isReplace ? 'block' : 'none';
+    if (submitBtn) {
+      submitBtn.innerHTML = isReplace ? '<i class="fa-solid fa-rotate"></i> Replace File' : '<i class="fa-solid fa-upload"></i> Upload File';
+    }
+    const modal = document.getElementById('clergyUploadModal');
+    if (modal) {
+      modal.classList.add('active', 'show');
+      modal.style.display = 'flex';
+      syncBodyScrollLock();
+    }
+  });
+
+  // Preserve open stage across form upload POST and reload
+  document.getElementById('clergyUploadModalForm')?.addEventListener('submit', function() {
+    try {
+      if (activeStageId) {
+        sessionStorage.setItem(REOPEN_STAGE_KEY, activeStageId);
+      }
+    } catch (_e) {}
+  });
+
+  document.addEventListener('click', function(e) {
+    const closeBtn = e.target.closest('[data-close-modal]');
+    if (!closeBtn) return;
+    const modalId = closeBtn.dataset.closeModal;
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.remove('active', 'show');
+      modal.style.display = 'none';
+      syncBodyScrollLock();
+    }
+  });
+
+  const clergyUploadModalEl = document.getElementById('clergyUploadModal');
+  clergyUploadModalEl?.addEventListener('click', function(e) {
+    if (e.target === clergyUploadModalEl) {
+      clergyUploadModalEl.classList.remove('active', 'show');
+      clergyUploadModalEl.style.display = 'none';
+      syncBodyScrollLock();
+    }
+  });
+  clergyUploadModalEl?.addEventListener('wheel', function(e) {
+    if (e.target === clergyUploadModalEl) e.preventDefault();
+  }, { passive: false });
+
+  // 7. Auto-Reopen or Deep-Link Stage on Load
+  try {
+    const reopenStage = sessionStorage.getItem(REOPEN_STAGE_KEY);
+    if (reopenStage) {
+      sessionStorage.removeItem(REOPEN_STAGE_KEY);
+      openStageInModal(reopenStage);
+    } else {
+      const hash = window.location.hash ? window.location.hash.substring(1) : '';
+      const stageParam = urlParams.get('stage');
+      const targetFromUrl = hash.startsWith('sec-doc-') ? hash : (stageParam ? ('sec-doc-' + stageParam) : '');
+      if (targetFromUrl && document.getElementById(targetFromUrl)) {
+        openStageInModal(targetFromUrl);
+      }
+    }
+  } catch (_e) {}
+
+  let isScrollTicking = false;
+  window.addEventListener('scroll', function() {
+    if (document.body.classList.contains('modal-open')) return;
+    if (!isScrollTicking) {
+      window.requestAnimationFrame(function() {
+        updatePageStageIndicator();
+        isScrollTicking = false;
+      });
+      isScrollTicking = true;
+    }
+  }, { passive: true });
+
+  syncElevatorWithActiveTab();
+  setTimeout(function() { updatePageStageIndicator(0); }, 80);
+})();
+</script>
+{% endblock %}
+
+{% block modals %}
+<!-- Stage Documents Modal (opened by clicking stage pills or stage cards) -->
+<div class="modal-bg stage-modal-bg" id="stageDocumentsModal" role="dialog" aria-modal="true" style="display:none;">
+  <div class="modal stage-quick-modal">
+    <div class="modal-head">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <h3 id="stageDocumentsModalTitle" style="margin:0;display:flex;align-items:center;gap:8px;">
+            <i class="fa-solid fa-folder-open" style="color:var(--blue);"></i>
+            <span>Stage Requirements</span>
+          </h3>
+          <span class="badge blue" id="stageDocumentsStepBadge" style="font-size:11.5px;padding:3px 8px;">Stage 1 of 6</span>
+          <span class="badge pending-b" id="stageDocumentsProgressBadge" style="font-size:11.5px;padding:3px 8px;">0 uploaded</span>
+        </div>
+        <p class="muted" id="stageDocumentsModalDesc" style="margin:4px 0 0;font-size:12.5px;">Requirements and attachments for this formation stage</p>
+      </div>
+      <button class="close" type="button" aria-label="Close" id="stageDocumentsCloseTop">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="stage-modal-body" id="stageDocumentsBody"></div>
+
+    <div class="stage-modal-foot">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button type="button" class="btn small secondary" id="stagePrevBtn"><i class="fa-solid fa-chevron-left"></i> Previous Stage</button>
+        <span class="stage-step-indicator" id="stageStepIndicator" aria-live="polite">1 / 6</span>
+        <button type="button" class="btn small secondary" id="stageNextBtn">Next Stage <i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button type="button" class="btn secondary" id="stageDocumentsDoneBtn"><i class="fa-solid fa-xmark"></i> Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="clergyUploadModal" style="display:none;" role="dialog" aria-modal="true">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-head">
+      <div>
+        <h3 id="clergyUploadModalTitle"><i class="fa-solid fa-cloud-arrow-up" style="color:var(--blue);"></i> <span>Upload Requirement</span></h3>
+        <span class="muted">Upload document attachment to your clergy profile</span>
+      </div>
+      <button class="close" type="button" aria-label="Close" data-close-modal="clergyUploadModal">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <form method="post" enctype="multipart/form-data" id="clergyUploadModalForm">
+      {% csrf_token %}
+      <input type="hidden" name="document_type" id="clergyUploadDocTypeId" value="">
+      <div id="clergyUploadReplaceAlert" class="notice" style="display:none;margin-top:10px;font-size:12.5px;background:#fff8e6;color:#8a5800;border:1px solid #fed7aa;">
+        <i class="fa-solid fa-triangle-exclamation"></i> Uploading a new file will replace the current file on record.
+      </div>
+      <div class="edit-grid" style="margin-top:12px;">
+        <div class="edit-field full">
+          <label>File (PDF, PNG, JPG) <span class="req-mark">*</span></label>
+          <input type="file" name="file" required accept=".pdf,.jpg,.jpeg,.png">
+          <small class="muted" style="font-size:11.5px;margin-top:4px;display:block;">Maximum 5 MB for PDF, 10 MB for images.</small>
+        </div>
+        <div class="edit-field full">
+          <label>Notes (optional)</label>
+          <input type="text" name="notes" placeholder="e.g. Certified copy, renewal update">
+        </div>
+      </div>
+      <div class="actions" style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+        <button type="button" class="btn secondary" data-close-modal="clergyUploadModal"><i class="fa-solid fa-xmark"></i> Cancel</button>
+        <button type="submit" class="btn" id="clergyUploadSubmitBtn"><i class="fa-solid fa-upload"></i> Upload</button>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}

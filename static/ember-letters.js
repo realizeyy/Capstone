@@ -695,22 +695,70 @@
   // Generic tab switcher fallback if a page uses .page-tabs [data-tab] without record-detail.js
   var pageTabsEl = document.querySelector('.page-tabs[data-active-tab]');
   if (pageTabsEl && typeof window.selectTab !== 'function') {
-    window.selectTab = function (tab) {
+    var defaultTab = pageTabsEl.getAttribute('data-active-tab') || 'checklist';
+
+    function updateUrlTab(tab, mode) {
+      if (mode === 'skip' || !window.history || !window.location) return;
+      try {
+        var url = new URL(window.location.href);
+        var currentParam = url.searchParams.get('tab');
+        var target = (tab === defaultTab) ? null : tab;
+        var normalizedCurrent = (currentParam === defaultTab || currentParam === null) ? null : currentParam;
+
+        if (target === normalizedCurrent) return;
+
+        if (target === null) {
+          url.searchParams.delete('tab');
+        } else {
+          url.searchParams.set('tab', target);
+        }
+
+        var targetPath = url.pathname + (url.search ? url.search : '') + (url.hash ? url.hash : '');
+        if (mode === 'replace') {
+          window.history.replaceState({ tab: tab }, '', targetPath);
+        } else {
+          window.history.pushState({ tab: tab }, '', targetPath);
+        }
+      } catch (_e) {}
+    }
+
+    window.selectTab = function (tab, historyMode) {
+      var targetTab = tab || defaultTab;
       document.querySelectorAll('.tab-content').forEach(function (el) { el.classList.remove('active'); });
       document.querySelectorAll('.page-tabs [data-tab]').forEach(function (btn) { btn.classList.remove('active'); });
-      var btn = document.querySelector('.page-tabs [data-tab="' + tab + '"]') || document.querySelector('.page-tabs [data-tab]');
+      var btn = document.querySelector('.page-tabs [data-tab="' + targetTab + '"]') || document.querySelector('.page-tabs [data-tab]');
       if (!btn) return;
       btn.classList.add('active');
+      var actualTab = btn.getAttribute('data-tab') || targetTab;
       var targetId = btn.getAttribute('data-target');
       var panel = targetId ? document.getElementById(targetId) : null;
       if (panel) panel.classList.add('active');
+
+      updateUrlTab(actualTab, historyMode || 'push');
     };
+
     document.querySelectorAll('.page-tabs [data-tab]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         window.selectTab(btn.getAttribute('data-tab'));
       });
     });
-    window.selectTab(pageTabsEl.getAttribute('data-active-tab') || 'checklist');
+
+    window.addEventListener('popstate', function () {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var currentTab = params.get('tab') || defaultTab;
+        window.selectTab(currentTab, 'skip');
+      } catch (_e) {}
+    });
+
+    var urlParams = new URLSearchParams(window.location.search);
+    var queryTab = urlParams.get('tab');
+    var hash = (window.location.hash || '').replace(/^#/, '').toLowerCase();
+    var hashTab = (hash === 'ember' || hash === 'tabember') ? 'ember' :
+                  (hash === 'checklist' || hash === 'tabchecklist') ? 'checklist' : null;
+
+    var initialTab = queryTab || hashTab || defaultTab;
+    window.selectTab(initialTab, 'replace');
   }
 
   // Also support "[data-open-tab]" buttons (e.g. from the Ember Letters summary card)

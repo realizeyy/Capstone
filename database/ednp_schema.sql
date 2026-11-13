@@ -252,9 +252,6 @@ INSERT INTO clergy_records (id, name, gender, date_of_birth, baptism_date, confi
 -- files before this database unified them.
 -- =========================================================
 
-INSERT INTO clergy_accounts (username, password, record_id, name, first_name, middle_name, last_name, suffix, birth_date, place_of_birth, gender, civil_status, baptism_date, baptism_place, confirmation_date, confirmation_place, address, contact, email, ordination_date, ordination_place, assignment, previous_assignment, education, other_information, status, diocese, contract_end, verification) VALUES
-  ('clergy', 'password', 'CLG-001', 'Rev. Fr. Juan Dela Cruz', 'Juan', NULL, 'Dela Cruz', NULL, '1985-05-15', 'Baguio City', 'Male', 'Single', '1985-06-01', 'St. Peter Parish', '1990-07-15', 'St. Peter Parish', 'Baguio City, Philippines', '09123456789', 'juan@example.com', '2014-04-01', 'Baguio Cathedral', 'St. Peter Parish', 'St. Paul Parish', 'Seminary and theological studies', NULL, 'Active', 'Episcopal Diocese of Northern Philippines', '2027-03-31', 'Verified');
-
 -- =========================================================
 -- SEED DATA -- registrar / admin login (matches login.js demo credentials)
 -- =========================================================

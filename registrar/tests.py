@@ -63,6 +63,20 @@ class CreateRecordTests(TestCase):
         self.assertTrue(r.content.startswith(b'%PDF'))
         self.assertEqual(r['Cache-Control'], 'no-store')
 
+    def test_creates_record_returns_html_slips_with_iframe_protection(self):
+        r = self.client.post(
+            reverse('registrar:create_record'),
+            self.payload,
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+            HTTP_X_SLIP_FORMAT='html',
+        )
+        self.assertEqual(r.status_code, 200)
+        self.assertIn('text/html', r['Content-Type'])
+        self.assertContains(r, 'class="actions no-print"')
+        self.assertContains(r, 'window.self !== window.top')
+        self.assertContains(r, 'in-iframe')
+        self.assertContains(r, 'window.self === window.top')
+
     def test_dashboard_includes_create_record_modal_directly(self):
         r = self.client.get(reverse('registrar:dashboard'))
         self.assertEqual(r.status_code, 200)
@@ -225,7 +239,7 @@ class BlankFieldTests(TestCase):
         blanks = dict.fromkeys(['email', 'address', 'ordination_place', 'bishop_name',
                                 'previous_assignment', 'service_history', 'leave_reason'], '')
         self.client.post(reverse('registrar:record_detail', args=[self.record.id]),
-                         {'name': 'Fr. New', 'status': 'Active', 'rank': 'postulancy', **blanks})
+                         {'name': 'Fr. New', 'status': 'Active', 'rank': 'deacon', **blanks})
         self.record.refresh_from_db()
         for field in blanks:
             self.assertIn(getattr(self.record, field), (None, ''), field)
@@ -234,7 +248,7 @@ class BlankFieldTests(TestCase):
         res = self.client.post(reverse('registrar:record_detail', args=[self.record.id]), {
             'name': 'Fr. New',
             'status': 'Active',
-            'rank': 'postulancy',
+            'rank': 'deacon',
             'email': 'Fr.New@GMAIL.COM',
         })
         self.record.refresh_from_db()
@@ -244,7 +258,7 @@ class BlankFieldTests(TestCase):
         res = self.client.post(reverse('registrar:record_detail', args=[self.record.id]), {
             'name': 'Fr. New',
             'status': 'Active',
-            'rank': 'postulancy',
+            'rank': 'deacon',
             'email': 'fr.new@yahoo.com',
         }, follow=True)
         self.assertContains(res, 'Only Gmail addresses (@gmail.com) are accepted.')
@@ -444,6 +458,19 @@ class ClergyRecordEnhancementRegistrarTests(TestCase):
         self.assertEqual(res.status_code, 200)
         self.record.refresh_from_db()
         self.assertEqual(self.record.diaconate_place, 'Cathedral of Saint Mary & Saint John')
+
+    def test_api_parishes_returns_deaneries_and_parishes(self):
+        d = Deanery.objects.create(name='Central Deanery')
+        Parish.objects.create(deanery=d, parish_name='All Saints Cathedral', place_name='Bontoc')
+        res = self.client.get(reverse('registrar:api_parishes'))
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertIn('deaneries', data)
+        self.assertIn(str(d.id), data['deaneries'])
+        first_deanery = data['deaneries'][str(d.id)]
+        self.assertEqual(first_deanery['name'], 'Central Deanery')
+        self.assertIn('All Saints Cathedral - Bontoc', first_deanery['parishes'])
+        self.assertEqual(first_deanery['parish_items'][0]['name'], 'All Saints Cathedral')
 
     def test_registrar_can_add_and_delete_deployment(self):
         # Add deployment
@@ -716,4 +743,190 @@ class ClericalDirectoryReportTests(TestCase):
         with self.assertNumQueries(4):
             report = reports.build_report('clerical_directory')
         self.assertEqual(len(report['entries']), 11)
+
+
+class RegistrarDashboardSearchTests(TestCase):
+    def setUp(self):
+        self.staff_user = activate(User.objects.create_user(
+            username='staff_reg',
+            email='staff_reg@example.com',
+            password='TestPassword123!',
+            is_staff=True,
+            first_name='Maria',
+        ))
+        self.client.force_login(self.staff_user)
+        self.record = ClergyRecord.objects.create(
+            id='EDNP-TEST-01',
+            name='The Rev. Fr. John Doe',
+            rank='priest',
+            status='Active',
+            assignment='Cathedral of All Saints',
+        )
+
+    def test_dashboard_renders_search_and_welcome(self):
+        r = self.client.get(reverse('registrar:dashboard'))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, 'portalSearchCatalogData')
+        self.assertContains(r, 'id="dashboardSearchInput"')
+        self.assertContains(r, 'id="registrarWelcomeBanner"')
+        self.assertContains(r, 'Welcome, Maria')
+
+        catalog = r.context.get('portal_catalog')
+        self.assertIsNotNone(catalog)
+        self.assertTrue(len(catalog) > 0)
+
+        # Confirm sample record is present in catalog
+        titles = [item['title'] for item in catalog]
+        self.assertIn('The Rev. Fr. John Doe', titles)
+        self.assertIn('Create New Clergy Account', titles)
+        self.assertIn('Clergy Records Directory', titles)
+
+
+class RegistrarRecordDetailModernizationTests(TestCase):
+    def setUp(self):
+        self.staff_user = activate(User.objects.create_user(
+            username='registrar_tester',
+            email='reg_tester@example.com',
+            password='TestPassword123!',
+            is_staff=True,
+            first_name='Gabriel',
+        ))
+        self.client.force_login(self.staff_user)
+        self.record = ClergyRecord.objects.create(
+            id='EDNP-TEST-02',
+            name='The Rev. Fr. Matthew Mark',
+            rank='priest',
+            status='Active',
+            assignment='St. Barnabas Parish',
+        )
+        self.user = User.objects.create_user(
+            username='EDNP-TEST-02',
+            email='matthew@example.com',
+            password='TestPassword123!',
+        )
+        self.profile = ClergyProfile.objects.create(
+            user=self.user,
+            record=self.record,
+            place_of_birth='Bontoc',
+        )
+
+    def test_record_detail_renders_hub_and_modals(self):
+        url = reverse('registrar:record_detail', args=[self.record.id])
+        r = self.client.get(url)
+        self.assertEqual(r.status_code, 200)
+
+        # Phase 2: Stages Summary Hub & Stage Documents Modal
+        self.assertContains(r, 'id="stagesSummaryHub"')
+        self.assertContains(r, 'id="stageDocumentsModal"')
+        self.assertContains(r, 'id="stageSectionsRepository"')
+        self.assertContains(r, 'id="stageFloatingElevator"')
+        self.assertContains(r, 'id="stageStepperControl"')
+        self.assertContains(r, 'id="stageSearchEmpty"')
+
+        # Phase 3: Personal Information Hub & Quick-Edit Modal
+        self.assertContains(r, 'id="registrarSummaryHub"')
+        self.assertContains(r, 'id="sectionQuickEditModal"')
+        self.assertContains(r, 'id="sectionQuickEditStepBadge"')
+        self.assertContains(r, 'id="sectionQuickEditStepIndicator"')
+        self.assertContains(r, 'id="profileStepperControl"')
+        self.assertContains(r, 'id="profileSearchInput"')
+        self.assertContains(r, 'id="profileSearchEmpty"')
+
+        # Check parish address picker integration
+        self.assertContains(r, 'data-picker-mode="parish"')
+        self.assertContains(r, 'data-ph-picker-target="baptismPlaceInputRegistrar"')
+        self.assertContains(r, 'data-ph-picker-target="confirmationPlaceInputRegistrar"')
+
+    def test_record_detail_ajax_save(self):
+        url = reverse('registrar:record_detail', args=[self.record.id])
+        payload = {
+            'action': 'save_record',
+            'name': 'The Rev. Fr. Matthew Mark Updated',
+            'rank': 'priest',
+            'status': 'Active',
+            'assignment': 'St. Barnabas Parish',
+        }
+        r = self.client.post(url, payload, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(r.status_code, 200)
+        data = r.json()
+        self.assertTrue(data.get('ok'))
+        self.record.refresh_from_db()
+        self.assertEqual(self.record.name, 'The Rev. Fr. Matthew Mark Updated')
+
+
+class PostulancyRemovalAndReportsTests(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.registrar = activate(User.objects.create_user(
+            username='reg_test',
+            email='reg_test@example.com',
+            password='TestPassword123!',
+            is_staff=True,
+            first_name='Registrar',
+        ))
+        self.client.force_login(self.registrar)
+        self.deacon = ClergyRecord.objects.create(
+            id='CLG-D01', name='Rev. Deacon John', rank='deacon', status='Active',
+        )
+        self.priest = ClergyRecord.objects.create(
+            id='CLG-P01', name='Rev. Fr. Peter', rank='priest', status='Active',
+        )
+        self.postulant = ClergyRecord.objects.create(
+            id='CLG-X01', name='Postulant Mark', rank='postulancy', status='Active',
+        )
+
+    def test_rank_choices_exclude_postulancy(self):
+        from registrar.models import RANK_CHOICES, RANK_ORDER
+        ranks = [c[0] for c in RANK_CHOICES]
+        self.assertEqual(ranks, ['deacon', 'priest', 'bishop'])
+        self.assertNotIn('postulancy', RANK_ORDER)
+
+    def test_ranks_selection_in_templates_exclude_postulancy(self):
+        res_records = self.client.get(reverse('registrar:clergy_records'))
+        self.assertEqual(res_records.status_code, 200)
+        self.assertNotContains(res_records, '<option value="postulancy"')
+
+        res_detail = self.client.get(reverse('registrar:record_detail', args=[self.deacon.id]))
+        self.assertEqual(res_detail.status_code, 200)
+        self.assertNotContains(res_detail, '<option value="postulancy"')
+
+    def test_ordination_documents_report_excludes_postulancy_records_and_documents(self):
+        DocumentType.objects.get_or_create(
+            name='Letter of Intention (Postulancy)',
+            defaults={'required_from_rank': 'postulancy', 'is_required': True},
+        )
+        DocumentType.objects.get_or_create(
+            name='Declaration of Conformity',
+            defaults={'required_from_rank': 'deacon', 'is_required': True},
+        )
+        report = reports.build_report('ordination_documents')
+        rows = report['sections'][0]['rows']
+        names = [r[0] for r in rows]
+        ranks = [r[1] for r in rows]
+
+        self.assertNotIn('Postulant Mark', names)
+        self.assertNotIn('Postulancy', ranks)
+        self.assertIn('Rev. Deacon John', names)
+        self.assertIn('Rev. Fr. Peter', names)
+
+        # Ensure postulancy document types are excluded from missing list
+        for r in rows:
+            missing_str = r[5]
+            self.assertNotIn('Letter of Intention (Postulancy)', missing_str)
+
+    def test_status_report_excludes_postulancy_records(self):
+        report = reports.build_report('status_report')
+        rows = report['sections'][0]['rows']
+        names = [r[0] for r in rows]
+        self.assertNotIn('Postulant Mark', names)
+        self.assertIn('Rev. Deacon John', names)
+        self.assertIn('Rev. Fr. Peter', names)
+
+    def test_ordination_requirements_catalog_excludes_postulancy(self):
+        res = self.client.get(reverse('registrar:ordination_requirements'))
+        self.assertEqual(res.status_code, 200)
+        self.assertNotContains(res, '<h4><i class="fa-solid fa-clipboard-check"></i> Postulancy</h4>')
+        self.assertNotContains(res, '<h4><i class="fa-solid fa-clipboard-check"></i> Holy Order</h4>')
+
+
 

@@ -683,3 +683,48 @@ class EnhancedClergyProfileTests(TestCase):
         self.assertContains(login_res, 'id="accept-terms" value="1" required checked')
 
 
+class DashboardSearchAndWelcomeTests(TestCase):
+    """Dashboard top search bar and temporary onboarding welcome banner lifecycle."""
+
+    def setUp(self):
+        self.user = activate(User.objects.create_user('fr_test_dash', password='pw12345!x'))
+        self.record = ClergyRecord.objects.create(id='CLG-DASH-1', name='Fr. Dashboard Test')
+        self.profile = ClergyProfile.objects.create(user=self.user, record=self.record)
+
+    def test_newly_activated_account_shows_welcome_and_search_bar(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('clergy:dashboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['show_welcome'])
+        self.assertContains(response, 'id="dashboardSearchInput"')
+        self.assertContains(response, 'id="dashboardGlobalSearchDropdown"')
+        self.assertContains(response, 'id="portalSearchCatalogData"')
+        self.assertContains(response, 'id="clergyWelcomeBanner"')
+        self.assertContains(response, 'id="welcomeDismissBtn"')
+
+        # Verify portal search catalog covers cross-portal items
+        catalog = response.context['portal_catalog']
+        categories = {item['category'] for item in catalog}
+        self.assertIn('Requirements & Documents', categories)
+        self.assertIn('Profile & Information', categories)
+        self.assertIn('Quick Actions', categories)
+
+    def test_older_account_automatically_removes_welcome_banner(self):
+        from datetime import timedelta
+        from django.utils import timezone
+        old_time = timezone.now() - timedelta(days=30)
+        if hasattr(self.user, 'security') and self.user.security:
+            self.user.security.activated_at = old_time
+            self.user.security.save()
+        self.user.date_joined = old_time
+        self.user.save()
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('clergy:dashboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context['show_welcome'])
+        self.assertNotContains(response, 'id="clergyWelcomeBanner"')
+        self.assertContains(response, 'id="dashboardSearchInput"')
+
+
+

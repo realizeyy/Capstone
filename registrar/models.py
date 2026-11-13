@@ -9,7 +9,6 @@ from django.db.models.functions import Coalesce
 from django.utils import timezone
 
 RANK_CHOICES = [
-    ('postulancy', 'Postulancy'),
     ('deacon', 'Deacon'),
     ('priest', 'Priest'),
     ('bishop', 'Bishop'),
@@ -465,13 +464,65 @@ class ClergyRecord(models.Model):
         return checklist
 
     def document_checklist_grouped(self, required_types=None):
-        """The same checklist, split into the two groups the UI shows as
-        separate card panels: documents the clergy member normally submits
-        themselves, and documents the Registrar normally provides."""
+        """The same checklist, split into groups for display:
+        - 'clergy' and 'registrar' groups (preserving backwards compatibility)
+        - 'stages': ordered list of canonical stages and filing categories
+        """
         checklist = self.document_checklist(required_types=required_types)
-        groups = {'clergy': [], 'registrar': []}
+        groups = {'clergy': [], 'registrar': [], 'all': checklist}
         for item in checklist:
             groups[item['document_type'].uploaded_by].append(item)
+
+        stage_order = [
+            ('postulancy', 'Postulancy Formation', 'fa-seedling', 'Foundational requirements for postulants entering formation'),
+            ('deacon', 'Diaconate Ordination', 'fa-church', 'Requirements and endorsements for ordination to the Diaconate'),
+            ('priest', 'Priesthood Ordination', 'fa-cross', 'Requirements and certificates for ordination to the Priesthood'),
+            ('bishop', 'Episcopate Consecration', 'fa-crown', 'Requirements and consents for consecration to the Episcopate'),
+            ('vital', 'Vital & Canonical Records', 'fa-certificate', 'Civil certificates, sacraments, and foundational biodata'),
+            ('registrar', 'Official Diocesan Filings', 'fa-building-columns', 'Evaluations, appointment notices, and official diocesan records'),
+        ]
+
+        stage_items = {s[0]: [] for s in stage_order}
+        for item in checklist:
+            dt = item['document_type']
+            req_rank = dt.required_from_rank
+            if dt.uploaded_by == 'registrar' and req_rank in ('none', ''):
+                stage_items['registrar'].append(item)
+            elif req_rank == 'postulancy':
+                stage_items['postulancy'].append(item)
+            elif req_rank == 'deacon':
+                stage_items['deacon'].append(item)
+            elif req_rank == 'priest':
+                stage_items['priest'].append(item)
+            elif req_rank == 'bishop':
+                stage_items['bishop'].append(item)
+            elif dt.uploaded_by == 'registrar':
+                stage_items['registrar'].append(item)
+            else:
+                stage_items['vital'].append(item)
+
+        stages_list = []
+        for slug, title, icon, description in stage_order:
+            items = stage_items[slug]
+            if not items:
+                continue
+            submitted_count = sum(1 for it in items if it['status'] == 'Submitted')
+            not_uploaded_count = sum(1 for it in items if it['status'] == 'Missing')
+            expired_count = sum(1 for it in items if it['status'] == 'Expired')
+            stages_list.append({
+                'slug': slug,
+                'title': title,
+                'icon': icon,
+                'description': description,
+                'items': items,
+                'total': len(items),
+                'submitted': submitted_count,
+                'not_uploaded': not_uploaded_count,
+                'expired': expired_count,
+                'is_complete': (submitted_count == len(items)),
+            })
+
+        groups['stages'] = stages_list
         return groups
 
     def document_summary(self, required_types=None):
@@ -567,7 +618,7 @@ def sync_expired_contracts(today=None, queryset=None):
 
 
 class DocumentType(models.Model):
-    RANK_GATE_CHOICES = RANK_CHOICES + [('none', 'Not rank-gated')]
+    RANK_GATE_CHOICES = [('postulancy', 'Postulancy')] + RANK_CHOICES + [('none', 'Not rank-gated')]
     UPLOADED_BY_CHOICES = [
         ('clergy', 'Clergy Submission'),
         ('registrar', 'Registrar Upload'),

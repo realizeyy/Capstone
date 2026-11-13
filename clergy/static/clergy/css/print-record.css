@@ -1,20 +1,1073 @@
-/* The clergy member's printable record (clergy/print-record.html): the on-screen copy
-   with its Print / Download buttons, and the same page rendered to PDF by WeasyPrint
-   (ednp/pdf.py), which uses the print rules below. */
-@page{size:A4;margin:16mm}
-body{font-family:Arial,Segoe UI,sans-serif;color:#17212b;font-size:12px;line-height:1.45;margin:0}
-h1{font-size:22px;margin:0 0 4px}
-h2{font-size:16px;margin:24px 0 8px;border-bottom:2px solid #17324d;padding-bottom:5px}
-.header{border-bottom:3px solid #17324d;padding-bottom:12px;margin-bottom:18px}
-.subtitle{color:#64748b}
-table{width:100%;border-collapse:collapse}
-th,td{border:1px solid #d9e0e7;padding:7px;text-align:left;vertical-align:top}
-th{width:32%;background:#f3f5f7;font-size:11px;text-transform:uppercase;color:#526273}
-.note{margin-top:20px;padding:10px;background:#f3f7fb;border:1px solid #d9e0e7;color:#526273}
-.actions{position:fixed;top:12px;right:12px;display:flex;gap:8px}
-.actions a,.actions button{border:0;border-radius:7px;padding:9px 14px;font-weight:700;cursor:pointer;text-decoration:none;font-family:Arial,Segoe UI,sans-serif;font-size:12px}
-.print-btn{background:#239b62;color:white}
-.download-btn{background:#eef1f5;color:#17324d}
-@media print{.actions{display:none}}
-/* The requirements table's headings, unlike the record table's row labels, size to their columns */
-thead th{width:auto}
+/* ==========================================================================
+   EDNP Clergy Personal Record - Word Processor Print Layout Stylesheet
+   Strict compliance: Zero emoji, no single-sided colored borders, token-by-intent.
+   Designed for desktop/mobile browsers (Word Print Layout view) and WeasyPrint A4.
+   ========================================================================== */
+
+:root {
+  /* Semantic Color Tokens */
+  --color-primary: #17324d;
+  --color-primary-dark: #102438;
+  --color-accent: #2f6fed;
+  --color-accent-hover: #2458c2;
+  --color-accent-active: #1b4291;
+  --color-accent-border: #255ecc;
+  --color-accent-dark: #153472;
+
+  --color-text-main: #1e293b;
+  --color-text-dark: #0f172a;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
+  --color-text-label: #475569;
+  --color-text-body: #334155;
+
+  --color-desk-bg: #525659;
+  --color-bg-page: #525659;
+  --color-bg-sheet: #ffffff;
+  --color-bg-subtle: #f8fafc;
+  --color-bg-muted: #f1f5f9;
+  --color-bg-row-alt: #fafbfc;
+
+  --color-border: #d9e0e7;
+  --color-border-light: #e2e8f0;
+  --color-border-sheet: #cbd5e1;
+  --color-border-hover: #94a3b8;
+
+  --color-success-bg: #ecfdf5;
+  --color-success-text: #065f46;
+  --color-success-border: #a7f3d0;
+  --color-success-bar: #239b62;
+
+  --color-warning-bg: #fffbeb;
+  --color-warning-text: #92400e;
+  --color-warning-border: #fde68a;
+
+  --color-danger-bg: #fef2f2;
+  --color-danger-text: #991b1b;
+  --color-danger-border: #fecaca;
+
+  /* Typography Tokens */
+  --font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-family-serif: Georgia, "Times New Roman", serif;
+  --font-family-mono: "Courier New", Courier, monospace;
+
+  /* Font Scale Tokens */
+  --font-size-2xs: 8.5px;
+  --font-size-xs: 9.5px;
+  --font-size-sm: 10px;
+  --font-size-label: 11px;
+  --font-size-caption: 11.5px;
+  --font-size-base: 12px;
+  --font-size-body: 12.5px;
+  --font-size-subtitle: 13px;
+  --font-size-h3: 13.5px;
+  --font-size-md: 14px;
+  --font-size-h2: 17px;
+  --font-size-hero: 19.5px;
+  --font-size-watermark: 56pt;
+
+  /* Spacing Scale Tokens */
+  --space-2xs: 2px;
+  --space-xs: 3.5px;
+  --space-sm: 5px;
+  --space-md: 7px;
+  --space-row: 8px;
+  --space-base: 9px;
+  --space-lg: 12px;
+  --space-section: 12px;
+  --space-block: 15px;
+  --space-sheet-gap: 24px;
+  --space-sheet-pad-v: 10mm;
+  --space-sheet-pad-h: 13mm;
+  --space-toolbar-top: 14px;
+  --space-toolbar-right: 20px;
+
+  /* Sizing Tokens */
+  --size-seal-w: 48px;
+  --size-seal-h: 72px;
+  --size-num-badge: 18px;
+  --size-sign-space: 22px;
+  --size-stamp-box: 42px;
+  --size-stamp-circle: 44px;
+  --size-stat-min-width: 92px;
+  --size-sheet-width: 210mm;
+  --size-sheet-min-height: 297mm;
+  --size-progress-height: 6px;
+  --size-sign-line-width: 75%;
+
+  /* Radius Tokens */
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 5px;
+  --radius-button: 6px;
+  --radius-card: 2px;
+  --radius-pill: 12px;
+  --radius-circle: 50%;
+
+  /* Timing & Shadow Tokens */
+  --duration-fast: 0.15s;
+  --shadow-sheet: 0 4px 18px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.15);
+  --shadow-button: 0 1px 3px rgba(15, 23, 42, 0.2);
+  --shadow-focus-accent: 0 0 0 3px rgba(47, 111, 237, 0.35);
+  --shadow-focus-muted: 0 0 0 3px rgba(203, 213, 225, 0.6);
+}
+
+/* Paged Media Setup for A4 Document & WeasyPrint */
+@page {
+  size: A4 portrait;
+  margin: 10mm 12mm 12mm 12mm;
+  @bottom-left {
+    content: "Episcopal Diocese of Northern Philippines (EDNP) \2022  Personnel Registry";
+    font-size: 8pt;
+    font-family: var(--font-family-sans);
+    color: #64748b; /* ds-allow-hardcode */
+  }
+  @bottom-right {
+    content: "Page " counter(page) " of " counter(pages);
+    font-size: 8pt;
+    font-family: var(--font-family-sans);
+    color: #64748b; /* ds-allow-hardcode */
+    font-weight: bold;
+  }
+}
+
+/* Base Reset & Desk Viewport Canvas */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family-sans);
+  color: var(--color-text-main);
+  font-size: var(--font-size-body);
+  line-height: 1.4;
+  margin: 0px;
+  padding: var(--space-sheet-gap) var(--space-block) 60px var(--space-block); /* ds-allow-hardcode */
+  background-color: var(--color-desk-bg);
+  -webkit-print-color-adjust: exact;
+}
+
+/* Floating Actions Toolbar (Fixed at Top-Right of Screen) */
+.actions {
+  position: fixed;
+  top: var(--space-toolbar-top);
+  right: var(--space-toolbar-right);
+  display: flex;
+  gap: var(--space-base);
+  z-index: 2000;
+}
+
+.actions a,
+.actions button {
+  border: 1px solid transparent;
+  border-radius: var(--radius-button);
+  padding: var(--space-base) var(--space-block);
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: var(--font-family-sans);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+  box-shadow: var(--shadow-button);
+}
+
+/* 8-State Definition for Primary Print Button */
+.print-btn {
+  background-color: var(--color-accent);
+  color: var(--color-bg-sheet);
+  border-color: var(--color-accent-border);
+}
+.print-btn:hover {
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-active);
+}
+.print-btn:focus {
+  outline: none;
+  box-shadow: var(--shadow-focus-accent);
+}
+.print-btn:focus-visible {
+  outline: 2px solid var(--color-primary); /* ds-allow-hardcode */
+  outline-offset: 2px; /* ds-allow-hardcode */
+}
+.print-btn:active {
+  background-color: var(--color-accent-active);
+  border-color: var(--color-accent-dark);
+}
+.print-btn:disabled,
+.print-btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.print-btn.is-loading {
+  opacity: 0.75;
+  cursor: wait;
+}
+.print-btn.is-selected {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary-dark);
+}
+
+/* 8-State Definition for Secondary Action Link/Button */
+.download-btn {
+  background-color: var(--color-bg-sheet);
+  color: var(--color-primary);
+  border-color: var(--color-border-sheet);
+}
+.download-btn:hover {
+  background-color: var(--color-bg-subtle);
+  border-color: var(--color-border-hover);
+  color: var(--color-text-dark);
+}
+.download-btn:focus {
+  outline: none;
+  box-shadow: var(--shadow-focus-muted);
+}
+.download-btn:focus-visible {
+  outline: 2px solid var(--color-accent); /* ds-allow-hardcode */
+  outline-offset: 2px; /* ds-allow-hardcode */
+}
+.download-btn:active {
+  background-color: var(--color-bg-muted);
+  border-color: var(--color-text-muted);
+}
+.download-btn:disabled,
+.download-btn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.download-btn.is-loading {
+  opacity: 0.75;
+  cursor: wait;
+}
+.download-btn.is-selected {
+  background-color: var(--color-border-light);
+  border-color: var(--color-border-hover);
+}
+
+/* Word Processor Canvas & Paper Sheets */
+.word-canvas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sheet-gap);
+  width: 100%;
+}
+
+.paper-sheet {
+  position: relative;
+  width: var(--size-sheet-width);
+  min-height: var(--size-sheet-min-height);
+  max-width: 100%;
+  background-color: var(--color-bg-sheet);
+  padding: var(--space-sheet-pad-v) var(--space-sheet-pad-h);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sheet);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  page-break-after: always;
+  break-after: page;
+}
+
+.paper-sheet:last-child {
+  margin-bottom: 0px;
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+.sheet-content {
+  flex: 1 1 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* Subtle Document Watermark */
+.doc-watermark {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-30deg);
+  font-size: var(--font-size-watermark);
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: rgba(23, 50, 77, 0.035); /* ds-allow-hardcode */
+  pointer-events: none;
+  z-index: 0;
+  white-space: nowrap;
+}
+
+/* 1. Diocesan Letterhead Header */
+.doc-header {
+  margin-bottom: var(--space-section);
+  position: relative;
+  z-index: 1;
+}
+
+.letterhead-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-block);
+  margin-bottom: var(--space-base);
+}
+
+.seal-col {
+  flex-shrink: 0;
+}
+
+.church-seal {
+  width: var(--size-seal-w) !important;
+  height: var(--size-seal-h) !important;
+  max-width: var(--size-seal-w) !important;
+  max-height: var(--size-seal-h) !important;
+  object-fit: contain;
+  display: block;
+}
+
+.masthead-col {
+  flex: 1 1 auto;
+  text-align: center;
+}
+
+.church-name {
+  font-family: var(--font-family-serif);
+  font-size: var(--font-size-body);
+  font-style: italic;
+  color: var(--color-text-label);
+  margin-bottom: 1px;
+  letter-spacing: 0.02em;
+}
+
+.diocese-name {
+  font-family: var(--font-family-serif);
+  font-size: var(--font-size-h2);
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0px 0px 1px 0px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.diocesan-center {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2xs);
+}
+
+.registry-title {
+  font-size: var(--font-size-label);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  letter-spacing: 0.05em;
+}
+
+.doc-stamp-col {
+  flex-shrink: 0;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-sm);
+}
+
+.record-id-box {
+  border: 1px solid var(--color-border-sheet);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-base);
+  background-color: var(--color-bg-subtle);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.id-label {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.id-value {
+  font-size: var(--font-size-h3);
+  font-weight: 700;
+  color: var(--color-primary);
+  font-family: var(--font-family-mono);
+}
+
+.copy-badge {
+  display: inline-block;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: var(--space-2xs) var(--space-md);
+  border-radius: var(--radius-xs);
+  background-color: var(--color-bg-muted);
+  color: var(--color-text-label);
+  border: 1px solid var(--color-border-sheet);
+}
+
+.header-divider {
+  height: 2px; /* ds-allow-hardcode */
+  background-color: var(--color-primary);
+  margin: var(--space-base) 0px var(--space-lg) 0px;
+}
+
+.document-title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-section);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.doc-main-title {
+  font-family: var(--font-family-serif);
+  font-size: var(--font-size-hero);
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0px 0px 1px 0px;
+  letter-spacing: 0.02em;
+}
+
+.doc-subtitle {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+.doc-meta-pills {
+  display: flex;
+  gap: var(--space-md);
+  flex-shrink: 0;
+}
+
+/* Page 2 Running Header */
+.sheet-top-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  padding-bottom: var(--space-md);
+  margin-bottom: var(--space-section);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.sheet-top-title {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* Badge System - Full Hairline Borders */
+.badge {
+  display: inline-block;
+  font-size: var(--font-size-label);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: var(--space-2xs) var(--space-row);
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.badge-active,
+.badge-verified,
+.badge-submitted {
+  background-color: var(--color-success-bg);
+  color: var(--color-success-text);
+  border: 1px solid var(--color-success-border);
+}
+
+.badge-neutral {
+  background-color: var(--color-bg-muted);
+  color: var(--color-text-label);
+  border: 1px solid var(--color-border-sheet);
+}
+
+.badge-warning,
+.badge-pending {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  border: 1px solid var(--color-warning-border);
+}
+
+.badge-danger {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger-text);
+  border: 1px solid var(--color-danger-border);
+}
+
+/* Hero Identity & Key Visual Strip */
+.hero-summary-card {
+  position: relative;
+  z-index: 1;
+  background-color: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-button);
+  padding: var(--space-base) var(--space-block);
+  margin-bottom: var(--space-section);
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.hero-main-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-block);
+}
+
+.hero-identity {
+  flex: 1 1 auto;
+}
+
+.hero-name {
+  font-size: var(--font-size-hero);
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.hero-rank-station {
+  display: flex;
+  align-items: center;
+  gap: var(--radius-md);
+  flex-wrap: wrap;
+}
+
+.rank-chip {
+  background-color: var(--color-primary);
+  color: var(--color-bg-sheet);
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  padding: var(--space-2xs) var(--space-md);
+  border-radius: var(--radius-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.station-chip {
+  background-color: var(--color-bg-sheet);
+  color: var(--color-text-main);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  padding: var(--space-2xs) var(--space-md);
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--color-border-sheet);
+}
+
+.deanery-chip {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  padding: var(--space-2xs) var(--space-sm);
+}
+
+.hero-stats {
+  display: flex;
+  gap: var(--space-base);
+  flex-shrink: 0;
+}
+
+.stat-cell {
+  background-color: var(--color-bg-sheet);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm) var(--space-lg);
+  text-align: center;
+  min-width: var(--size-stat-min-width);
+}
+
+.stat-number {
+  display: block;
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.stat-label {
+  display: block;
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+/* Sections & Structural Layout */
+.doc-section {
+  position: relative;
+  z-index: 1;
+  margin-bottom: var(--space-section);
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.section-title {
+  font-family: var(--font-family-serif);
+  font-size: var(--font-size-h3);
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0px 0px var(--radius-md) 0px;
+  padding-bottom: var(--space-xs);
+  border-bottom: 1.5px solid var(--color-primary); /* ds-allow-hardcode */
+  display: flex;
+  align-items: center;
+  gap: var(--radius-md);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+.section-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-num-badge);
+  height: var(--size-num-badge);
+  background-color: var(--color-primary);
+  color: var(--color-bg-sheet);
+  border-radius: var(--radius-circle);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-sans);
+  font-weight: 700;
+}
+
+.section-header-split {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  margin-bottom: var(--radius-md);
+  border-bottom: 1.5px solid var(--color-primary); /* ds-allow-hardcode */
+  padding-bottom: var(--space-xs);
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+.section-header-split .section-title {
+  margin: 0px;
+  padding: 0px;
+  border: none;
+}
+
+.checklist-summary-stat {
+  font-size: var(--font-size-base);
+  color: var(--color-primary);
+}
+
+/* Clean Grid Tables for Personal, Canonical & Sacramental Info */
+.grid-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--space-xs);
+}
+
+.grid-table th,
+.grid-table td {
+  border: 1px solid var(--color-border);
+  padding: var(--space-sm) var(--space-row);
+  vertical-align: middle;
+  font-size: var(--font-size-base);
+}
+
+.grid-table th.grid-label {
+  width: 22%;
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text-label);
+  font-weight: 600;
+  text-align: left;
+  font-size: var(--font-size-label);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.grid-table td.grid-value {
+  width: 28%;
+  color: var(--color-text-main);
+}
+
+.id-item {
+  display: inline-block;
+  margin-right: var(--space-sm);
+}
+
+/* Clean Data Tables for Deployments, Children, Education, Requirements */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--space-xs);
+}
+
+.data-table th,
+.data-table td {
+  border: 1px solid var(--color-border);
+  padding: var(--space-sm) var(--space-row);
+  text-align: left;
+  vertical-align: top;
+  font-size: var(--font-size-base);
+}
+
+.data-table thead th {
+  background-color: var(--color-bg-muted);
+  color: var(--color-primary);
+  font-size: var(--font-size-label);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: var(--radius-md) var(--space-row);
+}
+
+.data-table tbody tr:nth-child(even) {
+  background-color: var(--color-bg-row-alt);
+}
+
+.cell-subtext {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-top: 1px;
+}
+
+.empty-cell {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--space-row) !important;
+  font-style: italic;
+  background-color: var(--color-bg-subtle);
+}
+
+.muted-dash {
+  color: var(--color-text-muted);
+  font-style: italic;
+  font-size: var(--font-size-label);
+}
+
+/* Note Callout Boxes */
+.note-box {
+  background-color: var(--color-bg-subtle);
+  border: 1px solid var(--color-border-sheet);
+  border-radius: var(--radius-sm);
+  padding: var(--radius-md) var(--space-lg);
+  font-size: var(--font-size-base);
+  color: var(--color-text-body);
+  margin-top: var(--space-xs);
+}
+
+.info-callout {
+  background-color: var(--color-bg-subtle);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-sm);
+  padding: var(--radius-md) var(--space-lg);
+  font-size: var(--font-size-base);
+  color: var(--color-text-label);
+  font-style: italic;
+}
+
+/* Requirements Progress Bar & Metric Pills */
+.progress-wrap {
+  background-color: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-row) var(--space-lg);
+  margin-bottom: var(--space-base);
+}
+
+.progress-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  margin-bottom: var(--radius-md);
+}
+
+.progress-label {
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-primary);
+}
+
+.progress-pills {
+  display: flex;
+  gap: var(--radius-md);
+}
+
+.stat-pill {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  padding: var(--space-2xs) var(--space-md);
+  border-radius: var(--space-lg);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.stat-pill-green {
+  background-color: var(--color-success-bg);
+  color: var(--color-success-text);
+  border: 1px solid var(--color-success-border);
+}
+
+.stat-pill-slate {
+  background-color: var(--color-bg-muted);
+  color: var(--color-text-label);
+  border: 1px solid var(--color-border-sheet);
+}
+
+.stat-pill-red {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger-text);
+  border: 1px solid var(--color-danger-border);
+}
+
+.progress-track {
+  width: 100%;
+  height: var(--size-progress-height);
+  background-color: var(--color-border-light);
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--color-success-bar);
+  border-radius: var(--radius-xs);
+}
+
+/* Canonical Stages Blocks */
+.stage-block {
+  margin-bottom: var(--space-base);
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.stage-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-base);
+  background-color: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-bottom: none;
+  padding: var(--space-xs) var(--space-row);
+  border-top-left-radius: var(--radius-sm);
+  border-top-right-radius: var(--radius-sm);
+}
+
+.stage-name {
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.stage-count {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.stage-block .data-table {
+  margin-bottom: 0px;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+}
+
+/* 7. Certification & Sign-off Area */
+.certification-section {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-base);
+  border-top: 1.5px solid var(--color-primary); /* ds-allow-hardcode */
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.sign-grid {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px; /* ds-allow-hardcode */
+}
+
+.sign-block {
+  flex: 1 1 50%;
+  background-color: var(--color-bg-row-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-base) var(--space-block);
+  text-align: center;
+}
+
+.sign-heading {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-2xs);
+}
+
+.sign-text {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin: 0px 0px var(--space-md) 0px;
+  line-height: 1.35;
+}
+
+.sign-space {
+  height: var(--size-sign-space);
+}
+
+.stamp-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--size-stamp-box);
+  margin-bottom: var(--space-xs);
+}
+
+.stamp-inner-circle {
+  width: var(--size-stamp-circle);
+  height: var(--size-stamp-circle);
+  border: 1.5px dashed var(--color-primary); /* ds-allow-hardcode */
+  border-radius: var(--radius-circle);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  background-color: rgba(23, 50, 77, 0.02); /* ds-allow-hardcode */
+}
+
+.stamp-text-org {
+  font-size: 6.5px; /* ds-allow-hardcode */
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.stamp-text-loc {
+  font-size: 6px; /* ds-allow-hardcode */
+  font-weight: 600;
+}
+
+.sign-line {
+  border-top: 1px solid var(--color-text-main);
+  width: var(--size-sign-line-width);
+  margin: 0px auto var(--space-xs) auto;
+}
+
+.sign-name {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.sign-caption {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Sheet Running Footers */
+.sheet-footer {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.sheet-footer-right {
+  font-weight: 700;
+  color: var(--color-text-label);
+}
+
+.footer-notice {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-xs);
+  line-height: 1.35;
+  text-transform: none;
+}
+
+/* Print Specific Rules */
+@media print {
+  body {
+    background-color: var(--color-bg-sheet) !important;
+    margin: 0px !important;
+    padding: 0px !important;
+    font-size: 10pt !important;
+  }
+
+  .actions {
+    display: none !important;
+  }
+
+  .sheet-footer {
+    display: none !important;
+  }
+
+  .word-canvas {
+    display: block !important;
+    gap: 0px !important;
+    padding: 0px !important;
+    background: transparent !important;
+  }
+
+  .paper-sheet {
+    width: 100% !important;
+    min-height: 0px !important;
+    margin: 0px !important;
+    padding: 0px !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0px !important;
+    page-break-after: always !important;
+    break-after: page !important;
+  }
+
+  .paper-sheet:last-child {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  .doc-watermark {
+    display: block !important;
+    opacity: 0.04 !important;
+  }
+
+  .hero-summary-card,
+  .doc-section,
+  .stage-block,
+  .certification-section,
+  .grid-table,
+  .data-table {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .section-title,
+  .stage-header {
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
+}

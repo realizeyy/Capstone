@@ -1,5 +1,6 @@
 import secrets
 from datetime import date, timedelta
+import urllib.parse
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -40,7 +41,7 @@ GENERATED_REPORTS_PER_PAGE = 10
 
 def _can_access_document(user, document):
     """Registrar (staff) sees every document; a clergy user only sees
-    documents on their own linked record — checked here, server-side, not
+    documents on their own linked record :  checked here, server-side, not
     just by which links happen to be rendered on their pages."""
     if user.is_staff:
         return True
@@ -242,11 +243,201 @@ def _build_deaneries_map():
     deaneries_map = {}
     for deanery in Deanery.objects.prefetch_related('parishes'):
         options = []
+        parish_items = []
         for parish in deanery.parishes.all():
             label = f"{parish.parish_name} - {parish.place_name}" if parish.place_name else parish.parish_name
             options.append(label)
-        deaneries_map[str(deanery.id)] = {'name': deanery.name, 'parishes': options}
+            parish_items.append({
+                'id': parish.id,
+                'name': parish.parish_name,
+                'place': parish.place_name or '',
+                'label': label,
+            })
+        deaneries_map[str(deanery.id)] = {
+            'name': deanery.name,
+            'parishes': options,
+            'parish_items': parish_items,
+        }
     return deaneries_map
+
+
+@login_required
+def api_parishes(request):
+    """Return JSON list of deaneries and parishes for UI pickers."""
+    return JsonResponse({'deaneries': _build_deaneries_map()})
+
+
+def _build_registrar_search_catalog(user=None):
+    """Compile a cross-portal search catalog for the Registrar Dashboard.
+    Enables instant jumping to clergy records, documents, system tools,
+    reports, and administrative actions with zero latency."""
+    catalog = []
+
+    # 1. Stored Clergy Records
+    try:
+        records = ClergyRecord.objects.select_related('profile').all().order_by('-created_at')[:80]
+        for r in records:
+            rank_disp = r.get_rank_display()
+            assignment = r.assignment or 'Not assigned'
+            status = r.status or 'Active'
+            badge_class = 'green' if status == 'Active' else ('amber' if status == 'On Leave' else 'slate')
+
+            catalog.append({
+                'category': 'Clergy Records',
+                'icon': 'fa-solid fa-user-tie',
+                'title': r.name,
+                'subtitle': f"{r.id} : {rank_disp} : {assignment} ({status})",
+                'badge': status,
+                'badge_class': badge_class,
+                'keywords': f"{r.name} {r.id} {r.rank} {rank_disp} {assignment} {status} {r.phone or ''} {r.email or ''}".lower(),
+                'url': reverse('registrar:record_detail', args=[r.id]),
+            })
+
+            catalog.append({
+                'category': 'Document Checklists',
+                'icon': 'fa-solid fa-folder-open',
+                'title': f"{r.name} : Document Checklist",
+                'subtitle': f"{r.id} : View & manage ordination and diocesan requirements",
+                'badge': 'Checklist',
+                'badge_class': 'blue',
+                'keywords': f"{r.name} {r.id} checklist documents requirements upload attachments {rank_disp}".lower(),
+                'url': reverse('registrar:record_detail', args=[r.id]) + '?tab=documents',
+            })
+    except Exception:
+        pass
+
+    # 2. Administrative Tools & Actions
+    catalog.append({
+        'category': 'Administrative Actions',
+        'icon': 'fa-solid fa-user-plus',
+        'title': 'Create New Clergy Account',
+        'subtitle': 'Encode verified clergy biodata and provision portal credentials',
+        'badge': 'New Record',
+        'badge_class': 'blue',
+        'keywords': 'create new account add encode clergy record register user'.lower(),
+        'url': reverse('registrar:dashboard') + '#recordModal',
+    })
+    catalog.append({
+        'category': 'Administrative Actions',
+        'icon': 'fa-solid fa-address-book',
+        'title': 'Clergy Records Directory',
+        'subtitle': 'Search, filter, and view full roster of active diocesan clergy',
+        'badge': 'Directory',
+        'badge_class': 'slate',
+        'keywords': 'clergy records roster list directory search priests deacons bishops'.lower(),
+        'url': reverse('registrar:clergy_records'),
+    })
+    catalog.append({
+        'category': 'Administrative Actions',
+        'icon': 'fa-solid fa-box-archive',
+        'title': 'Archived Clergy Records',
+        'subtitle': 'Browse and restore archived retired clergy records',
+        'badge': 'Archived',
+        'badge_class': 'amber',
+        'keywords': 'archived records retired clergy file restore'.lower(),
+        'url': reverse('registrar:clergy_records') + '?view=archived',
+    })
+    catalog.append({
+        'category': 'Administrative Actions',
+        'icon': 'fa-solid fa-folder-open',
+        'title': 'Documents Overview',
+        'subtitle': 'Rank-based document checklist status across every stored clergy record',
+        'badge': 'Overview',
+        'badge_class': 'slate',
+        'keywords': 'documents overview summary status rank checklist tracking'.lower(),
+        'url': reverse('registrar:documents_overview'),
+    })
+    catalog.append({
+        'category': 'Administrative Actions',
+        'icon': 'fa-solid fa-list-check',
+        'title': 'Ordination Requirements Catalog',
+        'subtitle': 'Reference catalog of required canonical documents grouped by rank',
+        'badge': 'Catalog',
+        'badge_class': 'slate',
+        'keywords': 'ordination requirements catalog document types rank deacon priest bishop'.lower(),
+        'url': reverse('registrar:ordination_requirements'),
+    })
+    catalog.append({
+        'category': 'Administrative Actions',
+        'icon': 'fa-solid fa-file-contract',
+        'title': 'Contract Review',
+        'subtitle': 'Monitor upcoming and expired clergy deployment contracts',
+        'badge': 'Contracts',
+        'badge_class': 'amber',
+        'keywords': 'contract review expiry expiring contracts renewal deployment'.lower(),
+        'url': reverse('registrar:contract_review'),
+    })
+    catalog.append({
+        'category': 'Administrative Actions',
+        'icon': 'fa-solid fa-file-circle-plus',
+        'title': 'Generate Diocesan Report',
+        'subtitle': 'Create point-in-time and archival PDF reports of diocesan records',
+        'badge': 'Reports',
+        'badge_class': 'blue',
+        'keywords': 'generate report export pdf printable diocesan summary list'.lower(),
+        'url': reverse('registrar:generate_report'),
+    })
+    catalog.append({
+        'category': 'Administrative Actions',
+        'icon': 'fa-solid fa-rotate',
+        'title': 'Backup & Restore Records',
+        'subtitle': 'Download encrypted database dump and media document archives',
+        'badge': 'Backup',
+        'badge_class': 'slate',
+        'keywords': 'backup records database dump zip archive restore download'.lower(),
+        'url': reverse('registrar:backup_records'),
+    })
+    catalog.append({
+        'category': 'Administrative Actions',
+        'icon': 'fa-solid fa-users-gear',
+        'title': 'Bulk Account Provisioning',
+        'subtitle': 'Generate portal accounts, credentials, and slips in bulk for unlinked records',
+        'badge': 'Provisioning',
+        'badge_class': 'blue',
+        'keywords': 'bulk accounts provisioning passwords slips temporary credentials'.lower(),
+        'url': reverse('registrar:bulk_accounts'),
+    })
+    catalog.append({
+        'category': 'Administrative Actions',
+        'icon': 'fa-solid fa-user-shield',
+        'title': 'Account Security & Audit Log',
+        'subtitle': 'Registrar session management, 2FA settings, and security audit log',
+        'badge': 'Security',
+        'badge_class': 'slate',
+        'keywords': 'account security password sessions two factor 2fa audit log'.lower(),
+        'url': reverse('registrar:account_security'),
+    })
+
+    # 3. Deaneries & Parishes
+    try:
+        deaneries = Deanery.objects.prefetch_related('parishes').all()
+        for d in deaneries:
+            catalog.append({
+                'category': 'Deaneries & Parishes',
+                'icon': 'fa-solid fa-church',
+                'title': f"Deanery of {d.name}",
+                'subtitle': f"Filter roster by Deanery ({d.parishes.count()} parishes)",
+                'badge': 'Deanery',
+                'badge_class': 'blue',
+                'keywords': f"deanery {d.name} parishes district episcopal".lower(),
+                'url': reverse('registrar:clergy_records') + f"?deanery={d.id}",
+            })
+            for p in d.parishes.all():
+                place_str = f" - {p.place_name}" if p.place_name else ""
+                catalog.append({
+                    'category': 'Deaneries & Parishes',
+                    'icon': 'fa-solid fa-cross',
+                    'title': f"{p.parish_name}{place_str}",
+                    'subtitle': f"Parish under Deanery of {d.name}",
+                    'badge': d.name,
+                    'badge_class': 'slate',
+                    'keywords': f"{p.parish_name} {p.place_name or ''} {d.name} church parish station mission".lower(),
+                    'url': reverse('registrar:clergy_records') + f"?q={urllib.parse.quote(p.parish_name)}",
+                })
+    except Exception:
+        pass
+
+    return catalog
 
 
 @registrar_required
@@ -271,6 +462,7 @@ def dashboard(request):
         'deaneries_map': _build_deaneries_map(),
         'record_modal_draft': record_modal_draft,
         'record_modal_errors': record_modal_errors,
+        'portal_catalog': _build_registrar_search_catalog(request.user),
     })
 
 
@@ -679,7 +871,7 @@ def bulk_accounts(request):
 
 @registrar_required
 def record_detail(request, record_id):
-    """One combined per-record page — Personal Information and Documents as
+    """One combined per-record page :  Personal Information and Documents as
     two tabs of the same record, instead of a JS-populated modal plus a
     separate documents page. `?tab=documents` (or `?tab=personal`, the
     default) picks which tab is active on load, so the Documents overview
@@ -788,6 +980,17 @@ def record_detail(request, record_id):
             messages.error(request, err)
         else:
             form.save()
+            profile = getattr(record, 'profile', None)
+            if profile:
+                profile_changed = False
+                if 'baptism_place' in request.POST:
+                    profile.baptism_place = request.POST.get('baptism_place', '').strip()
+                    profile_changed = True
+                if 'confirmation_place' in request.POST:
+                    profile.confirmation_place = request.POST.get('confirmation_place', '').strip()
+                    profile_changed = True
+                if profile_changed:
+                    profile.save()
             record.record_expired_contract()
             notifications.record_updated(record, request.user, form)
             if is_ajax:
@@ -806,7 +1009,7 @@ def record_detail(request, record_id):
         'record': record,
         'clergy_profile': clergy_profile,
         'checklist': record.document_checklist_grouped(),
-        'active_tab': request.GET.get('tab', 'personal'),
+        'active_tab': request.GET.get('tab', 'personal') if request.GET.get('tab') in ('personal', 'documents', 'ember') else 'personal',
         'deaneries_map': _build_deaneries_map(),
         'record_data': {'deanery_id': record.deanery_id, 'assignment': record.assignment or ''},
         'archivable_status': archive.ARCHIVABLE_STATUS,
@@ -829,7 +1032,7 @@ def documents_overview(request):
 @registrar_required
 def ordination_requirements(request):
     """A read-only reference view of the document catalog, grouped by the
-    rank each requirement is introduced at — generated live from
+    rank each requirement is introduced at :  generated live from
     DocumentType instead of a hardcoded page, so it can't drift out of sync
     with whatever the catalog actually requires."""
     groups = []
@@ -837,12 +1040,6 @@ def ordination_requirements(request):
         types = DocumentType.objects.filter(required_from_rank=rank_value)
         if types:
             groups.append({'label': rank_label, 'types': types})
-        if rank_value == 'postulancy':
-            groups.append({
-                'label': 'Holy Order',
-                'custom_items': ['Date admitted as Holy Order'],
-                'types': types,
-            })
     general_types = DocumentType.objects.filter(required_from_rank='none')
     if general_types:
         groups.append({'label': 'Required for Every Clergy Member', 'types': general_types})
@@ -987,7 +1184,7 @@ def view_generated_report(request, report_id):
 @registrar_required
 def preview_generated_report(request, report_id):
     """Shows the report as an ordinary HTML page (the same template used to
-    build the stored PDF), with its own Print button — rather than embedding
+    build the stored PDF), with its own Print button :  rather than embedding
     the PDF file itself, which ran into browsers that force a download on a
     direct PDF navigation regardless of what headers say. Renders the data
     fresh as of right now rather than replaying the historical snapshot, so

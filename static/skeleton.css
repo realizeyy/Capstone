@@ -204,10 +204,23 @@ button.is-busy::after, .btn.is-busy::after, [aria-busy="true"]::after {
     transform: translateY(0) scale(1);
   }
 }
-.modal-bg.show, .modal-bg.section-modal-active {
+html {
+  scrollbar-gutter: stable;
+}
+body.modal-open {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+.modal-bg {
+  overscroll-behavior: contain;
+}
+.modal {
+  overscroll-behavior: contain;
+}
+.modal-bg.show, .modal-bg.section-modal-active, .modal-bg.stage-modal-active {
   animation: modalBackdropFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-.modal-bg.show .modal, .modal-bg.section-modal-active .modal {
+.modal-bg.show .modal, .modal-bg.section-modal-active .modal, .modal-bg.stage-modal-active .modal {
   animation: modalBoxEnter 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
   will-change: transform, opacity;
 }
