@@ -196,6 +196,22 @@ class BulkViewTests(TestCase):
         self.assertEqual(r.status_code, 302)
         self.assertFalse(ClergyRecord.objects.exists())
 
+    def test_confirm_creates_100_accounts_and_returns_html_slips(self):
+        names = [f'Rev. Clergy {i}' for i in range(1, bulk.MAX_NAMES + 1)]
+        token = self._preview('\n'.join(names)).context['token']
+        r = self.client.post(
+            self.url,
+            {'step': 'confirm', 'token': token, 'names': names, 'format': 'html'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+            HTTP_X_SLIP_FORMAT='html',
+        )
+        self.assertEqual(r.status_code, 200)
+        self.assertTrue(r['Content-Type'].startswith('text/html'))
+        self.assertEqual(ClergyRecord.objects.count(), bulk.MAX_NAMES)
+        self.assertEqual(UserSecurity.objects.filter(user__username__startswith='CLG').count(), bulk.MAX_NAMES)
+        self.assertContains(r, 'Rev. Clergy 1')
+        self.assertContains(r, f'Rev. Clergy {bulk.MAX_NAMES}')
+
 
 class ResetAndLoginExpiryTests(TestCase):
     def setUp(self):

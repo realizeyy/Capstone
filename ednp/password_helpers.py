@@ -6,8 +6,18 @@ this, a registrar could set someone's password to "1".
 """
 
 from django.contrib import messages
+from django.contrib.auth.hashers import PBKDF2PasswordHasher
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+
+
+class TemporaryPBKDF2PasswordHasher(PBKDF2PasswordHasher):
+    """Faster PBKDF2 hasher for high-entropy random temporary passwords that
+    expire after SETUP_WINDOW_DAYS and are replaced on first-login activation.
+    Registered as a secondary hasher so user-chosen passwords still use the
+    primary PBKDF2PasswordHasher."""
+    algorithm = 'pbkdf2_sha256_temp'
+    iterations = 50_000
 
 
 def validate_password_or_flag_errors(request, password, user=None):

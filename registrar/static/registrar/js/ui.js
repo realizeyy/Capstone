@@ -1103,9 +1103,17 @@ document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast
     'X-Slip-Format': 'html'
    }
   }).then(async function (res) {
+   form.classList.remove('is-submitting');
+   document.querySelectorAll('.sk-progress.on').forEach(function (p) { p.classList.remove('on'); });
    if (submitBtn) {
     submitBtn.disabled = false;
+    submitBtn.classList.remove('is-busy');
     submitBtn.removeAttribute('aria-busy');
+   }
+
+   if (res.redirected) {
+    window.location.href = res.url;
+    return;
    }
 
    const contentType = res.headers.get('content-type') || '';
@@ -1165,15 +1173,18 @@ document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast
     return;
    }
 
-   // If server redirected or returned HTML
-   if (res.redirected) {
-    window.location.href = res.url;
-   } else {
-    window.location.reload();
+   if (!res.ok) {
+    showToast('Could not complete request (server returned ' + res.status + '). Please try again.', 'error');
+    return;
    }
+
+   window.location.reload();
   }).catch(function (err) {
+   form.classList.remove('is-submitting');
+   document.querySelectorAll('.sk-progress.on').forEach(function (p) { p.classList.remove('on'); });
    if (submitBtn) {
     submitBtn.disabled = false;
+    submitBtn.classList.remove('is-busy');
     submitBtn.removeAttribute('aria-busy');
    }
    showToast('Could not complete request: ' + (err.message || 'Network error'), 'error');

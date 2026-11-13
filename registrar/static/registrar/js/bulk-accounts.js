@@ -11,6 +11,8 @@
     btn.lastChild.textContent = ' Create ' + n + ' account' + (n === 1 ? '' : 's') + ' & open slips';
   }
   form.addEventListener('change', refresh);
-  form.addEventListener('submit', function () { btn.disabled = true; });
+  form.addEventListener('submit', function (e) {
+    if (!e.defaultPrevented) btn.disabled = true;
+  });
   refresh();
 })();

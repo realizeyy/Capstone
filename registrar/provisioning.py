@@ -10,6 +10,7 @@ the account (registers their phone number and picks their own password).
 import secrets
 from datetime import timedelta
 
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -65,7 +66,11 @@ def provision_account(record):
 
     password = generate_password()
     try:
-        user = User.objects.create_user(username=username, password=password)
+        user = User(
+            username=User.normalize_username(username),
+            password=make_password(password, hasher='pbkdf2_sha256_temp'),
+        )
+        user.save()
     except IntegrityError:
         raise ProvisionError(f'The username {username} is already in use by another account.')
 
