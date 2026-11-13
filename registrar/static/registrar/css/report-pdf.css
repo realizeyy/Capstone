@@ -568,21 +568,18 @@ body {
   margin-top: var(--space-section);
 }
 
-.directory-entry {
+.directory-entry-table {
   page-break-inside: avoid;
   break-inside: avoid;
   margin-bottom: var(--space-section);
-  padding: var(--space-lg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background-color: var(--color-bg-sheet);
 }
 
-.entry-header {
-  margin-bottom: var(--space-md);
-  padding-bottom: var(--space-sm);
-  border-bottom: 1px solid var(--color-border-light);
+.directory-entry-table thead th.directory-entry-header {
+  text-transform: none;
+  letter-spacing: normal;
   font-size: var(--font-size-h3);
+  font-weight: 700;
+  padding: var(--space-row) var(--space-base);
 }
 
 .clergy-name {
@@ -593,6 +590,7 @@ body {
   font-size: var(--font-size-base);
   color: var(--color-text-muted);
   margin-left: var(--space-sm);
+  font-weight: 400;
 }
 
 .entry-record-id {
@@ -600,31 +598,17 @@ body {
   color: var(--color-text-muted);
   margin-left: var(--space-md);
   font-family: var(--font-family-mono);
+  font-weight: 400;
 }
 
-table.dir-details-table {
-  width: 100%;
-  border-collapse: collapse;
-  border: none;
-  margin: 0px;
-}
-
-table.dir-details-table td {
-  border: none;
-  padding: var(--space-xs) var(--space-sm) var(--space-xs) 0px;
-  font-size: var(--font-size-base);
-  line-height: 1.4;
-  vertical-align: top;
-}
-
-table.dir-details-table td.dir-label {
-  width: 68px; /* ds-allow-hardcode */
-  font-weight: bold;
+.directory-entry-table td.dir-label {
+  width: 30%;
+  font-weight: 700;
   color: var(--color-primary);
   white-space: nowrap;
 }
 
-table.dir-details-table td.dir-val {
+.directory-entry-table td.dir-val {
   color: var(--color-text-main);
 }
 

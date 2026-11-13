@@ -700,16 +700,17 @@ class ClericalDirectoryReportTests(TestCase):
         report = reports.build_report('clerical_directory')
         html = render_to_string('registrar/report_pdf.html', {'report': report})
 
-        # Bolds name and abbreviations
+        # Bolds name and full field labels inside structured directory tables
+        self.assertIn('directory-entry-table', html)
         self.assertIn('<b>The Rev. Fr. John Doe, M.Div.</b>', html)
-        self.assertIn('<b>DOB:</b>', html)
-        self.assertIn('<b>Grad:</b>', html)
-        self.assertIn('<b>OD:</b>', html)
-        self.assertIn('<b>OP:</b>', html)
-        self.assertIn('<b>Dep:</b>', html)
-        self.assertIn('<b>S:</b>', html)
-        self.assertIn('<b>M:</b>', html)
-        self.assertIn('<b>C:</b>', html)
+        self.assertIn('<b>Date &amp; Place of Birth</b>', html)
+        self.assertIn('<b>Education</b>', html)
+        self.assertIn('<b>Ordination to the Diaconate</b>', html)
+        self.assertIn('<b>Ordination to the Priesthood</b>', html)
+        self.assertIn('<b>Deployments</b>', html)
+        self.assertIn('<b>Spouse</b>', html)
+        self.assertIn('<b>Date &amp; Place of Marriage</b>', html)
+        self.assertIn('<b>Children</b>', html)
 
         # PDF generation produces valid binary
         pdf = reports.render_pdf(report)

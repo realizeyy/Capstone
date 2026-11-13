@@ -159,55 +159,57 @@
           {% if report.type == 'clerical_directory' %}
             <div class="directory-list">
               {% for entry in report.entries %}
-                <div class="directory-entry">
-                  <div class="entry-header">
-                    <span class="clergy-name"><b>{{ entry.name }}</b></span>
-                    <span class="clergy-rank">({{ entry.rank_display }})</span>
-                    <span class="entry-record-id">[{{ entry.id }}]</span>
-                  </div>
-                  <table class="dir-details-table">
-                    <tbody>
-                      <tr>
-                        <td class="dir-label"><b>DOB:</b></td>
-                        <td class="dir-val">{{ entry.dob }}</td>
-                      </tr>
-                      <tr>
-                        <td class="dir-label"><b>Grad:</b></td>
-                        <td class="dir-val">{{ entry.grad }}</td>
-                      </tr>
-                      <tr>
-                        <td class="dir-label"><b>OD:</b></td>
-                        <td class="dir-val">{{ entry.od }}</td>
-                      </tr>
-                      <tr>
-                        <td class="dir-label"><b>OP:</b></td>
-                        <td class="dir-val">{{ entry.op }}</td>
-                      </tr>
-                      <tr>
-                        <td class="dir-label"><b>Dep:</b></td>
-                        <td class="dir-val">
-                          {% for dep in entry.deployments %}
-                            <div class="dep-item">{{ dep }}</div>
-                          {% empty %}
-                            <div>-</div>
-                          {% endfor %}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td class="dir-label"><b>S:</b></td>
-                        <td class="dir-val">{{ entry.spouse }}</td>
-                      </tr>
-                      <tr>
-                        <td class="dir-label"><b>M:</b></td>
-                        <td class="dir-val">{{ entry.marriage }}</td>
-                      </tr>
-                      <tr>
-                        <td class="dir-label"><b>C:</b></td>
-                        <td class="dir-val">{{ entry.children }}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                <table class="report-table directory-entry-table">
+                  <thead>
+                    <tr>
+                      <th colspan="2" class="directory-entry-header">
+                        <span class="clergy-name"><b>{{ entry.name }}</b></span>
+                        <span class="clergy-rank">({{ entry.rank_display }})</span>
+                        <span class="entry-record-id">[{{ entry.id }}]</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="dir-label"><b>Date &amp; Place of Birth</b></td>
+                      <td class="dir-val">{{ entry.dob }}</td>
+                    </tr>
+                    <tr>
+                      <td class="dir-label"><b>Education</b></td>
+                      <td class="dir-val">{{ entry.grad }}</td>
+                    </tr>
+                    <tr>
+                      <td class="dir-label"><b>Ordination to the Diaconate</b></td>
+                      <td class="dir-val">{{ entry.od }}</td>
+                    </tr>
+                    <tr>
+                      <td class="dir-label"><b>Ordination to the Priesthood</b></td>
+                      <td class="dir-val">{{ entry.op }}</td>
+                    </tr>
+                    <tr>
+                      <td class="dir-label"><b>Deployments</b></td>
+                      <td class="dir-val">
+                        {% for dep in entry.deployments %}
+                          <div class="dep-item">{{ dep }}</div>
+                        {% empty %}
+                          <div>-</div>
+                        {% endfor %}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="dir-label"><b>Spouse</b></td>
+                      <td class="dir-val">{{ entry.spouse }}</td>
+                    </tr>
+                    <tr>
+                      <td class="dir-label"><b>Date &amp; Place of Marriage</b></td>
+                      <td class="dir-val">{{ entry.marriage }}</td>
+                    </tr>
+                    <tr>
+                      <td class="dir-label"><b>Children</b></td>
+                      <td class="dir-val">{{ entry.children }}</td>
+                    </tr>
+                  </tbody>
+                </table>
               {% empty %}
                 <div class="empty-row">No records found.</div>
               {% endfor %}
