@@ -354,7 +354,7 @@ def _build_registrar_search_catalog(user=None):
         'subtitle': 'Reference catalog of required canonical documents grouped by rank',
         'badge': 'Catalog',
         'badge_class': 'slate',
-        'keywords': 'ordination requirements catalog document types rank deacon priest bishop'.lower(),
+        'keywords': 'ordination requirements catalog document types rank postulancy deacon priest bishop'.lower(),
         'url': reverse('registrar:ordination_requirements'),
     })
     catalog.append({
@@ -434,6 +434,32 @@ def _build_registrar_search_catalog(user=None):
                     'keywords': f"{p.parish_name} {p.place_name or ''} {d.name} church parish station mission".lower(),
                     'url': reverse('registrar:clergy_records') + f"?q={urllib.parse.quote(p.parish_name)}",
                 })
+    except Exception:
+        pass
+
+    # 4. Generated Reports
+    try:
+        saved_reports = (
+            GeneratedReport.objects.filter(archived_at__isnull=True)
+            .select_related('generated_by')
+            .order_by('-generated_at')[:50]
+        )
+        for rep in saved_reports:
+            gen_by = (
+                (rep.generated_by.first_name or rep.generated_by.username)
+                if rep.generated_by else 'Not specified'
+            )
+            gen_date = rep.generated_at.strftime('%b %d, %Y %I:%M %p')
+            catalog.append({
+                'category': 'Generated Reports',
+                'icon': 'fa-solid fa-file-pdf',
+                'title': rep.title,
+                'subtitle': f"Generated {gen_date} by {gen_by}",
+                'badge': 'PDF',
+                'badge_class': 'blue',
+                'keywords': f"{rep.title} {rep.report_type} {gen_by} {rep.generated_at.strftime('%B %d %Y')} pdf report".lower(),
+                'url': reverse('registrar:preview_generated_report', args=[rep.id]),
+            })
     except Exception:
         pass
 
@@ -1020,12 +1046,27 @@ def record_detail(request, record_id):
 
 @registrar_required
 def documents_overview(request):
+    query = request.GET.get('q', '').strip()
+    rank_filter = request.GET.get('rank', '').strip()
+
     required_types = list(DocumentType.objects.filter(is_required=True))
-    records = ClergyRecord.objects.current().prefetch_related('documents__document_type')
+    records = ClergyRecord.objects.current()
+    if query:
+        records = records.filter(
+            db_models.Q(name__icontains=query)
+            | db_models.Q(assignment__icontains=query)
+            | db_models.Q(id__icontains=query)
+        )
+    if rank_filter:
+        records = records.filter(rank__iexact=rank_filter)
+    records = records.prefetch_related('documents__document_type')
     rows = [{'record': r, 'summary': r.document_summary(required_types=required_types)} for r in records]
     return render(request, 'registrar/documents.html', {
         'active_page': 'documents',
         'rows': rows,
+        'search_query': query,
+        'rank_filter': rank_filter,
+        'rank_choices': RANK_CHOICES,
     })
 
 
@@ -1036,6 +1077,14 @@ def ordination_requirements(request):
     DocumentType instead of a hardcoded page, so it can't drift out of sync
     with whatever the catalog actually requires."""
     groups = []
+    postulancy_types = DocumentType.objects.filter(required_from_rank='postulancy')
+    if postulancy_types:
+        groups.append({'label': 'Postulancy', 'types': postulancy_types})
+        groups.append({
+            'label': 'Holy Order',
+            'custom_items': ['Date admitted as Holy Order'],
+            'types': postulancy_types,
+        })
     for rank_value, rank_label in RANK_CHOICES:
         types = DocumentType.objects.filter(required_from_rank=rank_value)
         if types:
@@ -1085,8 +1134,32 @@ def generate_report(request):
         messages.success(request, f"{report['title']} generated.")
         return redirect('registrar:generate_report')
 
+    query = request.GET.get('q', '').strip()
+    report_type_filter = request.GET.get('report_type', '').strip()
+
     saved = GeneratedReport.objects.select_related('generated_by', 'archived_by')
-    page = Paginator(saved.filter(archived_at__isnull=True), GENERATED_REPORTS_PER_PAGE).get_page(request.GET.get('page'))
+    current_reports = saved.filter(archived_at__isnull=True)
+    if query:
+        current_reports = current_reports.filter(
+            db_models.Q(title__icontains=query)
+            | db_models.Q(report_type__icontains=query)
+            | db_models.Q(file__icontains=query)
+            | db_models.Q(generated_by__first_name__icontains=query)
+            | db_models.Q(generated_by__last_name__icontains=query)
+            | db_models.Q(generated_by__username__icontains=query)
+        )
+    if report_type_filter and report_type_filter in reports.REPORT_TYPES:
+        current_reports = current_reports.filter(report_type=report_type_filter)
+    elif report_type_filter:
+        current_reports = current_reports.none()
+
+    page = Paginator(current_reports, GENERATED_REPORTS_PER_PAGE).get_page(request.GET.get('page'))
+    page_params = {}
+    if query:
+        page_params['q'] = query
+    if report_type_filter:
+        page_params['report_type'] = report_type_filter
+
     archived_reports = list(saved.filter(archived_at__isnull=False).order_by('archived_at'))   # next to go first
     now = timezone.now()
     for generated in archived_reports:
@@ -1096,6 +1169,9 @@ def generate_report(request):
         'report_types': reports.REPORT_TYPES.items(),
         'generated_reports': page.object_list,
         'page': page,
+        'page_query': urlencode(page_params),
+        'search_query': query,
+        'report_type_filter': report_type_filter,
         'archived_reports': archived_reports,
         'archive_days': REPORT_ARCHIVE_DAYS,
     })

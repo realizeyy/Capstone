@@ -6,21 +6,92 @@
 {% block content %}
   <section class="page active">
     <div class="panel">
-      <div class="panel-head">
-        <div>
-          <h3><i class="fa-solid fa-address-book"></i> Clergy Records</h3>
-          <span class="muted">Create, search, retrieve and update stored clergy information</span>
+      <div id="clergyStickySentinel" aria-hidden="true"></div>
+      <div class="clergy-sticky-header" id="clergyStickyHeader">
+        <div class="panel-head">
+          <div>
+            <h3><i class="fa-solid fa-address-book"></i> Clergy Records</h3>
+            <span class="muted">Create, search, retrieve and update stored clergy information</span>
+          </div>
+          <div class="panel-head-actions">
+            <a class="btn secondary" href="{% url 'registrar:bulk_accounts' %}"><i class="fa-solid fa-users-gear"></i> Bulk Create Accounts</a>
+            <button class="btn" id="newRecordButton"><i class="fa-solid fa-plus"></i> Create New Account</button>
+          </div>
         </div>
-        <div class="panel-head-actions">
-          <a class="btn secondary" href="{% url 'registrar:bulk_accounts' %}"><i class="fa-solid fa-users-gear"></i> Bulk Create Accounts</a>
-          <button class="btn" id="newRecordButton"><i class="fa-solid fa-plus"></i> Create New Account</button>
+        <div class="page-tabs">
+          <a class="{% if not showing_archived %}active{% endif %}"
+             href="{% url 'registrar:clergy_records' %}"><i class="fa-solid fa-address-book"></i> Clergy Records</a>
+          <a class="{% if showing_archived %}active{% endif %}"
+             href="{% url 'registrar:clergy_records' %}?view=archived"><i class="fa-solid fa-box-archive"></i> Archived ({{ archived_count }})</a>
         </div>
-      </div>
-      <div class="page-tabs">
-        <a class="{% if not showing_archived %}active{% endif %}"
-           href="{% url 'registrar:clergy_records' %}"><i class="fa-solid fa-address-book"></i> Clergy Records</a>
-        <a class="{% if showing_archived %}active{% endif %}"
-           href="{% url 'registrar:clergy_records' %}?view=archived"><i class="fa-solid fa-box-archive"></i> Archived ({{ archived_count }})</a>
+        <form class="toolbar" method="get">
+          {% if showing_archived %}<input type="hidden" name="view" value="archived">{% endif %}
+          <input type="hidden" name="per_page" value="{{ per_page }}">
+          <input name="q"
+                 class="search"
+                 placeholder="Search by clergy name, assignment or ID..."
+                 value="{{ search_query }}">
+          <!-- ds-allow-native-select: search filter dropdown -->
+          <select name="deanery" class="select" data-autosubmit>
+            <option value="">All Deaneries</option>
+            {% for d in deaneries %}
+              <option value="{{ d.id }}"
+                      {% if deanery_filter|stringformat:"s" == d.id|stringformat:"s" %}selected{% endif %}>{{ d.name }}</option>
+            {% endfor %}
+          </select>
+          <!-- ds-allow-native-select: search filter dropdown -->
+          <select name="rank" class="select" data-autosubmit>
+            <option value="">All Ranks</option>
+            {% for value, label in rank_choices %}
+              <option value="{{ value }}"
+                      {% if rank_filter|lower == value|lower %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <!-- ds-allow-native-select: search filter dropdown -->
+          <select name="status" class="select" data-autosubmit>
+            <option value="">All Status</option>
+            {% for value, label in status_choices %}
+              <option value="{{ value }}"
+                      {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <button type="submit" class="btn secondary"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+        </form>
+        <div class="table-meta-bar top">
+          <div class="meta-count">
+            {% if page.paginator.count > 0 %}
+              Showing <strong>{{ page.start_index }} to {{ page.end_index }}</strong> of <strong>{{ page.paginator.count }}</strong> clergy records
+            {% else %}
+              <span>0 clergy records found</span>
+            {% endif %}
+          </div>
+          <div class="meta-controls">
+            <div class="per-page-select">
+              <label for="perPageSelect">Per page:</label>
+              <!-- ds-allow-native-select: table items-per-page selector -->
+              <select id="perPageSelect" class="select small" onchange="window.location.href='?{% if base_page_query %}{{ base_page_query }}&amp;{% endif %}per_page=' + this.value;">
+                {% for n in per_page_choices %}
+                  <option value="{{ n }}" {% if per_page == n %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            {% if page.has_other_pages %}
+              <div class="pager-mini">
+                {% if page.has_previous %}
+                  <a class="btn small secondary" href="?{% if page_query %}{{ page_query }}&amp;{% endif %}page={{ page.previous_page_number }}"><i class="fa-solid fa-arrow-left"></i> Previous</a>
+                {% else %}
+                  <span class="btn small secondary disabled" aria-disabled="true"><i class="fa-solid fa-arrow-left"></i> Previous</span>
+                {% endif %}
+                <span class="page-indicator">Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+                {% if page.has_next %}
+                  <a class="btn small btn-next" href="?{% if page_query %}{{ page_query }}&amp;{% endif %}page={{ page.next_page_number }}">Next <i class="fa-solid fa-arrow-right"></i></a>
+                {% else %}
+                  <span class="btn small secondary disabled" aria-disabled="true">Next <i class="fa-solid fa-arrow-right"></i></span>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
       </div>
       {% if showing_archived %}
         <div class="notice" id="noticeArchivedRecordsRegistrar">
@@ -30,74 +101,6 @@
           </button>
         </div>
       {% endif %}
-      <form class="toolbar" method="get">
-        {% if showing_archived %}<input type="hidden" name="view" value="archived">{% endif %}
-        <input type="hidden" name="per_page" value="{{ per_page }}">
-        <input name="q"
-               class="search"
-               placeholder="Search by clergy name, assignment or ID..."
-               value="{{ search_query }}">
-        <!-- ds-allow-native-select: search filter dropdown -->
-        <select name="deanery" class="select" data-autosubmit>
-          <option value="">All Deaneries</option>
-          {% for d in deaneries %}
-            <option value="{{ d.id }}"
-                    {% if deanery_filter|stringformat:"s" == d.id|stringformat:"s" %}selected{% endif %}>{{ d.name }}</option>
-          {% endfor %}
-        </select>
-        <!-- ds-allow-native-select: search filter dropdown -->
-        <select name="rank" class="select" data-autosubmit>
-          <option value="">All Ranks</option>
-          {% for value, label in rank_choices %}
-            <option value="{{ value }}"
-                    {% if rank_filter|lower == value|lower %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-        <!-- ds-allow-native-select: search filter dropdown -->
-        <select name="status" class="select" data-autosubmit>
-          <option value="">All Status</option>
-          {% for value, label in status_choices %}
-            <option value="{{ value }}"
-                    {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-        <button type="submit" class="btn secondary"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
-      </form>
-      <div class="table-meta-bar top">
-        <div class="meta-count">
-          {% if page.paginator.count > 0 %}
-            Showing <strong>{{ page.start_index }} to {{ page.end_index }}</strong> of <strong>{{ page.paginator.count }}</strong> clergy records
-          {% else %}
-            <span>0 clergy records found</span>
-          {% endif %}
-        </div>
-        <div class="meta-controls">
-          <div class="per-page-select">
-            <label for="perPageSelect">Per page:</label>
-            <!-- ds-allow-native-select: table items-per-page selector -->
-            <select id="perPageSelect" class="select small" onchange="window.location.href='?{% if base_page_query %}{{ base_page_query }}&amp;{% endif %}per_page=' + this.value;">
-              {% for n in per_page_choices %}
-                <option value="{{ n }}" {% if per_page == n %}selected{% endif %}>{{ n }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          {% if page.has_other_pages %}
-            <div class="pager-mini">
-              {% if page.has_previous %}
-                <a class="btn small secondary" href="?{% if page_query %}{{ page_query }}&amp;{% endif %}page={{ page.previous_page_number }}"><i class="fa-solid fa-arrow-left"></i> Previous</a>
-              {% else %}
-                <span class="btn small secondary disabled" aria-disabled="true"><i class="fa-solid fa-arrow-left"></i> Previous</span>
-              {% endif %}
-              <span class="page-indicator">Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
-              {% if page.has_next %}
-                <a class="btn small btn-next" href="?{% if page_query %}{{ page_query }}&amp;{% endif %}page={{ page.next_page_number }}">Next <i class="fa-solid fa-arrow-right"></i></a>
-              {% else %}
-                <span class="btn small secondary disabled" aria-disabled="true">Next <i class="fa-solid fa-arrow-right"></i></span>
-              {% endif %}
-            </div>
-          {% endif %}
-        </div>
-      </div>
       <div class="table-wrap">
         <table>
           <thead>
@@ -377,5 +380,5 @@
   {{ deaneries_map|json_script:"deaneries-data" }}
 {% endblock %}
 {% block extra_js %}
-  <script src="{% static 'registrar/js/clergy-records.js' %}?v=15"></script>
+  <script src="{% static 'registrar/js/clergy-records.js' %}?v=16"></script>
 {% endblock %}

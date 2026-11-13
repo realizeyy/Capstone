@@ -2,7 +2,7 @@
    (templates/_code_field.html). Used on the sign-in screens and on both
    portals' security sections. */
 .code-wrap { position: relative; display: block; }
-.field .code-wrap input, .code-wrap input { width: 100%; box-sizing: border-box; padding-right: 130px; }
+.field .code-wrap input, .code-wrap input { width: 100%; box-sizing: border-box; padding-right: 145px; }
 .code-send,
 .code-wrap .code-send,
 button.code-send,
@@ -22,7 +22,7 @@ button.code-send[aria-busy="true"] {
   background: var(--blue, #2f6fed);
   color: #fff;
   font: inherit;
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 700;
   line-height: 1.2;
   white-space: nowrap;
@@ -42,7 +42,7 @@ button.code-send[aria-busy="true"] {
   opacity: 0.85;
   cursor: wait;
 }
-.code-note { font-size: 11px; margin: 6px 0 0; color: #ff9b97; }
+.code-note { font-size: 13px; margin: 6px 0 0; color: #ff9b97; }
 /* The hidden first submit button that makes Enter verify instead of re-sending a text */
 .default-submit { position: absolute; width: 1px; height: 1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); opacity: 0; }
 .btn:disabled { opacity: .5; cursor: not-allowed; }

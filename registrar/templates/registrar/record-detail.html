@@ -15,7 +15,7 @@
     background: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 6px;
-    font-size: 12.5px;
+    font-size: 14px;
     line-height: 1.35;
     gap: 8px;
     flex-wrap: wrap;
@@ -50,7 +50,7 @@
     align-items: center;
     gap: 4px;
     padding: 4px 9px;
-    font-size: 12.5px;
+    font-size: 14px;
     font-weight: 600;
     border-radius: 4px;
     text-decoration: none;
@@ -123,7 +123,7 @@
     scrollbar-width: thin;
   }
   .section-nav-label {
-    font-size: 12.5px;
+    font-size: 14px;
     font-weight: 700;
     color: #64748b;
     text-transform: uppercase;
@@ -138,7 +138,7 @@
     white-space: nowrap;
     padding: 6px 13px;
     border-radius: 9999px;
-    font-size: 13.5px;
+    font-size: 15px;
     font-weight: 600;
     color: #334155;
     background: #f1f5f9;
@@ -256,7 +256,7 @@
     align-items: flex-end;
     justify-content: center;
     padding-bottom: 6px;
-    font-size: 11.5px;
+    font-size: 13px;
     font-weight: 600;
     color: #64748b;
     pointer-events: none;
@@ -291,7 +291,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 16px;
+    font-size: 17.5px;
     font-weight: 700;
     color: #17324d;
     margin: 0;
@@ -305,7 +305,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 15.5px;
     flex-shrink: 0;
   }
   .hub-edit-btn {
@@ -317,7 +317,7 @@
     background: #f1f5f9;
     color: #1e293b;
     border: 1px solid #cbd5e1;
-    font-size: 12.5px;
+    font-size: 14px;
     font-weight: 600;
     transition: all 0.15s ease;
     pointer-events: auto;
@@ -337,13 +337,13 @@
   }
   .hub-kv-label {
     display: block;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
     color: #64748b;
     margin-bottom: 3px;
   }
   .hub-kv-val {
-    font-size: 14.5px;
+    font-size: 16px;
     font-weight: 600;
     color: #1e293b;
     word-break: break-word;
@@ -357,7 +357,7 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 11.5px;
+    font-size: 13px;
     font-weight: 600;
     padding: 2px 8px;
     border-radius: 999px;
@@ -631,7 +631,7 @@
           <!-- 7. Family & Educational Background (Filed by Clergy) -->
           <div class="hub-card full" data-open-section="sec-reg-family" tabindex="0" role="button" aria-label="View Family and Educational Background">
             <div class="hub-card-head">
-              <h4 class="hub-card-title"><i class="fa-solid fa-people-roof"></i> Family &amp; Educational Background <span class="badge blue" style="font-size:11px;font-weight:600;margin-left:6px;">Filed by Clergy</span></h4>
+              <h4 class="hub-card-title"><i class="fa-solid fa-people-roof"></i> Family &amp; Educational Background <span class="badge blue" style="font-size:13px;font-weight:600;margin-left:6px;">Filed by Clergy</span></h4>
               <span class="hub-edit-btn"><i class="fa-solid fa-eye"></i> View Details</span>
             </div>
             <div class="hub-kv-grid">
@@ -676,7 +676,7 @@
           <div class="section-card">
             <h4><i class="fa-solid fa-user"></i> Personal &amp; Contact Information</h4>
             <div class="edit-grid" id="sec-reg-identity" style="scroll-margin-top: 70px;">
-              <div class="edit-field full" style="font-weight: 700; font-size: 13px; color: #17324d; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 4px; display: flex; align-items: center; gap: 8px;">
+              <div class="edit-field full" style="font-weight: 700; font-size: 15px; color: #17324d; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 4px; display: flex; align-items: center; gap: 8px;">
                 <i class="fa-solid fa-id-card" style="color: #2f6fed;"></i> Identity &amp; Basic Details
               </div>
               <div class="edit-field">
@@ -714,7 +714,7 @@
             </div>
 
             <div class="edit-grid" id="sec-reg-contact" style="scroll-margin-top: 70px;">
-              <div class="edit-field full" style="font-weight: 700; font-size: 13px; color: #17324d; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 12px; display: flex; align-items: center; gap: 8px;">
+              <div class="edit-field full" style="font-weight: 700; font-size: 15px; color: #17324d; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 12px; display: flex; align-items: center; gap: 8px;">
                 <i class="fa-solid fa-address-book" style="color: #2f6fed;"></i> Contact &amp; Residential Information
               </div>
               <div class="edit-field full">
@@ -738,12 +738,12 @@
               </div>
               <div class="edit-field">
                 <label>Email Address</label><input name="email" type="email" value="{{ record.email|default:'' }}" pattern="[a-zA-Z0-9._%+-]+@[gG][mM][aA][iI][lL]\.[cC][oO][mM]" placeholder="example@gmail.com" title="Please enter a valid Gmail address (@gmail.com)">
-                <span class="muted" style="font-size: 11px; color: #64748b; display: block; margin-top: 4px;">Only Gmail accounts (@gmail.com) are accepted at this time.</span>
+                <span class="muted" style="font-size: 13px; color: #64748b; display: block; margin-top: 4px;">Only Gmail accounts (@gmail.com) are accepted at this time.</span>
               </div>
             </div>
 
             <div class="edit-grid" id="sec-reg-sacraments" style="scroll-margin-top: 70px;">
-              <div class="edit-field full" style="font-weight: 700; font-size: 13px; color: #17324d; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 12px; display: flex; align-items: center; gap: 8px;">
+              <div class="edit-field full" style="font-weight: 700; font-size: 15px; color: #17324d; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 12px; display: flex; align-items: center; gap: 8px;">
                 <i class="fa-solid fa-water" style="color: #2f6fed;"></i> Sacramental Records
               </div>
               <div class="edit-field">
@@ -815,14 +815,14 @@
             <div class="edit-grid">
 
               <!-- Postulancy Notice (Shown when rank == postulancy) -->
-              <div id="stage-postulancy" class="edit-field full" style="{% if record.rank != 'postulancy' %}display:none;{% endif %} background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px 14px; color: #475569; font-size: 12px;">
+              <div id="stage-postulancy" class="edit-field full" style="{% if record.rank != 'postulancy' %}display:none;{% endif %} background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px 14px; color: #475569; font-size: 14px;">
                 <i class="fa-solid fa-seedling" style="color: #0284c7;"></i>
                 <strong>Postulancy (Lay Candidate):</strong> This record is registered in Postulancy. Ordination stages (Diaconate, Priesthood, Episcopate) are unlocked sequentially as the candidate receives Holy Orders.
               </div>
 
               <!-- Stage 1: The Diaconate (Deacon, Priest, Bishop) -->
               <div id="stage-diaconate" style="{% if not record.can_have_diaconate %}display:none;{% else %}display:contents;{% endif %}">
-                <div class="edit-field full" style="font-weight: 700; font-size: 13px; color: #17324d; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 4px; display: flex; align-items: center; gap: 8px;">
+                <div class="edit-field full" style="font-weight: 700; font-size: 15px; color: #17324d; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 4px; display: flex; align-items: center; gap: 8px;">
                   <i class="fa-solid fa-cross" style="color: #2f6fed;"></i> 1st Ordination: The Diaconate
                 </div>
                 <div class="edit-field">
@@ -861,7 +861,7 @@
 
               <!-- Stage 2: The Priesthood (Priest, Bishop) -->
               <div id="stage-priesthood" style="{% if not record.can_have_priesthood %}display:none;{% else %}display:contents;{% endif %}">
-                <div class="edit-field full" style="font-weight: 700; font-size: 13px; color: #17324d; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 12px; display: flex; align-items: center; gap: 8px;">
+                <div class="edit-field full" style="font-weight: 700; font-size: 15px; color: #17324d; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 12px; display: flex; align-items: center; gap: 8px;">
                   <i class="fa-solid fa-hands-praying" style="color: #2f6fed;"></i> 2nd Ordination: The Priesthood
                 </div>
                 <div class="edit-field">
@@ -900,7 +900,7 @@
 
               <!-- Stage 3: Consecration to the Episcopate (Bishop) -->
               <div id="stage-episcopate" style="{% if not record.can_have_consecration %}display:none;{% else %}display:contents;{% endif %}">
-                <div class="edit-field full" style="font-weight: 700; font-size: 13px; color: #17324d; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 12px; display: flex; align-items: center; gap: 8px;">
+                <div class="edit-field full" style="font-weight: 700; font-size: 15px; color: #17324d; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 12px; display: flex; align-items: center; gap: 8px;">
                   <i class="fa-solid fa-crown" style="color: #2f6fed;"></i> 3rd Ordination: Consecration to the Episcopate
                 </div>
                 <div class="edit-field">
@@ -932,7 +932,7 @@
 
               <!-- Holy Orders Admission & Oversight (Deacon, Priest, Bishop) -->
               <div id="stage-oversight" style="{% if record.rank == 'postulancy' %}display:none;{% else %}display:contents;{% endif %}">
-                <div class="edit-field full" style="font-weight: 700; font-size: 13px; color: #17324d; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 12px; display: flex; align-items: center; gap: 8px;">
+                <div class="edit-field full" style="font-weight: 700; font-size: 15px; color: #17324d; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 12px; display: flex; align-items: center; gap: 8px;">
                   <i class="fa-solid fa-circle-info" style="color: #2f6fed;"></i> Holy Order Details &amp; Oversight
                 </div>
                 <div class="edit-field">
@@ -971,7 +971,7 @@
           <div class="section-card" id="sec-reg-status" style="scroll-margin-top: 70px;">
             <h4><i class="fa-solid fa-briefcase"></i> Deployment &amp; Official Status</h4>
             <div class="edit-grid">
-              <div class="edit-field full" style="font-weight: 700; font-size: 13px; color: #17324d; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 4px; display: flex; align-items: center; gap: 8px;">
+              <div class="edit-field full" style="font-weight: 700; font-size: 15px; color: #17324d; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 4px; display: flex; align-items: center; gap: 8px;">
                 <i class="fa-solid fa-id-badge" style="color: #2f6fed;"></i> Ecclesiastical Rank &amp; Status
               </div>
               <div class="edit-field">
@@ -1007,7 +1007,7 @@
         placeholder="e.g. medical leave, sabbatical">
               </div>
 
-              <div class="edit-field full" style="font-weight: 700; font-size: 13px; color: #17324d; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 12px; display: flex; align-items: center; gap: 8px;">
+              <div class="edit-field full" style="font-weight: 700; font-size: 15px; color: #17324d; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 12px; display: flex; align-items: center; gap: 8px;">
                 <i class="fa-solid fa-church" style="color: #2f6fed;"></i> Assignment &amp; Jurisdiction
               </div>
               <div class="edit-field">
@@ -1027,7 +1027,7 @@
                 </select>
               </div>
 
-              <div class="edit-field full" style="font-weight: 700; font-size: 13px; color: #17324d; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 12px; display: flex; align-items: center; gap: 8px;">
+              <div class="edit-field full" style="font-weight: 700; font-size: 15px; color: #17324d; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 12px; display: flex; align-items: center; gap: 8px;">
                 <i class="fa-solid fa-calendar-days" style="color: #2f6fed;"></i> Contract &amp; Tenure Dates
               </div>
               <div class="edit-field">
@@ -1054,7 +1054,7 @@
           <div class="section-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
             <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
               <h4 style="margin:0;"><i class="fa-solid fa-map-location-dot"></i> Deployments &amp; Station History</h4>
-              <span class="badge blue" style="font-size:12px;padding:3px 8px;font-weight:600;"><i class="fa-solid fa-business-time"></i> Total Service: {{ record.years_of_service_display }}</span>
+              <span class="badge blue" style="font-size:14px;padding:3px 8px;font-weight:600;"><i class="fa-solid fa-business-time"></i> Total Service: {{ record.years_of_service_display }}</span>
             </div>
             <button type="button" class="btn small" onclick="openModal('addDeploymentModal')"><i class="fa-solid fa-plus"></i> Add Deployment</button>
           </div>
@@ -1066,7 +1066,7 @@
           </div>
           <table style="width:100%;border-collapse:collapse;margin-top:12px;">
             <thead>
-              <tr style="border-bottom:2px solid #e3e8ef;text-align:left;font-size:11px;color:#64748b;">
+              <tr style="border-bottom:2px solid #e3e8ef;text-align:left;font-size:13px;color:#64748b;">
                 <th style="padding:8px;">Parish / Station / Mission</th>
                 <th style="padding:8px;">Place / Location</th>
                 <th style="padding:8px;">Role</th>
@@ -1078,11 +1078,11 @@
             <tbody>
               {% for dep in record.deployments.all %}
               <tr style="border-bottom:1px solid #edf0f3;">
-                <td style="padding:8px;"><b>{{ dep.station_name }}</b>{% if dep.notes %}<br><span class="muted" style="font-size:11px;">{{ dep.notes }}</span>{% endif %}</td>
+                <td style="padding:8px;"><b>{{ dep.station_name }}</b>{% if dep.notes %}<br><span class="muted" style="font-size:13px;">{{ dep.notes }}</span>{% endif %}</td>
                 <td style="padding:8px;">{{ dep.place_name|default:"Not set" }}</td>
                 <td style="padding:8px;">{{ dep.role }}</td>
-                <td style="padding:8px;">{% if dep.start_date %}{{ dep.start_date|date:"M Y" }} to {% endif %}{% if dep.is_current %}<span class="badge active-b" style="background:#e9f7ef;color:#166534;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">Present</span>{% elif dep.end_date %}{% if not dep.start_date %}Ended {% endif %}{{ dep.end_date|date:"M Y" }}{% else %}Not specified{% endif %}</td>
-                <td style="padding:8px;">{% if dep.is_current %}<span class="badge active-b" style="background:#e9f7ef;color:#166534;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">Current</span>{% else %}Past{% endif %}</td>
+                <td style="padding:8px;">{% if dep.start_date %}{{ dep.start_date|date:"M Y" }} to {% endif %}{% if dep.is_current %}<span class="badge active-b" style="background:#e9f7ef;color:#166534;padding:2px 6px;border-radius:4px;font-size:12.5px;font-weight:700;">Present</span>{% elif dep.end_date %}{% if not dep.start_date %}Ended {% endif %}{{ dep.end_date|date:"M Y" }}{% else %}Not specified{% endif %}</td>
+                <td style="padding:8px;">{% if dep.is_current %}<span class="badge active-b" style="background:#e9f7ef;color:#166534;padding:2px 6px;border-radius:4px;font-size:12.5px;font-weight:700;">Current</span>{% else %}Past{% endif %}</td>
                 <td style="padding:8px;text-align:center;">
                   <form method="post" class="inline-form" data-confirm="Remove this deployment entry?">
                     {% csrf_token %}
@@ -1093,7 +1093,7 @@
                 </td>
               </tr>
               {% empty %}
-              <tr><td colspan="6" style="padding:14px;text-align:center;color:#64748b;font-size:12px;">No structured deployments recorded yet. Click "Add Deployment" to record an assignment.</td></tr>
+              <tr><td colspan="6" style="padding:14px;text-align:center;color:#64748b;font-size:14px;">No structured deployments recorded yet. Click "Add Deployment" to record an assignment.</td></tr>
               {% endfor %}
             </tbody>
           </table>
@@ -1102,7 +1102,7 @@
         <!-- Family & Educational Background (Filed by Clergy) -->
         <div class="section-card" id="sec-reg-family" style="margin-top:24px; scroll-margin-top: 70px;">
           <div class="section-head" style="margin-bottom:8px;">
-            <h4 style="margin:0;"><i class="fa-solid fa-people-roof"></i> Family &amp; Education <span class="badge blue" style="font-size:10px;font-weight:600;margin-left:8px;">Filed by Clergy</span></h4>
+            <h4 style="margin:0;"><i class="fa-solid fa-people-roof"></i> Family &amp; Education <span class="badge blue" style="font-size:12.5px;font-weight:600;margin-left:8px;">Filed by Clergy</span></h4>
           </div>
           <div class="notice" id="noticeRecordDetailSelfService">
             <div class="notice-content">These details are entered and maintained directly by the clergy member through their self-service portal (Read-only for Registrar).</div>
@@ -1111,7 +1111,7 @@
             </button>
           </div>
 
-          <h5 style="margin:16px 0 8px;font-size:13px;color:#1e293b;border-bottom:1px solid #e2e8f0;padding-bottom:4px;"><i class="fa-solid fa-ring"></i> Marriage &amp; Spouse</h5>
+          <h5 style="margin:16px 0 8px;font-size:15px;color:#1e293b;border-bottom:1px solid #e2e8f0;padding-bottom:4px;"><i class="fa-solid fa-ring"></i> Marriage &amp; Spouse</h5>
           <div class="edit-grid" style="margin-bottom:16px;">
             <div class="edit-field"><label>Place of Birth</label><input value="{{ clergy_profile.place_of_birth|default:'Not set' }}" readonly></div>
             <div class="edit-field"><label>Civil Status</label><input value="{{ clergy_profile.civil_status|default:'Not set' }}" readonly></div>
@@ -1121,10 +1121,10 @@
             <div class="edit-field"><label>Spouse Date of Birth</label><input value="{{ clergy_profile.spouse_birth_date|date:'M d, Y'|default:'Not set' }}" readonly></div>
           </div>
 
-          <h5 style="margin:16px 0 8px;font-size:13px;color:#1e293b;border-bottom:1px solid #e2e8f0;padding-bottom:4px;"><i class="fa-solid fa-children"></i> Children (Organized List)</h5>
+          <h5 style="margin:16px 0 8px;font-size:15px;color:#1e293b;border-bottom:1px solid #e2e8f0;padding-bottom:4px;"><i class="fa-solid fa-children"></i> Children (Organized List)</h5>
           <table style="width:100%;border-collapse:collapse;margin-bottom:16px;">
             <thead>
-              <tr style="border-bottom:2px solid #e3e8ef;text-align:left;font-size:11px;color:#64748b;">
+              <tr style="border-bottom:2px solid #e3e8ef;text-align:left;font-size:13px;color:#64748b;">
                 <th style="padding:6px;">Child Name</th>
                 <th style="padding:6px;width:160px;">Date of Birth</th>
                 <th style="padding:6px;width:120px;">Gender</th>
@@ -1140,21 +1140,21 @@
                 <td style="padding:6px;">{% if child.age is not None %}{{ child.age }} yrs old{% else %}Not set{% endif %}</td>
               </tr>
               {% empty %}
-              <tr><td colspan="4" style="padding:10px;text-align:center;color:#64748b;font-size:12px;">No children recorded by clergy member.</td></tr>
+              <tr><td colspan="4" style="padding:10px;text-align:center;color:#64748b;font-size:14px;">No children recorded by clergy member.</td></tr>
               {% endfor %}
             </tbody>
           </table>
           {% if clergy_profile.children_names %}
           <div class="edit-field full" style="margin-bottom:16px;">
             <label>Additional Family Notes</label>
-            <div style="background:#f8fafc;padding:8px 12px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;">{{ clergy_profile.children_names }}</div>
+            <div style="background:#f8fafc;padding:8px 12px;border:1px solid #e2e8f0;border-radius:6px;font-size:15px;">{{ clergy_profile.children_names }}</div>
           </div>
           {% endif %}
 
-          <h5 style="margin:16px 0 8px;font-size:13px;color:#1e293b;border-bottom:1px solid #e2e8f0;padding-bottom:4px;"><i class="fa-solid fa-graduation-cap"></i> Educational Background (Degrees &amp; Graduations)</h5>
+          <h5 style="margin:16px 0 8px;font-size:15px;color:#1e293b;border-bottom:1px solid #e2e8f0;padding-bottom:4px;"><i class="fa-solid fa-graduation-cap"></i> Educational Background (Degrees &amp; Graduations)</h5>
           <table style="width:100%;border-collapse:collapse;margin-bottom:12px;">
             <thead>
-              <tr style="border-bottom:2px solid #e3e8ef;text-align:left;font-size:11px;color:#64748b;">
+              <tr style="border-bottom:2px solid #e3e8ef;text-align:left;font-size:13px;color:#64748b;">
                 <th style="padding:6px;">Degree / Program</th>
                 <th style="padding:6px;">Institution / Seminary / School</th>
                 <th style="padding:6px;">Place / Location</th>
@@ -1170,14 +1170,14 @@
                 <td style="padding:6px;">{{ edu.year_graduated|default:"Not set" }}</td>
               </tr>
               {% empty %}
-              <tr><td colspan="4" style="padding:10px;text-align:center;color:#64748b;font-size:12px;">No structured education records filed by clergy member.</td></tr>
+              <tr><td colspan="4" style="padding:10px;text-align:center;color:#64748b;font-size:14px;">No structured education records filed by clergy member.</td></tr>
               {% endfor %}
             </tbody>
           </table>
           {% if clergy_profile.education %}
           <div class="edit-field full">
             <label>Educational Notes / Continuing Education</label>
-            <div style="background:#f8fafc;padding:8px 12px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;">{{ clergy_profile.education }}</div>
+            <div style="background:#f8fafc;padding:8px 12px;border:1px solid #e2e8f0;border-radius:6px;font-size:15px;">{{ clergy_profile.education }}</div>
           </div>
           {% endif %}
         </div>
@@ -1404,7 +1404,7 @@
                           <span class="doc-table-name">{{ item.document_type.name }}</span>
                         {% endif %}
                         {% if item.document_type.uploaded_by == 'registrar' %}
-                          <span class="badge retired-b" style="font-size:10.5px; padding:1px 6px; margin-left:6px;" title="Registrar filing">Diocesan</span>
+                          <span class="badge retired-b" style="font-size:12.5px; padding:1px 6px; margin-left:6px;" title="Registrar filing">Diocesan</span>
                         {% endif %}
                       </td>
                       <td class="col-date">
@@ -1453,7 +1453,7 @@
                               </button>
                             </form>
                           {% else %}
-                            <button type="button" class="btn small" style="padding: 3px 10px; font-size: 11.5px; height: 28px;" data-open-noted-modal="{{ item.document_type.id }}" data-doc-title="{{ item.document_type.name }}">
+                            <button type="button" class="btn small" style="padding: 3px 10px; font-size: 13px; height: 28px;" data-open-noted-modal="{{ item.document_type.id }}" data-doc-title="{{ item.document_type.name }}">
                               <i class="fa-solid fa-check"></i> Mark Noted
                             </button>
                           {% endif %}
@@ -1469,7 +1469,7 @@
                               <i class="fa-solid fa-rotate"></i>
                             </button>
                           {% else %}
-                            <button type="button" class="btn small" style="padding: 3px 10px; font-size: 11.5px; height: 28px;" data-quick-upload="{{ item.document_type.id }}" data-doc-name="{{ item.document_type.name }}">
+                            <button type="button" class="btn small" style="padding: 3px 10px; font-size: 13px; height: 28px;" data-quick-upload="{{ item.document_type.id }}" data-doc-name="{{ item.document_type.name }}">
                               <i class="fa-solid fa-cloud-arrow-up"></i> Upload
                             </button>
                           {% endif %}
@@ -1555,7 +1555,7 @@
                             <i class="fa-solid fa-rotate"></i>
                           </button>
                         {% else %}
-                          <button type="button" class="btn small" style="padding: 3px 10px; font-size: 11.5px; height: 28px;" data-quick-upload="{{ item.document_type.id }}" data-doc-name="{{ item.document_type.name }}">
+                          <button type="button" class="btn small" style="padding: 3px 10px; font-size: 13px; height: 28px;" data-quick-upload="{{ item.document_type.id }}" data-doc-name="{{ item.document_type.name }}">
                             <i class="fa-solid fa-cloud-arrow-up"></i> Upload
                           </button>
                         {% endif %}
@@ -1620,7 +1620,7 @@
                     </span>
                   </td>
                   <td class="col-actions">
-                    <button type="button" class="btn small" style="padding: 3px 10px; font-size: 11.5px; height: 28px;" data-open-tab="ember">
+                    <button type="button" class="btn small" style="padding: 3px 10px; font-size: 13px; height: 28px;" data-open-tab="ember">
                       <i class="fa-solid fa-folder-open"></i> Open
                     </button>
                   </td>
@@ -1726,7 +1726,7 @@
       {% csrf_token %}
       <input type="hidden" name="action" value="upload_attachment">
       <input type="hidden" name="document_type" id="quickUploadDocTypeId" value="">
-      <div id="quickUploadReplaceAlert" class="notice" style="display:none;margin-top:10px;font-size:12px;background:#fff8e6;color:#8a5800;border:1px solid #fed7aa;">
+      <div id="quickUploadReplaceAlert" class="notice" style="display:none;margin-top:10px;font-size:14px;background:#fff8e6;color:#8a5800;border:1px solid #fed7aa;">
         <i class="fa-solid fa-triangle-exclamation"></i> Uploading a new file will replace the current document attachment.
       </div>
       <div class="edit-grid" style="margin-top:10px;">
@@ -1787,7 +1787,7 @@
       <div>
         <div style="display:flex;align-items:center;gap:10px;">
           <h3 id="sectionQuickEditTitle" style="margin:0;"><i class="fa-solid fa-pen-to-square" style="color:#2f6fed;"></i> <span>Quick Edit Section</span></h3>
-          <span class="badge blue" id="sectionQuickEditStepBadge" style="font-size:11.5px;padding:3px 8px;">Step 1 of 7</span>
+          <span class="badge blue" id="sectionQuickEditStepBadge" style="font-size:13px;padding:3px 8px;">Step 1 of 7</span>
         </div>
         <span class="muted" style="margin-top:3px;display:block;">Changes save directly to clergy record. Close when finished.</span>
       </div>
@@ -1821,10 +1821,10 @@
             <i class="fa-solid fa-folder-open" style="color:var(--blue);"></i>
             <span>Stage Requirements</span>
           </h3>
-          <span class="badge blue" id="stageDocumentsStepBadge" style="font-size:11.5px;padding:3px 8px;">Stage 1 of 6</span>
-          <span class="badge pending-b" id="stageDocumentsProgressBadge" style="font-size:11.5px;padding:3px 8px;">0 uploaded</span>
+          <span class="badge blue" id="stageDocumentsStepBadge" style="font-size:13px;padding:3px 8px;">Stage 1 of 6</span>
+          <span class="badge pending-b" id="stageDocumentsProgressBadge" style="font-size:13px;padding:3px 8px;">0 uploaded</span>
         </div>
-        <p class="muted" id="stageDocumentsModalDesc" style="margin:4px 0 0;font-size:12.5px;">Requirements and attachments for this formation stage</p>
+        <p class="muted" id="stageDocumentsModalDesc" style="margin:4px 0 0;font-size:14px;">Requirements and attachments for this formation stage</p>
       </div>
       <button class="close" type="button" aria-label="Close" id="stageDocumentsCloseTop">
         <i class="fa-solid fa-xmark"></i>

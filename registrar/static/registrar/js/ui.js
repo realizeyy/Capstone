@@ -1267,4 +1267,34 @@ document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast
  } else {
   initDismissibleNotices();
  }
+
+ function initStickyHeader() {
+  const header = document.getElementById('clergyStickyHeader');
+  const sentinel = document.getElementById('clergyStickySentinel');
+  if (!header || !sentinel) return;
+
+  function updateStuck() {
+   const rect = sentinel.getBoundingClientRect();
+   header.classList.toggle('is-stuck', rect.top < 0);
+  }
+
+  if ('IntersectionObserver' in window) {
+   const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+     header.classList.toggle('is-stuck', !entry.isIntersecting && entry.boundingClientRect.top < 0);
+    });
+   }, { root: null, threshold: 0 });
+   observer.observe(sentinel);
+  }
+
+  window.addEventListener('scroll', updateStuck, { passive: true });
+  window.addEventListener('resize', updateStuck, { passive: true });
+  updateStuck();
+ }
+
+ if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initStickyHeader);
+ } else {
+  initStickyHeader();
+ }
 })();

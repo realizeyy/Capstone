@@ -52,18 +52,18 @@
   --font-family-mono: "Courier New", Courier, monospace;
 
   /* Font Scale Tokens */
-  --font-size-2xs: 8.5px;
-  --font-size-xs: 9.5px;
-  --font-size-sm: 10px;
-  --font-size-label: 11px;
-  --font-size-caption: 11.5px;
-  --font-size-base: 12px;
-  --font-size-body: 12.5px;
-  --font-size-subtitle: 13px;
-  --font-size-h3: 13.5px;
-  --font-size-md: 14px;
-  --font-size-h2: 17px;
-  --font-size-hero: 19.5px;
+  --font-size-2xs: 10px;
+  --font-size-xs: 11px;
+  --font-size-sm: 11.5px;
+  --font-size-label: 12.5px;
+  --font-size-caption: 13px;
+  --font-size-base: 14px;
+  --font-size-body: 14.5px;
+  --font-size-subtitle: 15px;
+  --font-size-h3: 16px;
+  --font-size-md: 16px;
+  --font-size-h2: 20px;
+  --font-size-hero: 23px;
   --font-size-watermark: 56pt;
 
   /* Spacing Scale Tokens */
@@ -85,10 +85,10 @@
   /* Sizing Tokens */
   --size-seal-w: 48px;
   --size-seal-h: 72px;
-  --size-num-badge: 18px;
+  --size-num-badge: 20px;
   --size-sign-space: 22px;
-  --size-stamp-box: 42px;
-  --size-stamp-circle: 44px;
+  --size-stamp-box: 46px;
+  --size-stamp-circle: 48px;
   --size-stat-min-width: 92px;
   --size-sheet-width: 210mm;
   --size-sheet-min-height: 297mm;
@@ -118,13 +118,13 @@
   margin: 10mm 12mm 12mm 12mm;
   @bottom-left {
     content: "Episcopal Diocese of Northern Philippines (EDNP) \2022  Personnel Registry";
-    font-size: 8pt;
+    font-size: 9.5pt;
     font-family: var(--font-family-sans);
     color: #64748b; /* ds-allow-hardcode */
   }
   @bottom-right {
     content: "Page " counter(page) " of " counter(pages);
-    font-size: 8pt;
+    font-size: 9.5pt;
     font-family: var(--font-family-sans);
     color: #64748b; /* ds-allow-hardcode */
     font-weight: bold;
@@ -951,13 +951,13 @@ body {
 }
 
 .stamp-text-org {
-  font-size: 6.5px; /* ds-allow-hardcode */
+  font-size: 7.5px; /* ds-allow-hardcode */
   font-weight: 700;
   letter-spacing: 0.04em;
 }
 
 .stamp-text-loc {
-  font-size: 6px; /* ds-allow-hardcode */
+  font-size: 7px; /* ds-allow-hardcode */
   font-weight: 600;
 }
 
@@ -1015,7 +1015,7 @@ body {
     background-color: var(--color-bg-sheet) !important;
     margin: 0px !important;
     padding: 0px !important;
-    font-size: 10pt !important;
+    font-size: 11.5pt !important;
   }
 
   .actions {

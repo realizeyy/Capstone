@@ -10,6 +10,7 @@ from django.db import IntegrityError
 from django.db import close_old_connections, transaction
 from django.test import TestCase, TransactionTestCase, override_settings, skipUnlessDBFeature
 from django.urls import reverse
+from django.utils import timezone
 
 from accounts.testing import activate
 from clergy.models import ClergyChild, ClergyEducation, ClergyProfile
@@ -922,11 +923,103 @@ class PostulancyRemovalAndReportsTests(TestCase):
         self.assertIn('Rev. Deacon John', names)
         self.assertIn('Rev. Fr. Peter', names)
 
-    def test_ordination_requirements_catalog_excludes_postulancy(self):
+    def test_ordination_requirements_catalog_includes_postulancy(self):
+        DocumentType.objects.get_or_create(
+            name='Letter of Intention (Postulancy)',
+            defaults={'required_from_rank': 'postulancy', 'is_required': True},
+        )
         res = self.client.get(reverse('registrar:ordination_requirements'))
         self.assertEqual(res.status_code, 200)
-        self.assertNotContains(res, '<h4><i class="fa-solid fa-clipboard-check"></i> Postulancy</h4>')
-        self.assertNotContains(res, '<h4><i class="fa-solid fa-clipboard-check"></i> Holy Order</h4>')
+        self.assertContains(res, '<h4><i class="fa-solid fa-clipboard-check"></i> Postulancy</h4>')
+        self.assertContains(res, '<h4><i class="fa-solid fa-clipboard-check"></i> Holy Order</h4>')
+        self.assertContains(res, 'Letter of Intention (Postulancy)')
+        self.assertContains(res, 'Date admitted as Holy Order')
+
+
+class GeneratedReportsSearchTests(TestCase):
+    def setUp(self):
+        self.registrar = activate(User.objects.create_user(
+            'reg_search', password='pw12345!x', is_staff=True, first_name='Ana', last_name='Reyes'
+        ))
+        self.other_registrar = activate(User.objects.create_user(
+            'reg_other', password='pw12345!x', is_staff=True, first_name='Mark', last_name='Santos'
+        ))
+        self.client.force_login(self.registrar)
+
+        self.r1 = GeneratedReport.objects.create(
+            report_type='clerical_directory',
+            title='Clerical Directory',
+            file='generated_reports/clerical_directory_20260101.pdf',
+            generated_by=self.registrar,
+        )
+        self.r2 = GeneratedReport.objects.create(
+            report_type='status_report',
+            title='Status Report',
+            file='generated_reports/status_report_20260102.pdf',
+            generated_by=self.other_registrar,
+        )
+        self.r3 = GeneratedReport.objects.create(
+            report_type='per_deanery',
+            title='Per-Deanery Report',
+            file='generated_reports/per_deanery_20260103.pdf',
+            generated_by=self.registrar,
+        )
+        self.archived = GeneratedReport.objects.create(
+            report_type='status_report',
+            title='Archived Status Report',
+            file='generated_reports/status_report_old.pdf',
+            generated_by=self.registrar,
+            archived_at=timezone.now(),
+            archived_by=self.registrar,
+        )
+
+    def test_search_by_title_and_generated_by(self):
+        res = self.client.get(reverse('registrar:generate_report'), {'q': 'Directory'})
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(list(res.context['generated_reports']), [self.r1])
+
+        res_by_user = self.client.get(reverse('registrar:generate_report'), {'q': 'Santos'})
+        self.assertEqual(res_by_user.status_code, 200)
+        self.assertEqual(list(res_by_user.context['generated_reports']), [self.r2])
+
+    def test_filter_by_report_type(self):
+        res = self.client.get(reverse('registrar:generate_report'), {'report_type': 'per_deanery'})
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(list(res.context['generated_reports']), [self.r3])
+
+        res_invalid = self.client.get(reverse('registrar:generate_report'), {'report_type': 'nonexistent'})
+        self.assertEqual(res_invalid.status_code, 200)
+        self.assertEqual(list(res_invalid.context['generated_reports']), [])
+        self.assertContains(res_invalid, 'No generated reports match your search.')
+
+    def test_search_pagination_preserves_query_params(self):
+        for i in range(12):
+            GeneratedReport.objects.create(
+                report_type='status_report',
+                title=f'Status Report {i}',
+                file=f'generated_reports/status_{i}.pdf',
+                generated_by=self.registrar,
+            )
+        page1 = self.client.get(reverse('registrar:generate_report'), {'q': 'Status', 'report_type': 'status_report'})
+        self.assertEqual(len(page1.context['generated_reports']), 10)
+        self.assertTrue(page1.context['page'].has_next())
+        self.assertContains(page1, 'q=Status&amp;report_type=status_report&amp;page=2')
+
+        page2 = self.client.get(
+            reverse('registrar:generate_report'),
+            {'q': 'Status', 'report_type': 'status_report', 'page': 2},
+        )
+        self.assertEqual(len(page2.context['generated_reports']), 3)
+
+    def test_dashboard_search_catalog_includes_active_generated_reports(self):
+        res = self.client.get(reverse('registrar:dashboard'))
+        self.assertEqual(res.status_code, 200)
+        report_items = [item for item in res.context['portal_catalog'] if item['category'] == 'Generated Reports']
+        titles = [item['title'] for item in report_items]
+        self.assertIn('Clerical Directory', titles)
+        self.assertIn('Status Report', titles)
+        self.assertNotIn('Archived Status Report', titles)
+
 
 
 

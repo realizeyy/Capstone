@@ -7,8 +7,10 @@
 {% block top_actions %}
 <div class="dashboard-search-wrapper" id="dashboardSearchWrapper">
   <div class="page-tabs-search-box dashboard-search-box">
-    <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
-    <input type="text" class="page-search-input" id="dashboardSearchInput" placeholder="Search portal (clergy, actions, parishes)..." aria-label="Search across entire registrar portal" autocomplete="off">
+    <button type="button" class="search-submit" id="dashboardSearchBtn" aria-label="Search portal">
+      <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+    </button>
+    <input type="text" class="page-search-input" id="dashboardSearchInput" placeholder="Search portal (clergy, actions, reports, parishes)..." aria-label="Search across entire registrar portal" autocomplete="off">
     <button type="button" class="search-clear" id="dashboardSearchClear" aria-label="Clear search" hidden>
       <i class="fa-solid fa-xmark"></i>
     </button>
@@ -101,6 +103,17 @@
           <a class="action" href="{% url 'registrar:backup_records' %}"><strong><i class="fa-solid fa-rotate"></i> Backup Records</strong><span>Database dump and documents archive</span></a>
         </div>
       </div>
+    </div>
+
+    <div id="dashboardSearchResultsPanel" class="panel" style="display:none; margin-top: 18px;" aria-live="polite">
+      <div class="panel-head">
+        <div>
+          <h3><i class="fa-solid fa-magnifying-glass"></i> Search Results</h3>
+          <span class="muted" id="dashboardMainResultsSummary"></span>
+        </div>
+        <button type="button" class="btn small secondary" id="dashboardResultsClearBtn"><i class="fa-solid fa-rotate-left"></i> Clear Search</button>
+      </div>
+      <div id="dashboardMainResultsList"></div>
     </div>
 
     <div id="dashboardSearchEmpty" class="search-empty-state" style="display:none;" aria-live="polite">
@@ -247,6 +260,7 @@
     var portalCatalog = catalogEl ? JSON.parse(catalogEl.textContent || '[]') : [];
 
     var searchInput = document.getElementById('dashboardSearchInput');
+    var searchBtn = document.getElementById('dashboardSearchBtn');
     var searchClear = document.getElementById('dashboardSearchClear');
     var searchWrapper = document.getElementById('dashboardSearchWrapper');
     var dropdown = document.getElementById('dashboardGlobalSearchDropdown');
@@ -254,6 +268,10 @@
     var countSpan = document.getElementById('globalSearchResultCount');
 
     // In-page dashboard elements
+    var mainResultsPanel = document.getElementById('dashboardSearchResultsPanel');
+    var mainResultsSummary = document.getElementById('dashboardMainResultsSummary');
+    var mainResultsList = document.getElementById('dashboardMainResultsList');
+    var mainResultsClearBtn = document.getElementById('dashboardResultsClearBtn');
     var emptyState = document.getElementById('dashboardSearchEmpty');
     var searchQuerySpan = document.getElementById('dashboardSearchQuery');
     var resetBtn = document.getElementById('dashboardSearchResetBtn');
@@ -303,40 +321,19 @@
       });
     }
 
-    function renderGlobalResults(query) {
-      if (!dropdown || !resultsList) return;
-
-      if (!query) {
-        dropdown.style.display = 'none';
-        resultsList.innerHTML = '';
-        currentResultItems = [];
-        activeIndex = -1;
-        return;
-      }
-
+    function getGlobalMatches(query) {
+      if (!query) return [];
       var lowerQ = query.toLowerCase();
-
-      var matches = portalCatalog.filter(function(item) {
+      return portalCatalog.filter(function(item) {
         if (item.title && item.title.toLowerCase().indexOf(lowerQ) !== -1) return true;
         if (item.subtitle && item.subtitle.toLowerCase().indexOf(lowerQ) !== -1) return true;
         if (item.keywords && item.keywords.indexOf(lowerQ) !== -1) return true;
         if (item.category && item.category.toLowerCase().indexOf(lowerQ) !== -1) return true;
         return false;
       });
+    }
 
-      if (matches.length === 0) {
-        countSpan.textContent = '0 results found';
-        resultsList.innerHTML = '<div class="search-dropdown-empty">' +
-          '<i class="fa-solid fa-magnifying-glass"></i>' +
-          '<p>No portal items match "<b>' + escapeHtml(query) + '</b>"</p>' +
-          '<small>Try searching for a clergy name, record ID, parish, report, or action.</small>' +
-          '</div>';
-        dropdown.style.display = 'flex';
-        currentResultItems = [];
-        activeIndex = -1;
-        return;
-      }
-
+    function buildCatalogResultsHtml(query, matches) {
       var groups = {};
       matches.forEach(function(item) {
         var cat = item.category || 'Other';
@@ -344,10 +341,7 @@
         groups[cat].push(item);
       });
 
-      countSpan.textContent = 'Found ' + matches.length + ' result' + (matches.length === 1 ? '' : 's');
       var html = '';
-      currentResultItems = [];
-
       Object.keys(groups).forEach(function(catName) {
         html += '<div class="search-group-heading">' + escapeHtml(catName) + '</div>';
         groups[catName].forEach(function(item) {
@@ -368,14 +362,41 @@
             '</a>';
         });
       });
+      return html;
+    }
 
-      resultsList.innerHTML = html;
+    function renderGlobalResults(query, matches) {
+      if (!dropdown || !resultsList) return;
+
+      if (!query) {
+        dropdown.style.display = 'none';
+        resultsList.innerHTML = '';
+        currentResultItems = [];
+        activeIndex = -1;
+        return;
+      }
+
+      if (matches.length === 0) {
+        countSpan.textContent = '0 results found';
+        resultsList.innerHTML = '<div class="search-dropdown-empty">' +
+          '<i class="fa-solid fa-magnifying-glass"></i>' +
+          '<p>No portal items match "<b>' + escapeHtml(query) + '</b>"</p>' +
+          '<small>Try searching for a clergy name, record ID, parish, report, or action.</small>' +
+          '</div>';
+        dropdown.style.display = 'flex';
+        currentResultItems = [];
+        activeIndex = -1;
+        return;
+      }
+
+      countSpan.textContent = 'Found ' + matches.length + ' result' + (matches.length === 1 ? '' : 's');
+      resultsList.innerHTML = buildCatalogResultsHtml(query, matches);
       dropdown.style.display = 'flex';
       currentResultItems = Array.from(resultsList.querySelectorAll('.global-search-item'));
       activeIndex = -1;
     }
 
-    function filterInPageDashboard(query) {
+    function filterInPageDashboard(query, globalMatchesCount) {
       var lowerQ = (query || '').trim().toLowerCase();
       var hasFilter = lowerQ.length > 0;
 
@@ -430,7 +451,7 @@
       }
 
       var totalVisible = visibleStats + visibleRecent + visibleQuick;
-      if (hasFilter && totalVisible === 0) {
+      if (hasFilter && totalVisible === 0 && globalMatchesCount === 0) {
         if (searchQuerySpan) searchQuerySpan.textContent = query;
         if (emptyState) emptyState.style.display = 'block';
       } else {
@@ -438,10 +459,57 @@
       }
     }
 
+    function hideMainSearchResults() {
+      if (mainResultsPanel) mainResultsPanel.style.display = 'none';
+      if (mainResultsList) mainResultsList.innerHTML = '';
+    }
+
+    function submitMainSearch() {
+      var q = searchInput ? searchInput.value.trim() : '';
+      if (dropdown) dropdown.style.display = 'none';
+      activeIndex = -1;
+
+      if (!q) {
+        hideMainSearchResults();
+        filterInPageDashboard('', 0);
+        return;
+      }
+
+      var matches = getGlobalMatches(q);
+      if (matches.length === 0) {
+        hideMainSearchResults();
+        filterInPageDashboard(q, 0);
+        return;
+      }
+
+      if (cardsContainer) cardsContainer.style.display = 'none';
+      if (recentPanel) recentPanel.style.display = 'none';
+      if (quickPanel) quickPanel.style.display = 'none';
+      if (emptyState) emptyState.style.display = 'none';
+
+      if (mainResultsSummary) {
+        mainResultsSummary.textContent = 'Found ' + matches.length + ' result' + (matches.length === 1 ? '' : 's') + ' for "' + q + '"';
+      }
+      if (mainResultsList) {
+        mainResultsList.innerHTML = buildCatalogResultsHtml(q, matches);
+      }
+      if (mainResultsPanel) {
+        mainResultsPanel.style.display = 'block';
+      }
+    }
+
     function handleSearch(q) {
       if (searchClear) searchClear.hidden = !q;
-      renderGlobalResults(q);
-      filterInPageDashboard(q);
+      hideMainSearchResults();
+      var matches = getGlobalMatches(q);
+      renderGlobalResults(q, matches);
+      filterInPageDashboard(q, matches.length);
+    }
+
+    if (searchBtn) {
+      searchBtn.addEventListener('click', function() {
+        submitMainSearch();
+      });
     }
 
     if (searchInput) {
@@ -450,6 +518,18 @@
       });
 
       searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          if (dropdown && dropdown.style.display !== 'none' && activeIndex >= 0 && currentResultItems[activeIndex]) {
+            e.preventDefault();
+            var targetUrl = currentResultItems[activeIndex].getAttribute('href');
+            if (targetUrl) window.location.href = targetUrl;
+          } else {
+            e.preventDefault();
+            submitMainSearch();
+          }
+          return;
+        }
+
         if (!dropdown || dropdown.style.display === 'none') {
           if (e.key === 'Escape') {
             this.value = '';
@@ -471,12 +551,6 @@
             activeIndex = (activeIndex - 1 + currentResultItems.length) % currentResultItems.length;
             updateActiveItem();
           }
-        } else if (e.key === 'Enter') {
-          if (activeIndex >= 0 && currentResultItems[activeIndex]) {
-            e.preventDefault();
-            var targetUrl = currentResultItems[activeIndex].getAttribute('href');
-            if (targetUrl) window.location.href = targetUrl;
-          }
         } else if (e.key === 'Escape') {
           dropdown.style.display = 'none';
           activeIndex = -1;
@@ -484,27 +558,33 @@
       });
 
       searchInput.addEventListener('focus', function() {
-        if (this.value.trim().length > 0) {
-          renderGlobalResults(this.value.trim());
+        var q = this.value.trim();
+        if (q.length > 0 && (!mainResultsPanel || mainResultsPanel.style.display === 'none')) {
+          renderGlobalResults(q, getGlobalMatches(q));
         }
       });
+    }
+
+    function clearDashboardSearch() {
+      if (searchInput) {
+        searchInput.value = '';
+      }
+      handleSearch('');
     }
 
     if (searchClear) {
       searchClear.addEventListener('click', function() {
-        if (searchInput) {
-          searchInput.value = '';
-          searchInput.focus();
-        }
-        handleSearch('');
+        clearDashboardSearch();
+        if (searchInput) searchInput.focus();
       });
     }
 
     if (resetBtn) {
-      resetBtn.addEventListener('click', function() {
-        if (searchInput) searchInput.value = '';
-        handleSearch('');
-      });
+      resetBtn.addEventListener('click', clearDashboardSearch);
+    }
+
+    if (mainResultsClearBtn) {
+      mainResultsClearBtn.addEventListener('click', clearDashboardSearch);
     }
 
     // Close dropdown on outside click
