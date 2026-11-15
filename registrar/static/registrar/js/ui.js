@@ -94,6 +94,12 @@ function applyFormErrors(formEl, errors){
 window.applyFormErrors = applyFormErrors;
 
 let toastTimer;
+function hideToast(){
+ const el=document.getElementById('toast');
+ if(!el)return;
+ el.classList.remove('show');
+ clearTimeout(toastTimer);
+}
 function showToast(message,level){
  const el=document.getElementById('toast');
  if(!el)return;
@@ -102,8 +108,12 @@ function showToast(message,level){
  el.title='Click to dismiss';
  el.style.cursor='pointer';
  clearTimeout(toastTimer);
- toastTimer=setTimeout(()=>el.classList.remove('show'),level==='error'?8000:3500);
+ if(level!=='working'){
+  toastTimer=setTimeout(()=>el.classList.remove('show'),level==='error'?8000:4500);
+ }
 }
+window.showToast=showToast;
+window.hideToast=hideToast;
 
 document.getElementById('toast')?.addEventListener('click',function(){
  this.classList.remove('show');
@@ -224,9 +234,28 @@ document.querySelectorAll('select[data-autosubmit]').forEach(sel=>{
  sel.addEventListener('change',()=>sel.form.submit());
 });
 
+// <select data-per-page-select> updates per_page and resets to page 1 while preserving filters
+document.querySelectorAll('select[data-per-page-select]').forEach(sel=>{
+ sel.addEventListener('change',()=>{
+  const params=new URLSearchParams(sel.dataset.baseQuery||'');
+  params.set('per_page',sel.value);
+  window.location.href=`?${params.toString()}`;
+ });
+});
+
 // Messages Django attached to this response ("Record saved", errors), rendered
 // into #flash-messages by base.html, shown as toasts
 document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast(msg.textContent,msg.dataset.level));
+try{
+ const rawPendingToast=sessionStorage.getItem('ednp_pending_toast');
+ if(rawPendingToast){
+  sessionStorage.removeItem('ednp_pending_toast');
+  const pending=JSON.parse(rawPendingToast);
+  if(pending&&pending.message){
+   showToast(pending.message,pending.level||'info');
+  }
+ }
+}catch(err){}
 
 /* =========================================================================
    UX ENHANCEMENTS FOR REGISTRAR PORTAL:
@@ -253,7 +282,7 @@ document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast
    overscroll-behavior: contain;
   }
   .toast {
-   z-index: 120 !important;
+   z-index: 100005 !important;
   }
   .ph-picker-panel {
    z-index: 110 !important;
@@ -676,9 +705,9 @@ document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast
   }
  },true);
 
- // 4. Sticky Sub-Section Navigation Scrollspy & Smooth Scrolling
+ // 4. Sticky Sub-Section Navigation Scrollspy & Smooth Scrolling (skipped on single-modal workspaces)
  const sectionNav=document.getElementById('personalSectionNav');
- if(sectionNav){
+ if(sectionNav&&!document.querySelector('.inline-modal-stage')){
   const pills=Array.from(sectionNav.querySelectorAll('.nav-pill'));
   const targets=pills.map(p=>document.querySelector(p.getAttribute('href'))).filter(Boolean);
 
@@ -732,6 +761,29 @@ document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast
 
   recordForm.addEventListener('input',markDirty);
   recordForm.addEventListener('change',markDirty);
+  const secBody=document.getElementById('sectionQuickEditBody');
+  if(secBody){
+   secBody.addEventListener('input',function(e){
+    if(e.target.closest('#sec-reg-deployments, #sec-reg-family'))return;
+    markDirty();
+   });
+   secBody.addEventListener('change',function(e){
+    if(e.target.closest('#sec-reg-deployments, #sec-reg-family'))return;
+    markDirty();
+   });
+  }
+  document.addEventListener('ednp:form-saved',function(){
+   isDirty=false;
+   saveBar.classList.remove('visible');
+  });
+  document.addEventListener('ednp:draft-restored',function(){
+   saveBar.classList.add('visible');
+  });
+  document.addEventListener('ednp:form-dirty',markDirty);
+  document.addEventListener('ednp:form-clean',function(){
+   isDirty=false;
+   saveBar.classList.remove('visible');
+  });
 
   document.getElementById('floatingSaveBtn')?.addEventListener('click',function(){
    isDirty=false;
@@ -744,6 +796,7 @@ document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast
    if(confirm('Discard your unsaved changes?')){
     isDirty=false;
     saveBar.classList.remove('visible');
+    document.dispatchEvent(new CustomEvent('ednp:form-discarded'));
     window.location.reload();
    }
   });
@@ -775,10 +828,280 @@ document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast
   }
  });
 
- // 7. In-App Credential Slips Preview Modal with Back & Print Actions
+ // 7. In-App Progress Modal & Credential Slips Preview Modal with Back & Print Actions
  let activeSlipsBlobUrl = '';
  let activeSlipsBackUrl = '';
+ let activeSlipsStayOnClose = false;
+ let activeSlipsBackToast = '';
  let slipsPrintTimeout = null;
+ let slipProgressTimer = null;
+ let slipProgressStartedAt = 0;
+ let activeProgressIsBulk = false;
+
+ function ensureSlipProgressModal() {
+  let modal = document.getElementById('slipProgressModal');
+  if (modal) return modal;
+
+  if (!document.getElementById('slipProgressStyles')) {
+   const style = document.createElement('style');
+   style.id = 'slipProgressStyles';
+   style.textContent = `
+    #slipProgressModal {
+     z-index: 99999;
+     display: none;
+     position: fixed;
+     inset: 0;
+     background: rgba(15, 23, 42, 0.7);
+     backdrop-filter: blur(4px);
+     -webkit-backdrop-filter: blur(4px);
+     align-items: center;
+     justify-content: center;
+     padding: 16px;
+    }
+    #slipProgressModal.show {
+     display: flex !important;
+     animation: modalBackdropFadeIn 0.18s ease both;
+    }
+    .slip-progress-card {
+     width: 100% !important;
+     max-width: 460px !important;
+     min-width: 0 !important;
+     box-sizing: border-box !important;
+     background: #ffffff !important;
+     border: 1px solid #cbd5e1 !important;
+     border-radius: 14px !important;
+     box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(15, 23, 42, 0.08) !important;
+     padding: 24px !important;
+     display: flex !important;
+     flex-direction: column !important;
+     gap: 14px !important;
+     animation: modalBoxEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+    }
+    .slip-progress-head {
+     display: flex !important;
+     align-items: center !important;
+     gap: 14px !important;
+    }
+    .slip-progress-spinner {
+     width: 38px !important;
+     height: 38px !important;
+     flex-shrink: 0 !important;
+     border-radius: 999px !important;
+     border: 3px solid #dbeafe !important;
+     border-top-color: #2563eb !important;
+     animation: slipSpin 0.85s linear infinite !important;
+    }
+    .slip-progress-head-copy {
+     flex: 1 1 auto !important;
+     min-width: 0 !important;
+    }
+    .slip-progress-title-row {
+     display: flex !important;
+     align-items: center !important;
+     justify-content: space-between !important;
+     gap: 8px !important;
+    }
+    .slip-progress-title-row h3 {
+     margin: 0 !important;
+     font-size: 16px !important;
+     font-weight: 700 !important;
+     color: #0f172a !important;
+    }
+    .slip-progress-elapsed {
+     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+     font-size: 12px !important;
+     font-weight: 600 !important;
+     color: #334155 !important;
+     background: #f1f5f9 !important;
+     border: 1px solid #e2e8f0 !important;
+     border-radius: 999px !important;
+     padding: 2px 8px !important;
+     white-space: nowrap !important;
+    }
+    .slip-progress-stage {
+     margin: 4px 0 0 !important;
+     font-size: 13px !important;
+     color: #475569 !important;
+     line-height: 1.4 !important;
+    }
+    .slip-progress-track {
+     width: 100% !important;
+     height: 8px !important;
+     border-radius: 999px !important;
+     background: #e2e8f0 !important;
+     overflow: hidden !important;
+     position: relative !important;
+    }
+    .slip-progress-bar {
+     position: absolute !important;
+     top: 0 !important;
+     bottom: 0 !important;
+     left: 0 !important;
+     width: 38% !important;
+     border-radius: 999px !important;
+     background: linear-gradient(90deg, #2563eb, #3b82f6) !important;
+     animation: slipIndeterminate 1.4s ease-in-out infinite !important;
+    }
+    .slip-progress-notice {
+     display: none !important;
+     align-items: flex-start !important;
+     gap: 10px !important;
+     padding: 12px 14px !important;
+     border-radius: 10px !important;
+     border: 1px solid #e2e8f0 !important;
+     background: #f8fafc !important;
+     color: #334155 !important;
+     font-size: 12.5px !important;
+     line-height: 1.45 !important;
+    }
+    .slip-progress-notice.show {
+     display: flex !important;
+    }
+    .slip-progress-notice svg {
+     flex-shrink: 0 !important;
+     margin-top: 2px !important;
+     color: #2563eb !important;
+    }
+    @keyframes slipSpin {
+     to { transform: rotate(360deg); }
+    }
+    @keyframes slipIndeterminate {
+     0% { left: -40%; width: 36%; }
+     50% { left: 32%; width: 46%; }
+     100% { left: 102%; width: 32%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+     #slipProgressModal.show,
+     .slip-progress-card {
+      animation: none !important;
+     }
+     .slip-progress-spinner {
+      animation: none !important;
+      border-right-color: #2563eb !important;
+     }
+     .slip-progress-bar {
+      animation: none !important;
+      left: 0 !important;
+      width: 100% !important;
+      opacity: 0.55 !important;
+     }
+    }
+   `;
+   document.head.appendChild(style);
+  }
+
+  modal = document.createElement('div');
+  modal.className = 'modal-bg';
+  modal.id = 'slipProgressModal';
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-labelledby', 'slipProgressTitle');
+  modal.setAttribute('aria-describedby', 'slipProgressStage');
+  modal.innerHTML = `
+   <div class="modal slip-progress-card">
+    <div class="slip-progress-head">
+     <div class="slip-progress-spinner" aria-hidden="true"></div>
+     <div class="slip-progress-head-copy">
+      <div class="slip-progress-title-row">
+       <h3 id="slipProgressTitle">Creating account & login slips</h3>
+       <span class="slip-progress-elapsed" id="slipProgressElapsed" aria-live="off">0s</span>
+      </div>
+      <p class="slip-progress-stage" id="slipProgressStage" aria-live="polite">
+       Validating details and generating secure credentials...
+      </p>
+     </div>
+    </div>
+    <div class="slip-progress-track" role="progressbar" aria-label="Account creation progress" aria-valuetext="In progress">
+     <div class="slip-progress-bar"></div>
+    </div>
+    <div class="slip-progress-notice" id="slipProgressNotice">
+     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="16" x2="12" y2="12"></line>
+      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+     </svg>
+     <span id="slipProgressNoticeText"></span>
+    </div>
+   </div>
+  `;
+  document.body.appendChild(modal);
+  return modal;
+ }
+
+ function openSlipProgressModal(opts) {
+  opts = opts || {};
+  const modal = ensureSlipProgressModal();
+  if (slipProgressTimer) {
+   clearInterval(slipProgressTimer);
+   slipProgressTimer = null;
+  }
+
+  activeProgressIsBulk = Boolean(opts.isBulk);
+  slipProgressStartedAt = Date.now();
+
+  const titleEl = document.getElementById('slipProgressTitle');
+  const stageEl = document.getElementById('slipProgressStage');
+  const elapsedEl = document.getElementById('slipProgressElapsed');
+  const noticeEl = document.getElementById('slipProgressNotice');
+  const noticeTextEl = document.getElementById('slipProgressNoticeText');
+
+  if (titleEl) {
+   if (activeProgressIsBulk) {
+    titleEl.textContent = opts.count
+     ? ('Creating ' + opts.count + ' clergy ' + (opts.count === 1 ? 'account' : 'accounts'))
+     : 'Creating clergy accounts';
+   } else {
+    titleEl.textContent = opts.title || 'Generating login slip';
+   }
+  }
+  if (stageEl) {
+   stageEl.textContent = activeProgressIsBulk
+    ? 'Encrypting temporary passwords and saving records...'
+    : 'Saving credentials and preparing printable slip...';
+  }
+  if (elapsedEl) {
+   elapsedEl.textContent = '0s';
+  }
+  if (noticeEl && noticeTextEl) {
+   if (activeProgressIsBulk) {
+    noticeTextEl.textContent = 'Bulk batches take longer (often 5 to 20 seconds for large lists) because each temporary password is encrypted individually and printable QR slips are built together. Please keep this page open.';
+    noticeEl.classList.add('show');
+   } else {
+    noticeTextEl.textContent = 'This is taking slightly longer than usual while credentials and printable slips finish generating. Please keep this page open.';
+    noticeEl.classList.remove('show');
+   }
+  }
+
+  modal.classList.add('show');
+  syncBodyScrollLock();
+
+  slipProgressTimer = setInterval(function () {
+   const secs = Math.max(0, Math.floor((Date.now() - slipProgressStartedAt) / 1000));
+   if (elapsedEl) elapsedEl.textContent = secs + 's';
+   if (stageEl) {
+    if (secs >= 10) {
+     stageEl.textContent = 'Still working: compiling printable QR login slips...';
+    } else if (secs >= 4) {
+     stageEl.textContent = 'Finalizing database transaction and generating login slips...';
+    }
+   }
+   if (!activeProgressIsBulk && noticeEl && secs >= 3) {
+    noticeEl.classList.add('show');
+   }
+  }, 1000);
+ }
+
+ function closeSlipProgressModal() {
+  if (slipProgressTimer) {
+   clearInterval(slipProgressTimer);
+   slipProgressTimer = null;
+  }
+  const modal = document.getElementById('slipProgressModal');
+  if (modal) {
+   modal.classList.remove('show');
+   syncBodyScrollLock();
+  }
+ }
 
  function ensureSlipsModal() {
   let modal = document.getElementById('slipsPreviewModal');
@@ -798,14 +1121,19 @@ document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast
      -webkit-backdrop-filter: blur(4px);
      align-items: center;
      justify-content: center;
+     padding: 12px;
+     box-sizing: border-box;
     }
     #slipsPreviewModal.show {
      display: flex !important;
      animation: modalBackdropFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
     .slips-preview-card {
-     width: min(920px, calc(100vw - 32px)) !important;
-     max-width: 920px !important;
+     width: 100% !important;
+     max-width: 940px !important;
+     min-width: 0 !important;
+     box-sizing: border-box !important;
+     height: min(90vh, 860px) !important;
      max-height: 94vh !important;
      background: #fff !important;
      border-radius: 14px !important;
@@ -821,18 +1149,28 @@ document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast
      display: flex !important;
      align-items: center !important;
      justify-content: space-between !important;
-     padding: 16px 20px !important;
+     gap: 12px !important;
+     padding: 14px 20px !important;
      border-bottom: 1px solid #e2e8f0 !important;
      background: #ffffff !important;
+     flex-shrink: 0 !important;
+     min-width: 0 !important;
     }
     .slips-preview-head-title {
      display: flex !important;
      align-items: center !important;
      gap: 12px !important;
+     flex: 1 1 auto !important;
+     min-width: 0 !important;
+    }
+    .slips-preview-head-text {
+     flex: 1 1 auto !important;
+     min-width: 0 !important;
     }
     .slips-preview-head-icon {
      width: 40px !important;
      height: 40px !important;
+     flex-shrink: 0 !important;
      border-radius: 10px !important;
      background: #eff6ff !important;
      border: 1px solid #bfdbfe !important;
@@ -847,10 +1185,43 @@ document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast
      font-size: 17px !important;
      font-weight: 700 !important;
      color: #0f172a !important;
+     line-height: 1.25 !important;
+     overflow-wrap: anywhere !important;
     }
     .slips-preview-head .muted {
      font-size: 12px !important;
-     color: #64748b !important;
+     color: #475569 !important;
+     display: block !important;
+     line-height: 1.35 !important;
+     overflow-wrap: anywhere !important;
+    }
+    .slips-result-banner {
+     display: none !important;
+     align-items: center !important;
+     gap: 10px !important;
+     margin: 10px 20px 0 !important;
+     padding: 10px 14px !important;
+     border-radius: 10px !important;
+     border: 1px solid #bbf7d0 !important;
+     background: #f0fdf4 !important;
+     color: #166534 !important;
+     font-size: 13px !important;
+     font-weight: 600 !important;
+     flex-shrink: 0 !important;
+     min-width: 0 !important;
+     box-sizing: border-box !important;
+    }
+    .slips-result-banner.show {
+     display: flex !important;
+    }
+    #slipsResultBannerText {
+     flex: 1 1 auto !important;
+     min-width: 0 !important;
+     line-height: 1.4 !important;
+     overflow-wrap: anywhere !important;
+    }
+    .slips-result-banner svg {
+     flex-shrink: 0 !important;
     }
     .slips-preview-toolbar {
      display: flex !important;
@@ -859,36 +1230,89 @@ document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast
      padding: 12px 20px !important;
      background: #f8fafc !important;
      border-bottom: 1px solid #e2e8f0 !important;
-     gap: 12px !important;
+     gap: 10px !important;
      flex-wrap: wrap !important;
+     flex-shrink: 0 !important;
+     min-width: 0 !important;
     }
     .slips-toolbar-left, .slips-toolbar-right {
      display: flex !important;
      align-items: center !important;
      gap: 10px !important;
+     flex-wrap: wrap !important;
+     min-width: 0 !important;
+    }
+    .slips-preview-toolbar .btn,
+    #slipsPreviewCloseTop {
+     min-height: 40px !important;
+     min-width: 40px !important;
+     flex-shrink: 0 !important;
     }
     .slips-preview-body {
-     flex: 1 !important;
-     min-height: 520px !important;
-     height: 68vh !important;
-     background: #525659 !important;
+     flex: 1 1 auto !important;
+     min-height: 0 !important;
+     background: #e2e8f0 !important;
      position: relative !important;
+     overflow: hidden !important;
     }
     .slips-preview-frame {
+     position: absolute !important;
+     inset: 0 !important;
      width: 100% !important;
      height: 100% !important;
      border: none !important;
      display: block !important;
+     background: #ffffff !important;
     }
     .slips-btn-back {
      font-weight: 600 !important;
      border: 1px solid #cbd5e1 !important;
      background: #ffffff !important;
      color: #1e293b !important;
+     display: inline-flex !important;
+     align-items: center !important;
+     gap: 8px !important;
     }
     .slips-btn-back:hover {
      background: #f1f5f9 !important;
      border-color: #94a3b8 !important;
+    }
+    .slip-form-inline-error {
+     margin-bottom: 12px;
+    }
+    @media (max-width: 600px) {
+     #slipsPreviewModal {
+      padding: 6px !important;
+     }
+     .slips-preview-card {
+      width: 100% !important;
+      height: 94vh !important;
+     }
+     .slips-preview-head,
+     .slips-preview-toolbar {
+      padding: 10px 12px !important;
+     }
+     .slips-preview-head-icon {
+      width: 34px !important;
+      height: 34px !important;
+     }
+     .slips-preview-head h3 {
+      font-size: 15px !important;
+     }
+     .slips-result-banner {
+      margin: 8px 12px 0 !important;
+     }
+     .toast {
+      max-width: calc(100vw - 24px) !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere !important;
+     }
+    }
+    @media (prefers-reduced-motion: reduce) {
+     #slipsPreviewModal.show,
+     .slips-preview-card {
+      animation: none !important;
+     }
     }
    `;
    document.head.appendChild(style);
@@ -904,27 +1328,50 @@ document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast
    <div class="modal slips-preview-card">
     <div class="slips-preview-head">
      <div class="slips-preview-head-title">
-      <div class="slips-preview-head-icon">
-       <i class="fa-solid fa-print"></i>
+      <div class="slips-preview-head-icon" aria-hidden="true">
+       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 6 2 18 2 18 9"></polyline>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+        <rect x="6" y="14" width="12" height="8"></rect>
+       </svg>
       </div>
-      <div>
+      <div class="slips-preview-head-text">
        <h3 id="slipsPreviewTitle">Login Slips Ready to Print</h3>
        <span class="muted" id="slipsPreviewSub">Temporary account credentials. Print now and hand to clergy.</span>
       </div>
      </div>
      <button type="button" class="close" id="slipsPreviewCloseTop" aria-label="Close dialog">
-      <i class="fa-solid fa-xmark"></i>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+       <line x1="18" y1="6" x2="6" y2="18"></line>
+       <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
      </button>
+    </div>
+    <div class="slips-result-banner" id="slipsResultBanner" role="status" aria-live="polite">
+     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+     </svg>
+     <span id="slipsResultBannerText"></span>
     </div>
     <div class="slips-preview-toolbar">
      <div class="slips-toolbar-left">
       <button type="button" class="btn secondary slips-btn-back" id="slipsBackToRecordsBtn">
-       <i class="fa-solid fa-arrow-left"></i> <span id="slipsBackLabel">Back to Clergy Records</span>
+       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+       </svg>
+       <span id="slipsBackLabel">Back to Clergy Records</span>
       </button>
      </div>
      <div class="slips-toolbar-right">
       <button type="button" class="btn" id="slipsPrintBtn">
-       <i class="fa-solid fa-print"></i> Print Slips
+       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="6 9 6 2 18 2 18 9"></polyline>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+        <rect x="6" y="14" width="12" height="8"></rect>
+       </svg>
+       <span>Print Slips</span>
       </button>
      </div>
     </div>
@@ -935,7 +1382,9 @@ document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast
   `;
   document.body.appendChild(modal);
 
-  function closeSlipsModal(shouldReload) {
+  function closeSlipsModal(mode) {
+   const isBackAction = (mode === 'back');
+   const shouldNavigate = isBackAction || !activeSlipsStayOnClose;
    modal.classList.remove('show');
    syncBodyScrollLock();
    if (slipsPrintTimeout) {
@@ -951,7 +1400,15 @@ document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast
     URL.revokeObjectURL(activeSlipsBlobUrl);
     activeSlipsBlobUrl = '';
    }
-   if (shouldReload) {
+   if (shouldNavigate) {
+    if (activeSlipsBackToast) {
+     try {
+      sessionStorage.setItem('ednp_pending_toast', JSON.stringify({
+       message: activeSlipsBackToast,
+       level: 'success'
+      }));
+     } catch (err) {}
+    }
     if (activeSlipsBackUrl) {
      window.location.href = activeSlipsBackUrl;
     } else {
@@ -961,20 +1418,20 @@ document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast
   }
 
   document.getElementById('slipsPreviewCloseTop')?.addEventListener('click', function () {
-   closeSlipsModal(true);
+   closeSlipsModal('dismiss');
   });
   document.getElementById('slipsBackToRecordsBtn')?.addEventListener('click', function () {
-   closeSlipsModal(true);
+   closeSlipsModal('back');
   });
   modal.addEventListener('click', function (e) {
-   if (e.target === modal) closeSlipsModal(true);
+   if (e.target === modal) closeSlipsModal('dismiss');
   });
   modal.addEventListener('wheel', function (e) {
    if (e.target === modal) e.preventDefault();
   }, { passive: false });
   document.addEventListener('keydown', function (e) {
    if (e.key === 'Escape' && modal.classList.contains('show')) {
-    closeSlipsModal(true);
+    closeSlipsModal('dismiss');
    }
   });
 
@@ -1007,66 +1464,137 @@ document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast
    slipsPrintTimeout = null;
   }
 
-  var fallbackBackUrl = window.location.href;
-  if (window.location.pathname.indexOf('bulk') !== -1) {
+  const isBulkPath = window.location.pathname.indexOf('bulk') !== -1;
+  let fallbackBackUrl = window.location.href;
+  if (isBulkPath) {
    fallbackBackUrl = '/registrar/clergy-records/';
   }
   activeSlipsBackUrl = opts.backUrl || fallbackBackUrl;
+  activeSlipsStayOnClose = opts.stayOnPageOnClose !== undefined ? Boolean(opts.stayOnPageOnClose) : isBulkPath;
+  activeSlipsBackToast = opts.backToastMessage || '';
 
-  var backLabel = opts.backLabel || (window.location.pathname.indexOf('account-security') !== -1 ? 'Back to Account Security' : 'Back to Clergy Records');
-  var backLabelEl = document.getElementById('slipsBackLabel');
-  if (backLabelEl) backLabelEl.textContent = backLabel;
-
-  var subEl = document.getElementById('slipsPreviewSub');
-  if (subEl && opts.subtitle) {
-   subEl.textContent = opts.subtitle;
+  const titleEl = document.getElementById('slipsPreviewTitle');
+  if (titleEl) {
+   titleEl.textContent = opts.title || 'Login Slips Ready to Print';
   }
 
-  var frame = document.getElementById('slipsPreviewFrame');
+  const backLabel = opts.backLabel || (window.location.pathname.indexOf('account-security') !== -1 ? 'Back to Account Security' : 'Back to Clergy Records');
+  const backLabelEl = document.getElementById('slipsBackLabel');
+  if (backLabelEl) backLabelEl.textContent = backLabel;
+
+  const subEl = document.getElementById('slipsPreviewSub');
+  if (subEl) {
+   subEl.textContent = opts.subtitle || 'Temporary account credentials. Print now and hand to clergy.';
+  }
+
+  const bannerEl = document.getElementById('slipsResultBanner');
+  const bannerTextEl = document.getElementById('slipsResultBannerText');
+  if (bannerEl && bannerTextEl) {
+   if (opts.resultMessage) {
+    bannerTextEl.textContent = opts.resultMessage;
+    bannerEl.classList.add('show');
+   } else {
+    bannerTextEl.textContent = '';
+    bannerEl.classList.remove('show');
+   }
+  }
+
+  // Show modal BEFORE writing iframe content so layout viewport dimensions are resolved (prevents 150px iframe collapse)
+  modal.classList.add('show');
+  syncBodyScrollLock();
+
+  const frame = document.getElementById('slipsPreviewFrame');
   if (frame) {
    frame.onload = null;
+   let slipsPrintTriggered = false;
+   function scheduleFramePrint(delayMs) {
+    if (opts.skipAutoPrint || slipsPrintTriggered) return;
+    if (slipsPrintTimeout) clearTimeout(slipsPrintTimeout);
+    slipsPrintTimeout = setTimeout(function () {
+     if (slipsPrintTriggered || !modal.classList.contains('show')) return;
+     slipsPrintTriggered = true;
+     try {
+      if (frame.contentWindow) {
+       frame.contentWindow.focus();
+       frame.contentWindow.print();
+      }
+     } catch (err) {}
+    }, delayMs);
+   }
+   function prepareIframeDoc(doc) {
+    if (!doc) return;
+    const embeddedActions = doc.querySelector('.actions');
+    if (embeddedActions) embeddedActions.remove();
+    if (doc.documentElement) doc.documentElement.classList.add('in-iframe');
+   }
+
    if (opts.isHtml || typeof content === 'string') {
+    frame.onload = function () {
+     try {
+      prepareIframeDoc(frame.contentWindow && frame.contentWindow.document);
+     } catch (err) {}
+     scheduleFramePrint(180);
+    };
     try {
      const doc = frame.contentWindow.document;
      doc.open();
      doc.write(content);
      doc.close();
-
-     // Remove any nested in-page action bar so duplicate Back/Print buttons never appear inside the modal iframe
-     const embeddedActions = doc.querySelector('.actions');
-     if (embeddedActions) embeddedActions.remove();
-     if (doc.documentElement) doc.documentElement.classList.add('in-iframe');
-
-     slipsPrintTimeout = setTimeout(function () {
-      try {
-       frame.contentWindow.focus();
-       frame.contentWindow.print();
-      } catch (err) {}
-     }, 350);
+     prepareIframeDoc(doc);
+     if (doc.readyState === 'complete') {
+      scheduleFramePrint(220);
+     } else {
+      scheduleFramePrint(900);
+     }
     } catch (writeErr) {
      frame.srcdoc = content;
+     scheduleFramePrint(550);
     }
    } else {
     activeSlipsBlobUrl = URL.createObjectURL(content);
-    frame.src = activeSlipsBlobUrl;
     frame.onload = function () {
-     slipsPrintTimeout = setTimeout(function () {
-      try {
-       frame.contentWindow.focus();
-       frame.contentWindow.print();
-      } catch (err) {}
-     }, 350);
+     scheduleFramePrint(250);
     };
+    frame.src = activeSlipsBlobUrl;
    }
   }
-
-  modal.classList.add('show');
-  syncBodyScrollLock();
  };
 
- // Intercept slip-producing forms so the user remains on the portal with back and print controls
+ function clearSlipFormInlineError(form) {
+  form.querySelectorAll('.slip-form-inline-error').forEach(function (el) {
+   el.remove();
+  });
+ }
+
+ function showSlipFormInlineError(form, message) {
+  clearSlipFormInlineError(form);
+  const banner = document.createElement('div');
+  banner.className = 'alert alert-error slip-form-inline-error';
+  banner.setAttribute('role', 'alert');
+  banner.textContent = message;
+  form.prepend(banner);
+  try {
+   banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } catch (err) {}
+ }
+
+ function parseBulkCountFromForm(form, submitBtn) {
+  const checkedRows = form.querySelectorAll('input[type="checkbox"]:checked').length;
+  if (checkedRows > 0) return checkedRows;
+  const hiddenCount = form.querySelector('input[name="count"]');
+  if (hiddenCount && hiddenCount.value) {
+   const parsed = parseInt(hiddenCount.value, 10);
+   if (!isNaN(parsed) && parsed > 0) return parsed;
+  }
+  const btnText = (submitBtn && submitBtn.textContent) || '';
+  const match = btnText.match(/(\d+)/);
+  return match ? parseInt(match[1], 10) : 0;
+ }
+
+ // Intercept slip-producing forms so the user remains on the portal with progress, status, and print controls
  document.addEventListener('submit', function (e) {
   const form = e.target;
+  if (!form || form.tagName !== 'FORM') return;
   const action = form.getAttribute('action') || '';
   const isSlipForm = form.classList.contains('slip-form') ||
                      form.id === 'linkAccountForm' ||
@@ -1077,6 +1605,7 @@ document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast
                      /\/account-security\/(\d+\/)?reset\//.test(action);
 
   if (!isSlipForm) return;
+  if (e.defaultPrevented) return;
 
   e.preventDefault();
   e.stopImmediatePropagation();
@@ -1086,8 +1615,38 @@ document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast
    submitBtn.disabled = true;
    submitBtn.setAttribute('aria-busy', 'true');
   }
+  clearSlipFormInlineError(form);
 
-  showToast('Generating login slip for printing...', 'working');
+  const isBulk = form.id === 'bulkConfirmForm';
+  const batchCount = isBulk ? parseBulkCountFromForm(form, submitBtn) : 1;
+
+  function finishProgressUi() {
+   closeSlipProgressModal();
+   if (typeof window.ednpClearSkeleton === 'function') {
+    window.ednpClearSkeleton();
+   } else {
+    form.classList.remove('is-submitting');
+    document.querySelectorAll('.sk-progress.on').forEach(function (p) { p.classList.remove('on'); });
+   }
+   if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.classList.remove('is-busy');
+    submitBtn.removeAttribute('aria-busy');
+   }
+  }
+
+  openSlipProgressModal({
+   isBulk: isBulk,
+   count: batchCount,
+   title: isBulk ? undefined : 'Creating account & login slip'
+  });
+
+  showToast(
+   isBulk
+    ? ('Creating ' + (batchCount ? batchCount + ' ' : '') + 'clergy accounts & generating login slips...')
+    : 'Generating login slip for printing...',
+   'working'
+  );
 
   const formData = new FormData(form);
   if (e.submitter && e.submitter.name) {
@@ -1103,91 +1662,176 @@ document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast
     'X-Slip-Format': 'html'
    }
   }).then(async function (res) {
-   form.classList.remove('is-submitting');
-   document.querySelectorAll('.sk-progress.on').forEach(function (p) { p.classList.remove('on'); });
-   if (submitBtn) {
-    submitBtn.disabled = false;
-    submitBtn.classList.remove('is-busy');
-    submitBtn.removeAttribute('aria-busy');
-   }
+   const contentType = res.headers.get('content-type') || '';
 
    if (res.redirected) {
+    finishProgressUi();
+    hideToast();
+    const isLoginRedirect = res.url.indexOf('/login') !== -1;
+    if (!isLoginRedirect && isBulk && typeof window.ednpOnBulkAccountsError === 'function') {
+     window.ednpOnBulkAccountsError('Your bulk request could not be completed. Please review your batch and try again.', { isNetwork: false });
+     showToast('Bulk request did not produce login slips.', 'error');
+     return;
+    }
+    if (!isLoginRedirect) {
+     try {
+      sessionStorage.setItem('ednp_pending_toast', JSON.stringify({
+       message: 'Please verify the clergy list before retrying.',
+       level: 'info'
+      }));
+     } catch (err) {}
+    }
     window.location.href = res.url;
     return;
    }
 
-   const contentType = res.headers.get('content-type') || '';
    if (res.ok && contentType.indexOf('text/html') !== -1) {
-    const parentModal = form.closest('.modal-bg');
-    if (parentModal) parentModal.classList.remove('show');
-
     const html = await res.text();
-    showToast('Login slip ready for printing.', 'success');
+    const headerCount = parseInt(res.headers.get('X-Slips-Count') || '0', 10);
+    const slipCount = headerCount > 0 ? headerCount : (batchCount || 1);
 
-    var backLabel = 'Back to Clergy Records';
-    var backUrl = '/registrar/clergy-records/';
-    if (window.location.pathname.indexOf('account-security') !== -1) {
+    finishProgressUi();
+
+    const parentModal = form.closest('.modal-bg');
+    if (parentModal) {
+     parentModal.classList.remove('show');
+     syncBodyScrollLock();
+    }
+
+    const pathname = window.location.pathname;
+    let backLabel = 'Back to Clergy Records';
+    let backUrl = '/registrar/clergy-records/';
+    if (pathname.indexOf('account-security') !== -1) {
      backLabel = 'Back to Account Security';
      backUrl = window.location.href;
-    } else if (window.location.pathname.indexOf('clergy-records') !== -1) {
+    } else if (pathname.indexOf('bulk') !== -1) {
+     backLabel = 'Back to Clergy Records';
+     backUrl = '/registrar/clergy-records/';
+    } else if (pathname.indexOf('clergy-records') !== -1) {
      backUrl = window.location.href;
     }
 
+    let successMsg = 'Clergy record and portal login slip created.';
+    if (isBulk) {
+     successMsg = 'Created ' + slipCount + ' clergy ' + (slipCount === 1 ? 'account' : 'accounts') + '. Login slips are ready to print.';
+     if (typeof window.ednpOnBulkAccountsSuccess === 'function') {
+      window.ednpOnBulkAccountsSuccess(slipCount, html, true);
+     }
+    } else if (form.id === 'resetAccountForm' || action.indexOf('/reset') !== -1) {
+     successMsg = 'Temporary password reset. Login slip is ready to print.';
+    } else if (form.id === 'linkAccountForm' || action.indexOf('link-account') !== -1) {
+     successMsg = 'Clergy portal account linked. Login slip is ready to print.';
+    }
+
+    showToast(successMsg, 'success');
+
     window.openSlipsModal(html, {
+     isHtml: true,
+     title: isBulk ? ('Bulk Login Slips Ready (' + slipCount + ')') : 'Login Slip Ready to Print',
+     subtitle: isBulk
+      ? 'Temporary credentials created cleanly. Print all slips now, or close to return to your batch summary.'
+      : 'Temporary credentials generated. Print slip and hand to clergy.',
+     resultMessage: successMsg,
      backLabel: backLabel,
      backUrl: backUrl,
-     isHtml: true,
-     subtitle: 'Temporary credentials generated. Print slip and hand to clergy.'
+     backToastMessage: successMsg,
+     stayOnPageOnClose: isBulk
     });
     return;
    }
 
    if (res.ok && contentType.indexOf('application/pdf') !== -1) {
-    const parentModal = form.closest('.modal-bg');
-    if (parentModal) parentModal.classList.remove('show');
-
     const blob = await res.blob();
-    showToast('Login slips ready for printing.', 'success');
+    const headerCount = parseInt(res.headers.get('X-Slips-Count') || '0', 10);
+    const slipCount = headerCount > 0 ? headerCount : (batchCount || 1);
 
-    var backLabel = 'Back to Clergy Records';
-    var backUrl = '/registrar/clergy-records/';
-    if (window.location.pathname.indexOf('account-security') !== -1) {
+    finishProgressUi();
+
+    const parentModal = form.closest('.modal-bg');
+    if (parentModal) {
+     parentModal.classList.remove('show');
+     syncBodyScrollLock();
+    }
+
+    const pathname = window.location.pathname;
+    let backLabel = 'Back to Clergy Records';
+    let backUrl = '/registrar/clergy-records/';
+    if (pathname.indexOf('account-security') !== -1) {
      backLabel = 'Back to Account Security';
      backUrl = window.location.href;
-    } else if (window.location.pathname.indexOf('clergy-records') !== -1) {
+    } else if (pathname.indexOf('bulk') !== -1) {
+     backLabel = 'Back to Clergy Records';
+     backUrl = '/registrar/clergy-records/';
+    } else if (pathname.indexOf('clergy-records') !== -1) {
      backUrl = window.location.href;
     }
 
+    const successMsg = isBulk
+     ? ('Created ' + slipCount + ' clergy ' + (slipCount === 1 ? 'account' : 'accounts') + '. Login slips are ready to print.')
+     : 'Login slip ready for printing.';
+
+    if (isBulk && typeof window.ednpOnBulkAccountsSuccess === 'function') {
+     window.ednpOnBulkAccountsSuccess(slipCount, blob, false);
+    }
+
+    showToast(successMsg, 'success');
+
     window.openSlipsModal(blob, {
+     title: isBulk ? ('Bulk Login Slips Ready (' + slipCount + ')') : 'Login Slip Ready to Print',
+     subtitle: 'Temporary credentials generated. Print slip and hand to clergy.',
+     resultMessage: successMsg,
      backLabel: backLabel,
      backUrl: backUrl,
-     subtitle: 'Temporary credentials generated. Print slip and hand to clergy.'
+     backToastMessage: successMsg,
+     stayOnPageOnClose: isBulk
     });
     return;
    }
 
-   // If server returned JSON error (e.g. form validation error)
+   // Server returned JSON error (validation failure, duplicate username, expired token, etc.)
    if (contentType.indexOf('application/json') !== -1) {
     const data = await res.json();
-    showToast(data.message || 'An error occurred while creating records.', 'error');
+    finishProgressUi();
+    const errMsg = data.message || 'An error occurred while creating records.';
+    if (isBulk && typeof window.ednpOnBulkAccountsError === 'function') {
+     window.ednpOnBulkAccountsError(errMsg, {
+      expired: Boolean(data.expired),
+      isNetwork: false
+     });
+    } else {
+     if (data.errors && typeof window.applyFormErrors === 'function') {
+      window.applyFormErrors(form, data.errors);
+     }
+     showSlipFormInlineError(form, errMsg);
+    }
+    showToast(errMsg, 'error');
     return;
    }
 
+   finishProgressUi();
    if (!res.ok) {
-    showToast('Could not complete request (server returned ' + res.status + '). Please try again.', 'error');
+    const statusMsg = 'Could not complete request (server returned ' + res.status + '). Nothing was changed; please try again.';
+    if (isBulk && typeof window.ednpOnBulkAccountsError === 'function') {
+     window.ednpOnBulkAccountsError(statusMsg, { expired: false, isNetwork: false });
+    } else {
+     showSlipFormInlineError(form, statusMsg);
+    }
+    showToast(statusMsg, 'error');
     return;
    }
 
    window.location.reload();
   }).catch(function (err) {
-   form.classList.remove('is-submitting');
-   document.querySelectorAll('.sk-progress.on').forEach(function (p) { p.classList.remove('on'); });
-   if (submitBtn) {
-    submitBtn.disabled = false;
-    submitBtn.classList.remove('is-busy');
-    submitBtn.removeAttribute('aria-busy');
+   finishProgressUi();
+   const netMsg = isBulk
+    ? 'Connection interrupted while processing the batch. Check Clergy Records before retrying so you do not duplicate accounts.'
+    : ('Could not complete request: ' + ((err && err.message) || 'Network error'));
+   if (isBulk && typeof window.ednpOnBulkAccountsError === 'function') {
+    window.ednpOnBulkAccountsError(netMsg, { expired: false, isNetwork: true });
+   } else {
+    showSlipFormInlineError(form, netMsg);
    }
-   showToast('Could not complete request: ' + (err.message || 'Network error'), 'error');
+   showToast(netMsg, 'error');
   });
  });
 
@@ -1292,9 +1936,39 @@ document.querySelectorAll('#flash-messages [data-level]').forEach(msg=>showToast
   updateStuck();
  }
 
- if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initStickyHeader);
- } else {
+ // Floating bottom pagination dock when table extends beyond viewport
+ function initFloatingPager() {
+  const pager = document.getElementById('clergyBottomPager');
+  const sentinel = document.getElementById('clergyPagerSentinel');
+  if (!pager || !sentinel) return;
+
+  function updateFloating() {
+   const sentinelRect = sentinel.getBoundingClientRect();
+   pager.classList.toggle('is-floating', sentinelRect.top > window.innerHeight);
+  }
+
+  if ('IntersectionObserver' in window) {
+   const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+     pager.classList.toggle('is-floating', !entry.isIntersecting && entry.boundingClientRect.top > window.innerHeight);
+    });
+   }, { root: null, threshold: 0 });
+   observer.observe(sentinel);
+  }
+
+  window.addEventListener('scroll', updateFloating, { passive: true });
+  window.addEventListener('resize', updateFloating, { passive: true });
+  updateFloating();
+ }
+
+ function initStickyAndFloatingBars() {
   initStickyHeader();
+  initFloatingPager();
+ }
+
+ if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initStickyAndFloatingBars);
+ } else {
+  initStickyAndFloatingBars();
  }
 })();

@@ -52,7 +52,13 @@
     window.scrollTo(0, 0);
   }
 
+  var skeletonTimer = null;
+
   function clearSkeleton() {
+    if (skeletonTimer) {
+      clearTimeout(skeletonTimer);
+      skeletonTimer = null;
+    }
     progress(false);
     document.querySelectorAll('.is-pending').forEach(function (n) { n.classList.remove('is-pending'); });
     document.querySelectorAll('.is-submitting').forEach(function (f) { f.classList.remove('is-submitting'); });
@@ -64,6 +70,22 @@
     if (!main) return;
     main.classList.remove('is-loading');
     main.querySelectorAll('.sk-wrap').forEach(function (n) { n.remove(); });
+  }
+  window.ednpClearSkeleton = clearSkeleton;
+
+  function isAsyncManagedForm(form) {
+    if (!form) return false;
+    var action = (form.getAttribute && form.getAttribute('action')) || '';
+    return form.classList.contains('slip-form') ||
+           form.classList.contains('doc-card-upload') ||
+           Boolean(form.closest && form.closest('#quickUploadModal')) ||
+           form.id === 'linkAccountForm' ||
+           form.id === 'resetAccountForm' ||
+           form.id === 'bulkConfirmForm' ||
+           form.id === 'createRecordForm' ||
+           form.dataset.asyncSubmit === 'true' ||
+           /\/clergy-records\/([^/]+\/)?(create|link-account|reset-account)/.test(action) ||
+           /\/account-security\/(\d+\/)?reset\//.test(action);
   }
 
   /* Custom Centered In-App Confirmation Modal */
@@ -347,10 +369,18 @@
     form.classList.add('is-submitting');
     var btn = e.submitter || form.querySelector('button[type=submit],button:not([type]),input[type=submit]');
     progress(true);
-    // A POST that answers with a file download never leaves the page: don't spin forever
-    setTimeout(clearSkeleton, 20000);
-    if (typeof showToast === 'function') {
-      showToast(form.querySelector('input[type=file]') ? 'Uploading...' : 'Working on it...', 'working');
+    var asyncManaged = isAsyncManagedForm(form);
+    if (skeletonTimer) {
+      clearTimeout(skeletonTimer);
+      skeletonTimer = null;
+    }
+    // Async fetch forms clear skeleton explicitly when their request finishes;
+    // standard POSTs (which may return a file download without navigating) keep a 60s safety fallback.
+    if (!asyncManaged) {
+      skeletonTimer = setTimeout(clearSkeleton, 60000);
+      if (typeof showToast === 'function') {
+        showToast(form.querySelector('input[type=file]') ? 'Uploading...' : 'Working on it...', 'working');
+      }
     }
     if (btn) {
       btn.setAttribute('aria-busy', 'true');

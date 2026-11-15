@@ -6,214 +6,6 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'ember-letters.css' %}?v=8">
 <style>
-/* Stages Summary Hub (Overview Cards on the Page) */
-.stages-hub-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 14px;
-}
-@media (max-width: 820px) {
-  .stages-hub-grid {
-    grid-template-columns: 1fr;
-  }
-}
-.stage-hub-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 13px;
-  padding: 16px 20px 18px;
-  cursor: pointer;
-  box-sizing: border-box;
-  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.18s ease;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  position: relative;
-}
-.stage-hub-card:hover,
-.stage-hub-card:focus-visible {
-  border-color: #2f6fed;
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
-  transform: translateY(-2px);
-  outline: none;
-}
-.stage-hub-card:focus-visible {
-  box-shadow: 0 0 0 3px rgba(47, 111, 237, 0.2), 0 14px 30px rgba(15, 23, 42, 0.12);
-}
-.stage-hub-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-.stage-hub-title-wrap {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-  flex: 1;
-}
-.stage-hub-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  background: #eff6ff;
-  color: #2f6fed;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 17.5px;
-  flex-shrink: 0;
-}
-.stage-hub-title {
-  font-size: 16.5px;
-  font-weight: 700;
-  color: #17324d;
-  margin: 0;
-  line-height: 1.3;
-}
-.stage-hub-desc {
-  font-size: 14px;
-  color: #64748b;
-  margin: 2px 0 0;
-  line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.stage-hub-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-.stage-hub-open-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  background: #f1f5f9;
-  color: #1e293b;
-  border: 1px solid #cbd5e1;
-  transition: all 0.15s ease;
-}
-.stage-hub-card:hover .stage-hub-open-btn {
-  background: #2f6fed;
-  color: #ffffff;
-  border-color: #2f6fed;
-}
-.stage-hub-progress-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.stage-hub-progress-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
-  color: #64748b;
-}
-.stage-hub-progress-track {
-  height: 6px;
-  background: #f1f5f9;
-  border-radius: 999px;
-  overflow: hidden;
-  border: 1px solid #e2e8f0;
-}
-.stage-hub-progress-fill {
-  height: 100%;
-  border-radius: 999px;
-  transition: width 0.3s ease;
-  background: var(--blue, #2f6fed);
-}
-.stage-hub-progress-fill.complete {
-  background: #059669;
-}
-.stage-hub-items-preview {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  background: #f8fafc;
-  border-radius: 8px;
-  padding: 10px 12px;
-  border: 1px solid #f1f5f9;
-}
-.stage-preview-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 14px;
-}
-.stage-preview-name-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  flex: 1;
-}
-.stage-preview-dot {
-  width: 14px;
-  height: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12.5px;
-  flex-shrink: 0;
-}
-.stage-preview-dot.ok {
-  color: #059669;
-}
-.stage-preview-dot.pending {
-  color: #94a3b8;
-}
-.stage-preview-name {
-  color: #334155;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.stage-preview-status {
-  font-size: 13px;
-  padding: 1px 6px;
-  flex-shrink: 0;
-}
-.stage-preview-more {
-  font-size: 13px;
-  color: #64748b;
-  text-align: right;
-  padding-top: 2px;
-}
-.stage-hub-card-foot {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  font-size: 13px;
-  font-weight: 600;
-  color: #64748b;
-  padding-top: 4px;
-  border-top: 1px dashed #e2e8f0;
-}
-.stage-hub-card:hover .stage-hub-card-foot {
-  color: #2f6fed;
-}
-@keyframes stageCardFlash {
-  0% { box-shadow: 0 0 0 4px rgba(47, 111, 237, 0.4); transform: scale(1.01); }
-  100% { box-shadow: none; transform: scale(1); }
-}
-.stage-card-flash {
-  animation: stageCardFlash 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Hidden Repository for Form & Section Containers */
 .hub-hidden-sections {
   display: none !important;
 }
@@ -225,82 +17,11 @@ body.modal-open {
   overflow: hidden !important;
   overscroll-behavior: none !important;
 }
-body.modal-open .stage-floating-elevator {
-  display: none !important;
-}
-
-/* Stage Quick-View Modal */
-.modal-bg.stage-modal-active {
-  position: fixed;
-  inset: 0;
-  z-index: 70;
-  background: rgba(15, 23, 42, 0.55);
-  backdrop-filter: blur(3px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  overscroll-behavior: contain;
-}
-.modal.stage-quick-modal {
-  width: min(980px, 96vw);
-  max-height: 88vh;
-  display: flex;
-  flex-direction: column;
-  background: #ffffff;
-  border-radius: 14px;
-  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.28);
-  overflow: hidden;
-  overscroll-behavior: contain;
-}
-.stage-quick-modal .modal-head {
-  padding: 16px 20px;
-  border-bottom: 1px solid #e2e8f0;
-  background: #f8fafc;
-  margin: 0;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-.stage-quick-modal .stage-modal-body {
-  padding: 18px 20px;
-  overflow-y: auto;
-  flex: 1;
-  overscroll-behavior: contain;
-}
-.stage-quick-modal .stage-modal-body .doc-stage-section {
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  margin: 0 !important;
-}
-.stage-quick-modal .stage-modal-body .doc-stage-header {
-  display: none;
-}
-.stage-quick-modal .stage-modal-foot {
-  padding: 12px 20px;
-  border-top: 1px solid #e2e8f0;
-  background: #f8fafc;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.stage-step-indicator {
-  font-size: 15px;
-  font-weight: 700;
-  color: #475569;
-  padding: 2px 8px;
-  background: #e2e8f0;
-  border-radius: 6px;
-}
 #clergyUploadModal {
   z-index: 85 !important;
 }
 #docPreviewModal {
-  z-index: 90 !important;
+  z-index: 105 !important;
 }
 </style>
 {% endblock %}
@@ -387,13 +108,13 @@ body.modal-open .stage-floating-elevator {
           </div>
 
           <div class="doc-tools-right">
-            <!-- Stage Group Progress Indicator: Synchronized with scroll and elevator -->
-            <div class="stage-stepper-control" id="stageStepperControl" aria-live="polite" title="Current stage group">
-              <span class="stepper-count" id="stageStepperCount">1 / 3</span>
-              <span class="stepper-label" id="stageStepperLabel">Postulancy · Diaconate</span>
+            <!-- Stage Progress Indicator: Synchronized with active stage modal -->
+            <div class="stage-stepper-control" id="stageStepperControl" aria-live="polite" title="Current document stage">
+              <span class="stepper-count" id="stageStepperCount">1 / 1</span>
+              <span class="stepper-label" id="stageStepperLabel">Stage</span>
             </div>
 
-            <button type="button" class="btn-focus-toggle" id="btnFocusMode" aria-pressed="false" title="Hide stages and requirements that are already 100% complete">
+            <button type="button" class="btn-focus-toggle" id="btnFocusMode" aria-pressed="false" title="Hide requirements that are already complete">
               <i class="fa-solid fa-filter"></i> <span>Hide Complete</span>
             </button>
           </div>
@@ -406,147 +127,54 @@ body.modal-open .stage-floating-elevator {
         </div>
       </nav>
 
-      <!-- Stages Summary Hub (Click any card or quick jump pill to open the stage's full document table in a modal dialog) -->
-      <div class="stages-hub-grid" id="stagesSummaryHub" role="region" aria-label="Document Stages Overview">
-        {% if checklist.stages %}
-          {% for stage in checklist.stages %}
-          <div class="stage-hub-card" data-open-stage="sec-doc-{{ stage.slug }}" role="button" tabindex="0" aria-label="Open {{ stage.title }} requirements">
-            <div class="stage-hub-head">
-              <div class="stage-hub-title-wrap">
-                <span class="stage-hub-icon"><i class="fa-solid {{ stage.icon }}"></i></span>
-                <div>
-                  <h4 class="stage-hub-title">{{ stage.title }}</h4>
-                  <p class="stage-hub-desc">{{ stage.description }}</p>
-                </div>
+      <!-- Inline Single-Stage Documents Modal Workspace (one stage at a time) -->
+      <div class="inline-modal-stage inline-modal-stage--wide" id="stageDocumentsModal" role="region" aria-label="Stage documents checklist">
+        <button type="button" class="modal-edge-nav-btn prev" id="stageEdgePrevBtn" aria-label="Previous stage" title="Previous stage (Left arrow)" disabled>
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <div class="modal stage-quick-modal inline-modal-card">
+          <div class="modal-head">
+            <div>
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <h3 id="stageDocumentsModalTitle" style="margin:0;display:flex;align-items:center;gap:8px;">
+                  <i class="fa-solid fa-folder-open" style="color:var(--blue);"></i>
+                  <span>Stage Requirements</span>
+                </h3>
+                <span class="badge blue" id="stageDocumentsStepBadge" style="font-size:13px;padding:3px 8px;">Stage 1</span>
+                <span class="badge pending-b" id="stageDocumentsProgressBadge" style="font-size:13px;padding:3px 8px;">0 uploaded</span>
               </div>
-              <div class="stage-hub-actions">
-                {% if stage.is_complete %}
-                  <span class="badge stage-complete-b"><i class="fa-solid fa-check"></i> Complete</span>
-                {% else %}
-                  <span class="badge pending-b">{{ stage.submitted }}/{{ stage.total }}</span>
-                {% endif %}
-                <span class="stage-hub-open-btn"><i class="fa-solid fa-folder-open"></i> Open</span>
-              </div>
-            </div>
-
-            <div class="stage-hub-progress-wrap">
-              <div class="stage-hub-progress-meta">
-                <span>Progress</span>
-                <b>{% if stage.total > 0 %}{% widthratio stage.submitted stage.total 100 %}%{% else %}0%{% endif %} ({{ stage.submitted }} of {{ stage.total }})</b>
-              </div>
-              <div class="stage-hub-progress-track">
-                <div class="stage-hub-progress-fill{% if stage.is_complete %} complete{% endif %}" style="width:{% if stage.total > 0 %}{% widthratio stage.submitted stage.total 100 %}%{% else %}0%{% endif %};"></div>
-              </div>
-            </div>
-
-            <div class="stage-hub-items-preview">
-              {% for item in stage.items|slice:":3" %}
-              <div class="stage-preview-row">
-                <div class="stage-preview-name-wrap">
-                  <span class="stage-preview-dot {% if item.status == 'Submitted' %}ok{% else %}pending{% endif %}">
-                    <i class="fa-solid {% if item.status == 'Submitted' %}fa-circle-check{% else %}fa-circle-dot{% endif %}"></i>
-                  </span>
-                  <span class="stage-preview-name" title="{{ item.document_type.name }}">{{ item.document_type.name }}</span>
-                </div>
-                <span class="stage-preview-status badge {% if item.status == 'Submitted' %}active-b{% elif item.status == 'Expired' %}inactive-b{% else %}pending-b{% endif %}">
-                  {% if item.status == 'Submitted' %}Submitted{% elif item.status == 'Expired' %}Expired{% else %}Not Uploaded{% endif %}
-                </span>
-              </div>
-              {% endfor %}
-              {% if stage.total > 3 %}
-              <div class="stage-preview-more">
-                <span>+ {{ stage.total|add:"-3" }} more requirement{{ stage.total|add:"-3"|pluralize }}</span>
-              </div>
-              {% endif %}
-            </div>
-
-            <div class="stage-hub-card-foot">
-              <span>Click to view and manage stage documents <i class="fa-solid fa-arrow-right"></i></span>
-            </div>
-          </div>
-          {% endfor %}
-        {% else %}
-          <div class="stage-hub-card" data-open-stage="sec-doc-clergy" role="button" tabindex="0" aria-label="Open Own Requirements">
-            <div class="stage-hub-head">
-              <div class="stage-hub-title-wrap">
-                <span class="stage-hub-icon"><i class="fa-solid fa-user"></i></span>
-                <div>
-                  <h4 class="stage-hub-title">Own Requirements</h4>
-                  <p class="stage-hub-desc">Personal clergy requirements and ordination attachments</p>
-                </div>
-              </div>
-              <div class="stage-hub-actions">
-                <span class="stage-hub-open-btn"><i class="fa-solid fa-folder-open"></i> Open</span>
-              </div>
-            </div>
-            <div class="stage-hub-card-foot">
-              <span>Click to view and upload requirements <i class="fa-solid fa-arrow-right"></i></span>
-            </div>
-          </div>
-          <div class="stage-hub-card" data-open-stage="sec-doc-registrar" role="button" tabindex="0" aria-label="Open Official Documents">
-            <div class="stage-hub-head">
-              <div class="stage-hub-title-wrap">
-                <span class="stage-hub-icon"><i class="fa-solid fa-building-columns"></i></span>
-                <div>
-                  <h4 class="stage-hub-title">Official Documents</h4>
-                  <p class="stage-hub-desc">Official diocesan filings and evaluations</p>
-                </div>
-              </div>
-              <div class="stage-hub-actions">
-                <span class="stage-hub-open-btn"><i class="fa-solid fa-folder-open"></i> Open</span>
-              </div>
-            </div>
-            <div class="stage-hub-card-foot">
-              <span>Click to view official diocesan documents <i class="fa-solid fa-arrow-right"></i></span>
-            </div>
-          </div>
-        {% endif %}
-
-        <!-- Ember Letters Stage Card -->
-        <div class="stage-hub-card" data-open-stage="sec-doc-ember" role="button" tabindex="0" aria-label="Open Ember Letters">
-          <div class="stage-hub-head">
-            <div class="stage-hub-title-wrap">
-              <span class="stage-hub-icon"><i class="fa-solid fa-envelope-open-text"></i></span>
-              <div>
-                <h4 class="stage-hub-title">Ember Letters</h4>
-                <p class="stage-hub-desc">Quarterly Ember Letters grouped by year (Q1 to Q4)</p>
-              </div>
-            </div>
-            <div class="stage-hub-actions">
-              <span class="badge blue">{{ ember_summary.uploaded }}/{{ ember_summary.target }}</span>
-              <span class="stage-hub-open-btn"><i class="fa-solid fa-folder-open"></i> Open</span>
+              <p class="muted" id="stageDocumentsModalDesc" style="margin:4px 0 0;font-size:14px;">Requirements and attachments for this formation stage</p>
             </div>
           </div>
 
-          <div class="stage-hub-progress-wrap">
-            <div class="stage-hub-progress-meta">
-              <span>Submission Rate</span>
-              <b>{% if ember_summary.target > 0 %}{% widthratio ember_summary.uploaded ember_summary.target 100 %}%{% else %}0%{% endif %} ({{ ember_summary.uploaded }} of {{ ember_summary.target }})</b>
-            </div>
-            <div class="stage-hub-progress-track">
-              <div class="stage-hub-progress-fill{% if ember_summary.uploaded >= ember_summary.target and ember_summary.target > 0 %} complete{% endif %}" style="width:{% if ember_summary.target > 0 %}{% widthratio ember_summary.uploaded ember_summary.target 100 %}%{% else %}0%{% endif %};"></div>
-            </div>
-          </div>
-
-          <div class="stage-hub-items-preview">
-            <div class="stage-preview-row">
-              <div class="stage-preview-name-wrap">
-                <span class="stage-preview-dot {% if ember_summary.uploaded > 0 %}ok{% else %}pending{% endif %}">
-                  <i class="fa-solid {% if ember_summary.uploaded > 0 %}fa-circle-check{% else %}fa-circle-dot{% endif %}"></i>
-                </span>
-                <span class="stage-preview-name">Active Ember Years ({{ ember_summary.years }} year{{ ember_summary.years|pluralize }})</span>
-              </div>
-              <span class="stage-preview-status badge blue">{{ ember_summary.uploaded }} uploaded</span>
+          <div class="stage-modal-body" id="stageDocumentsBody">
+            <div id="stageSearchEmpty" class="inline-search-empty" style="display:none;" role="status">
+              <i class="fa-solid fa-folder-open" style="font-size:22px;color:#64748b;"></i>
+              <h4>No matching requirements</h4>
+              <p>No documents in this view matched your active search or status filter.</p>
+              <button type="button" class="btn small secondary" id="stageSearchResetBtn"><i class="fa-solid fa-rotate-left"></i> Reset Filters</button>
             </div>
           </div>
 
-          <div class="stage-hub-card-foot">
-            <span>Click to view Ember Letters summary or open tab <i class="fa-solid fa-arrow-right"></i></span>
+          <div class="stage-modal-foot">
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button type="button" class="btn small secondary" id="stagePrevBtn"><i class="fa-solid fa-chevron-left"></i> Previous Stage</button>
+              <span class="stage-step-indicator" id="stageStepIndicator" aria-live="polite">1 / 1</span>
+              <button type="button" class="btn small secondary" id="stageNextBtn">Next Stage <i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button type="button" class="btn small" id="stageOpenEmberTabBtn" data-open-tab="ember" style="display:none;">
+                <i class="fa-solid fa-envelope-open-text"></i> Open Ember Letters Tab
+              </button>
+            </div>
           </div>
         </div>
+        <button type="button" class="modal-edge-nav-btn next" id="stageEdgeNextBtn" aria-label="Next stage" title="Next stage (Right arrow)">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
       </div>
 
-      <!-- Hidden Form / Section Repository (individual stages pop into #stageDocumentsModal when clicked) -->
+      <!-- Hidden Section Repository (individual stages mount into #stageDocumentsBody one at a time) -->
       <div id="stageSectionsRepository" class="hub-hidden-sections">
         {% if checklist.stages %}
           {% for stage in checklist.stages %}
@@ -813,19 +441,6 @@ body.modal-open .stage-floating-elevator {
       {% include "_ember_letters.html" %}
     </div>
   </div>
-
-  <!-- Floating Stage Elevator Dock (Right side) -->
-  <aside class="stage-floating-elevator" id="stageFloatingElevator" aria-label="Stage group navigation">
-    <button type="button" class="elevator-btn" id="elevatorUpBtn" aria-label="Scroll to previous stage group" title="Previous stage group (Up)">
-      <i class="fa-solid fa-chevron-up"></i>
-    </button>
-    <div class="elevator-info" title="Current stage group">
-      <span class="elevator-count" id="elevatorCount">1 / 3</span>
-    </div>
-    <button type="button" class="elevator-btn" id="elevatorDownBtn" aria-label="Scroll to next stage group" title="Next stage group (Down)">
-      <i class="fa-solid fa-chevron-down"></i>
-    </button>
-  </aside>
 </section>
 {% endblock %}
 
@@ -848,10 +463,12 @@ body.modal-open .stage-floating-elevator {
   const searchFeedback = document.getElementById('docSearchFeedback');
   const searchFeedbackText = document.getElementById('docSearchFeedbackText');
   const searchResetBtn = document.getElementById('docSearchResetBtn');
+  const stageSearchEmpty = document.getElementById('stageSearchEmpty');
+  const stageSearchResetBtn = document.getElementById('stageSearchResetBtn');
   const filterPills = nav.querySelectorAll('.filter-pill');
   const btnFocusMode = document.getElementById('btnFocusMode');
 
-  // Stage Quick-View Modal Elements
+  // Inline Stage Modal Elements
   const stageModal = document.getElementById('stageDocumentsModal');
   const stageModalBody = document.getElementById('stageDocumentsBody');
   const stageModalTitle = document.getElementById('stageDocumentsModalTitle');
@@ -860,10 +477,10 @@ body.modal-open .stage-floating-elevator {
   const stageProgressBadge = document.getElementById('stageDocumentsProgressBadge');
   const stagePrevBtn = document.getElementById('stagePrevBtn');
   const stageNextBtn = document.getElementById('stageNextBtn');
+  const stageEdgePrevBtn = document.getElementById('stageEdgePrevBtn');
+  const stageEdgeNextBtn = document.getElementById('stageEdgeNextBtn');
   const stageStepIndicator = document.getElementById('stageStepIndicator');
-
-  const stageSections = Array.from(container.querySelectorAll('.doc-stage-section'));
-  const stageHubCards = Array.from(document.querySelectorAll('#stagesSummaryHub .stage-hub-card'));
+  const stageOpenEmberBtn = document.getElementById('stageOpenEmberTabBtn');
 
   let activeFilter = 'all';
   let searchQuery = '';
@@ -874,17 +491,68 @@ body.modal-open .stage-floating-elevator {
   let activeStageId = '';
 
   const REOPEN_STAGE_KEY = 'ednp_reopen_stage_' + window.location.pathname;
+  const ACTIVE_STAGE_KEY = 'ednp_active_stage_' + window.location.pathname;
+  const DOC_FILTERS_KEY = 'ednp_doc_filters_' + window.location.pathname;
+
+  function saveDocFilterState() {
+    try {
+      if (activeFilter === 'all' && !focusMode && !searchQuery.trim()) {
+        sessionStorage.removeItem(DOC_FILTERS_KEY);
+      } else {
+        sessionStorage.setItem(DOC_FILTERS_KEY, JSON.stringify({
+          filter: activeFilter,
+          focus: Boolean(focusMode),
+          q: searchQuery
+        }));
+      }
+    } catch (_e) {}
+  }
+
+  function revealStagePillHorizontally(pill, smooth) {
+    if (!pill || !pillsContainer || pillsContainer.scrollWidth <= pillsContainer.clientWidth) return;
+    const targetLeft = pill.offsetLeft - (pillsContainer.clientWidth / 2) + (pill.offsetWidth / 2);
+    const clampedLeft = Math.max(0, Math.min(targetLeft, pillsContainer.scrollWidth - pillsContainer.clientWidth));
+    try {
+      pillsContainer.scrollTo({ left: clampedLeft, behavior: smooth === false ? 'auto' : 'smooth' });
+    } catch (_e) {
+      pillsContainer.scrollLeft = clampedLeft;
+    }
+    setTimeout(updateScrollButtons, 180);
+  }
 
   function syncBodyScrollLock() {
     const anyOpen = Array.from(document.querySelectorAll('.modal-bg')).some(function(m) {
       if (!m) return false;
-      return (m.classList.contains('show') || m.classList.contains('active') ||
-              m.classList.contains('stage-modal-active') || m.classList.contains('section-modal-active') ||
-              m.style.display === 'flex') && m.style.display !== 'none';
+      return (m.classList.contains('show') || m.classList.contains('active') || m.style.display === 'flex') && m.style.display !== 'none';
     });
     document.body.classList.toggle('modal-open', anyOpen);
   }
   window.syncBodyScrollLock = syncBodyScrollLock;
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+
+  function getPillTargetId(pill) {
+    if (!pill) return '';
+    return pill.dataset.stageModal || pill.dataset.docTarget || (pill.getAttribute('href') ? pill.getAttribute('href').substring(1) : '');
+  }
+
+  function getStageShortName(section) {
+    if (!section) return '';
+    const title = section.dataset?.stageTitle || section.querySelector('.doc-stage-title')?.textContent || '';
+    const fullText = title.trim();
+    if (fullText.includes('Postulancy')) return 'Postulancy';
+    if (fullText.includes('Diaconate')) return 'Diaconate';
+    if (fullText.includes('Priesthood')) return 'Priesthood';
+    if (fullText.includes('Episcopate')) return 'Episcopate';
+    if (fullText.includes('Vital')) return 'Canonical';
+    if (fullText.includes('Official')) return 'Diocesan';
+    if (fullText.includes('Ember')) return 'Ember';
+    return fullText.split(' ')[0] || fullText.substring(0, 12);
+  }
 
   // 1. Stage Carousel Controls (Left/Right + Scroll update + Wheel tilt)
   function updateScrollButtons() {
@@ -917,7 +585,7 @@ body.modal-open .stage-floating-elevator {
     });
   }
 
-  // 2. Stage Documents Modal Engine (DOM Reparenting Pattern)
+  // 2. Inline Single-Stage Documents Modal Engine (DOM Reparenting Pattern)
   function returnStageToRepository() {
     if (activeStageNode && activeStagePlaceholder && activeStagePlaceholder.parentNode) {
       activeStagePlaceholder.parentNode.insertBefore(activeStageNode, activeStagePlaceholder);
@@ -927,10 +595,64 @@ body.modal-open .stage-floating-elevator {
     activeStagePlaceholder = null;
   }
 
-  function openStageInModal(stageId) {
-    if (!stageId) return;
+  function applyRowFiltersToModal(targetEl) {
+    if (!targetEl) return;
+    const rows = targetEl.querySelectorAll('.doc-table tbody tr.doc-row');
+    const query = searchQuery.trim().toLowerCase();
+    let visibleCount = 0;
+
+    rows.forEach(function(row) {
+      if (row.classList.contains('ember-summary-row')) {
+        let emberMatch = true;
+        if (query) {
+          const text = row.textContent.toLowerCase();
+          emberMatch = text.includes(query) || 'ember letters'.includes(query);
+        }
+        row.style.display = emberMatch ? '' : 'none';
+        if (emberMatch) visibleCount++;
+        return;
+      }
+
+      const status = row.dataset.docStatus || '';
+      const title = (row.dataset.docTitle || '').toLowerCase();
+      const rowText = row.textContent.toLowerCase();
+
+      let statusOk = true;
+      if (activeFilter === 'not-uploaded') {
+        statusOk = (status === 'not-uploaded' || status === 'expired');
+      } else if (activeFilter === 'submitted') {
+        statusOk = (status === 'submitted');
+      }
+
+      let queryOk = true;
+      if (query) {
+        queryOk = title.includes(query) || rowText.includes(query);
+      }
+
+      let focusOk = true;
+      if (focusMode && status === 'submitted') {
+        focusOk = false;
+      }
+
+      const isVisible = statusOk && queryOk && focusOk;
+      row.style.display = isVisible ? '' : 'none';
+      if (isVisible) visibleCount++;
+    });
+
+    const tableWrap = targetEl.querySelector('.doc-table-wrap');
+    if (tableWrap) {
+      tableWrap.style.display = (visibleCount === 0 && (query.length > 0 || activeFilter !== 'all' || focusMode)) ? 'none' : '';
+    }
+    if (stageSearchEmpty) {
+      stageSearchEmpty.style.display = (visibleCount === 0 && (query.length > 0 || activeFilter !== 'all' || focusMode)) ? 'block' : 'none';
+    }
+  }
+
+  function openStageInModal(stageId, opts) {
+    const options = opts || {};
+    if (!stageId) return false;
     const targetEl = document.getElementById(stageId);
-    if (!targetEl || !stageModal || !stageModalBody) return;
+    if (!targetEl || !stageModal || !stageModalBody) return false;
 
     if (activeStageNode && activeStageId !== stageId) {
       returnStageToRepository();
@@ -940,389 +662,172 @@ body.modal-open .stage-floating-elevator {
       activeStagePlaceholder = document.createElement('div');
       activeStagePlaceholder.style.display = 'none';
       targetEl.parentNode.insertBefore(activeStagePlaceholder, targetEl);
-      stageModalBody.appendChild(targetEl);
+      if (stageSearchEmpty && stageSearchEmpty.parentNode === stageModalBody) {
+        stageModalBody.insertBefore(targetEl, stageSearchEmpty);
+      } else {
+        stageModalBody.appendChild(targetEl);
+      }
       activeStageNode = targetEl;
     }
     activeStageId = stageId;
-
-    // Find corresponding pill
-    const pill = navPills.find(function(p) {
-      return (p.dataset.stageModal === stageId) ||
-             (p.dataset.docTarget === stageId) ||
-             (p.getAttribute('href') === '#' + stageId);
-    });
-
-    navPills.forEach(function(p) { p.classList.toggle('active', p === pill); });
-    if (pill) {
-      pill.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+    if (!options.skipPersist) {
+      try { sessionStorage.setItem(ACTIVE_STAGE_KEY, stageId); } catch (_e) {}
     }
 
-    // Step calculation
+    const pill = navPills.find(function(p) { return getPillTargetId(p) === stageId; });
+    navPills.forEach(function(p) { p.classList.toggle('active', p === pill); });
+    if (pill && options.scrollPill !== false) {
+      revealStagePillHorizontally(pill, !options.instantPill);
+    }
+
     const idx = navPills.indexOf(pill);
-    const total = navPills.length;
+    const total = navPills.length || 1;
     const currentStep = (idx >= 0 ? idx + 1 : 1);
 
-    // Read attributes
     const titleText = targetEl.dataset.stageTitle || pill?.dataset.stageTitle || pill?.textContent.trim() || 'Requirements';
-    const iconClass = targetEl.dataset.stageIcon || (pill?.querySelector('i')?.className) || 'fa-folder-open';
+    const iconClass = targetEl.dataset.stageIcon || 'fa-folder-open';
     const descText = targetEl.dataset.stageDesc || targetEl.querySelector('.doc-stage-desc')?.textContent || 'Stage requirements and endorsements';
-    const submittedCount = targetEl.dataset.stageSubmitted || '0';
-    const totalCount = targetEl.dataset.stageTotal || '0';
+    const submittedCount = targetEl.dataset.stageSubmitted;
+    const totalCount = targetEl.dataset.stageTotal;
     const isComplete = targetEl.dataset.stageComplete === '1';
 
     if (stageModalTitle) {
       stageModalTitle.innerHTML = '<i class="fa-solid ' + escapeHtml(iconClass) + '" style="color:var(--blue);"></i> <span>' + escapeHtml(titleText) + '</span>';
     }
-    if (stageModalDesc) {
-      stageModalDesc.textContent = descText;
-    }
-    if (stageStepBadge) {
-      stageStepBadge.textContent = 'Stage ' + currentStep + ' of ' + total;
-    }
-    if (stageStepIndicator) {
-      stageStepIndicator.textContent = currentStep + ' / ' + total;
-    }
+    if (stageModalDesc) stageModalDesc.textContent = descText;
+    if (stageStepBadge) stageStepBadge.textContent = 'Stage ' + currentStep + ' of ' + total;
+    if (stageStepIndicator) stageStepIndicator.textContent = currentStep + ' / ' + total;
+
     if (stageProgressBadge) {
-      if (isComplete) {
-        stageProgressBadge.className = 'badge stage-complete-b';
-        stageProgressBadge.innerHTML = '<i class="fa-solid fa-check"></i> Complete';
+      if (submittedCount !== undefined && totalCount !== undefined) {
+        if (isComplete) {
+          stageProgressBadge.className = 'badge stage-complete-b';
+          stageProgressBadge.innerHTML = '<i class="fa-solid fa-check"></i> Complete';
+        } else {
+          stageProgressBadge.className = 'badge pending-b';
+          stageProgressBadge.textContent = submittedCount + ' of ' + totalCount + ' uploaded';
+        }
+        stageProgressBadge.style.display = '';
       } else {
-        stageProgressBadge.className = 'badge pending-b';
-        stageProgressBadge.textContent = submittedCount + ' of ' + totalCount + ' uploaded';
+        stageProgressBadge.style.display = 'none';
       }
     }
 
-    if (stagePrevBtn) stagePrevBtn.disabled = idx <= 0;
-    if (stageNextBtn) stageNextBtn.disabled = idx === -1 || idx >= total - 1;
+    if (stageOpenEmberBtn) {
+      stageOpenEmberBtn.style.display = (stageId === 'sec-doc-ember') ? '' : 'none';
+    }
 
-    // Update sticky toolbar stage indicator
+    const atStart = idx <= 0;
+    const atEnd = idx === -1 || idx >= total - 1;
+    if (stagePrevBtn) stagePrevBtn.disabled = atStart;
+    if (stageNextBtn) stageNextBtn.disabled = atEnd;
+    if (stageEdgePrevBtn) stageEdgePrevBtn.disabled = atStart;
+    if (stageEdgeNextBtn) stageEdgeNextBtn.disabled = atEnd;
+
     const stepperCount = document.getElementById('stageStepperCount');
     const stepperLabel = document.getElementById('stageStepperLabel');
     if (stepperCount) stepperCount.textContent = currentStep + ' / ' + total;
     if (stepperLabel) stepperLabel.textContent = getStageShortName(targetEl);
 
-    const elevatorCount = document.getElementById('elevatorCount');
-    const elevatorUp = document.getElementById('elevatorUpBtn');
-    const elevatorDown = document.getElementById('elevatorDownBtn');
-    if (elevatorCount) elevatorCount.textContent = currentStep + ' / ' + total;
-    if (elevatorUp) elevatorUp.disabled = (idx <= 0);
-    if (elevatorDown) elevatorDown.disabled = (idx >= total - 1);
-
-    stageModal.style.display = 'flex';
-    stageModal.classList.add('show', 'stage-modal-active');
-    stageModalBody.scrollTop = 0;
-    syncBodyScrollLock();
+    stageModalBody.classList.remove('step-entering');
+    void stageModalBody.offsetWidth;
+    stageModalBody.classList.add('step-entering');
 
     applyRowFiltersToModal(targetEl);
+    return true;
   }
 
-  function closeStageModal(highlightCard) {
-    const lastId = activeStageId;
-    returnStageToRepository();
-    activeStageId = '';
-    if (stageModal) {
-      stageModal.classList.remove('show', 'stage-modal-active');
-      stageModal.style.display = 'none';
+  function stepStage(delta) {
+    const idx = navPills.findIndex(function(p) { return getPillTargetId(p) === activeStageId; });
+    const nextIdx = (idx === -1 ? 0 : idx) + delta;
+    if (nextIdx >= 0 && nextIdx < navPills.length) {
+      openStageInModal(getPillTargetId(navPills[nextIdx]));
     }
-    syncBodyScrollLock();
-    if (highlightCard && lastId) {
-      const card = document.querySelector('.stage-hub-card[data-open-stage="' + CSS.escape(lastId) + '"]');
-      if (card && card.offsetParent !== null) {
-        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        card.classList.remove('stage-card-flash');
-        void card.offsetWidth;
-        card.classList.add('stage-card-flash');
-      }
-    }
-    updatePageStageIndicator();
   }
 
-  function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str || '';
-    return div.innerHTML;
-  }
-
-  // Hook navigation pills to modal
   navPills.forEach(function(pill) {
     pill.addEventListener('click', function(e) {
       e.preventDefault();
-      const targetId = pill.dataset.stageModal || pill.dataset.docTarget || (pill.getAttribute('href') ? pill.getAttribute('href').substring(1) : '');
-      openStageInModal(targetId);
+      const targetId = getPillTargetId(pill);
+      if (targetId) openStageInModal(targetId);
     });
   });
 
-  // Hook hub cards to modal
-  stageHubCards.forEach(function(card) {
-    card.addEventListener('click', function(e) {
-      if (e.target.closest('a, button')) return;
-      openStageInModal(card.dataset.openStage);
-    });
-    card.querySelector('.stage-hub-open-btn')?.addEventListener('click', function(e) {
-      e.stopPropagation();
-      openStageInModal(card.dataset.openStage);
-    });
-    card.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        openStageInModal(card.dataset.openStage);
-      }
-    });
-  });
+  stagePrevBtn?.addEventListener('click', function() { stepStage(-1); });
+  stageNextBtn?.addEventListener('click', function() { stepStage(1); });
+  stageEdgePrevBtn?.addEventListener('click', function() { stepStage(-1); });
+  stageEdgeNextBtn?.addEventListener('click', function() { stepStage(1); });
 
-  // Modal foot controls
-  stagePrevBtn?.addEventListener('click', function() {
-    const idx = navPills.findIndex(function(p) {
-      return (p.dataset.stageModal === activeStageId) ||
-             (p.dataset.docTarget === activeStageId) ||
-             (p.getAttribute('href') === '#' + activeStageId);
-    });
-    if (idx > 0) {
-      const prevTarget = navPills[idx - 1].dataset.stageModal || navPills[idx - 1].dataset.docTarget || navPills[idx - 1].getAttribute('href').substring(1);
-      openStageInModal(prevTarget);
-    }
-  });
-
-  stageNextBtn?.addEventListener('click', function() {
-    const idx = navPills.findIndex(function(p) {
-      return (p.dataset.stageModal === activeStageId) ||
-             (p.dataset.docTarget === activeStageId) ||
-             (p.getAttribute('href') === '#' + activeStageId);
-    });
-    if (idx >= 0 && idx < navPills.length - 1) {
-      const nextTarget = navPills[idx + 1].dataset.stageModal || navPills[idx + 1].dataset.docTarget || navPills[idx + 1].getAttribute('href').substring(1);
-      openStageInModal(nextTarget);
-    }
-  });
-
-  document.getElementById('stageDocumentsCloseTop')?.addEventListener('click', function() { closeStageModal(true); });
-  document.getElementById('stageDocumentsDoneBtn')?.addEventListener('click', function() { closeStageModal(true); });
-  stageModal?.addEventListener('click', function(e) {
-    if (e.target === stageModal) closeStageModal(false);
-  });
-  stageModal?.addEventListener('wheel', function(e) {
-    if (e.target === stageModal) e.preventDefault();
-  }, { passive: false });
-
-  // 3. Helper Functions and Steppers
-  function getStageShortName(section) {
-    if (!section) return '';
-    const title = section.dataset?.stageTitle || section.querySelector('.doc-stage-title')?.textContent || '';
-    const fullText = title.trim();
-    if (fullText.includes('Postulancy')) return 'Postulancy';
-    if (fullText.includes('Diaconate')) return 'Diaconate';
-    if (fullText.includes('Priesthood')) return 'Priesthood';
-    if (fullText.includes('Episcopate')) return 'Episcopate';
-    if (fullText.includes('Vital')) return 'Vital';
-    if (fullText.includes('Official')) return 'Diocesan';
-    if (fullText.includes('Ember')) return 'Ember';
-    return fullText.split(' ')[0] || fullText.substring(0, 10);
-  }
-
-  function getStageHubRows() {
-    const visibleCards = stageHubCards.filter(function(card) {
-      return card.offsetParent !== null && card.style.display !== 'none';
-    });
-    if (!visibleCards.length) return [];
-
-    const rows = [];
-    for (let i = 0; i < visibleCards.length; i += 2) {
-      const rowCards = visibleCards.slice(i, i + 2);
-      const titles = rowCards.map(function(c) {
-        const fullTitle = (c.querySelector('.stage-hub-title')?.textContent || '').trim();
-        if (fullTitle.includes('Postulancy')) return 'Postulancy';
-        if (fullTitle.includes('Diaconate')) return 'Diaconate';
-        if (fullTitle.includes('Priesthood')) return 'Priesthood';
-        if (fullTitle.includes('Vital') || fullTitle.includes('Canonical')) return 'Canonical';
-        if (fullTitle.includes('Official') || fullTitle.includes('Diocesan')) return 'Diocesan';
-        if (fullTitle.includes('Ember')) return 'Ember';
-        return fullTitle.split(' ')[0] || ('Stage ' + (rows.length + 1));
-      });
-      rows.push({
-        index: rows.length,
-        cards: rowCards,
-        label: titles.join(' · ') || ('Row ' + (rows.length + 1))
-      });
-    }
-    return rows;
-  }
-
-  function getCurrentStageRowIndex() {
-    const rows = getStageHubRows();
-    if (!rows.length) return 0;
-    const viewportAnchor = window.innerHeight * 0.35;
-    let closestRowIndex = 0;
-    let minDistance = Infinity;
-
-    rows.forEach(function(row, rIdx) {
-      const card = row.cards[0];
-      if (!card) return;
-      const rect = card.getBoundingClientRect();
-      const rowCenter = rect.top + rect.height / 2;
-      const dist = Math.abs(rowCenter - viewportAnchor);
-      if (dist < minDistance) {
-        minDistance = dist;
-        closestRowIndex = rIdx;
-      }
-    });
-
-    return closestRowIndex;
-  }
-
-  function updatePageStageIndicator(rowIndex) {
-    const rows = getStageHubRows();
-    const total = rows.length || 3;
-    if (!rows.length) {
-      const elevatorUp = document.getElementById('elevatorUpBtn');
-      const elevatorDown = document.getElementById('elevatorDownBtn');
-      if (elevatorUp) elevatorUp.disabled = true;
-      if (elevatorDown) elevatorDown.disabled = true;
-      return;
-    }
-
-    const safeRowIndex = Math.max(0, Math.min(total - 1, (rowIndex !== undefined ? rowIndex : getCurrentStageRowIndex())));
-    const currentStep = safeRowIndex + 1;
-    const currentRow = rows[safeRowIndex];
-
-    const elevatorCount = document.getElementById('elevatorCount');
-    const elevatorUp = document.getElementById('elevatorUpBtn');
-    const elevatorDown = document.getElementById('elevatorDownBtn');
-    if (elevatorCount) elevatorCount.textContent = currentStep + ' / ' + total;
-    if (elevatorUp) elevatorUp.disabled = (safeRowIndex <= 0);
-    if (elevatorDown) elevatorDown.disabled = (safeRowIndex >= total - 1);
-
-    const stepperCount = document.getElementById('stageStepperCount');
-    const stepperLabel = document.getElementById('stageStepperLabel');
-    if (stepperCount) stepperCount.textContent = currentStep + ' / ' + total;
-    if (stepperLabel && currentRow) {
-      stepperLabel.textContent = currentRow.label || ('Row ' + currentStep);
-    }
-
-    if (currentRow && currentRow.cards) {
-      const rowStageIds = new Set(currentRow.cards.map(function(c) { return c.dataset.openStage; }));
-      navPills.forEach(function(pill) {
-        const stageId = pill.dataset.stageModal || pill.dataset.docTarget || (pill.getAttribute('href') ? pill.getAttribute('href').substring(1) : '');
-        const isMatch = rowStageIds.has(stageId);
-        pill.classList.toggle('active', isMatch);
-      });
-      const firstPill = navPills.find(function(p) {
-        const sId = p.dataset.stageModal || p.dataset.docTarget || (p.getAttribute('href') ? p.getAttribute('href').substring(1) : '');
-        return rowStageIds.has(sId);
-      });
-      firstPill?.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
-    }
-  }
-
-  function scrollStage(delta) {
-    const rows = getStageHubRows();
-    const total = rows.length || 3;
-    if (total === 0) return;
-
-    let currentRowIndex = getCurrentStageRowIndex();
-    let nextRowIndex = currentRowIndex + delta;
-
-    if (nextRowIndex < 0) nextRowIndex = 0;
-    if (nextRowIndex >= total) nextRowIndex = total - 1;
-
-    const targetRow = rows[nextRowIndex];
-    if (!targetRow || !targetRow.cards.length) return;
-
-    const navSticky = document.getElementById('documentsSectionNav');
-    const stickyHeight = navSticky ? navSticky.offsetHeight : 100;
-    const firstCard = targetRow.cards[0];
-    const cardRect = firstCard.getBoundingClientRect();
-    const targetScrollY = window.pageYOffset + cardRect.top - stickyHeight - 16;
-
-    window.scrollTo({
-      top: Math.max(0, targetScrollY),
-      behavior: 'smooth'
-    });
-
-    targetRow.cards.forEach(function(card) {
-      card.classList.remove('stage-card-flash');
-      void card.offsetWidth;
-      card.classList.add('stage-card-flash');
-    });
-
-    updatePageStageIndicator(nextRowIndex);
-  }
-
-  document.getElementById('elevatorUpBtn')?.addEventListener('click', function() { scrollStage(-1); });
-  document.getElementById('elevatorDownBtn')?.addEventListener('click', function() { scrollStage(1); });
-
-  // 4. Search, Status Filter & Focus Mode Engine
-  function applyFilters() {
+  // 3. Search, Status Filter & Focus Mode Engine
+  function getStageMatchCount(sec) {
     const query = searchQuery.trim().toLowerCase();
+    const rows = sec.querySelectorAll('.doc-table tbody tr.doc-row');
+    let stageMatchCount = 0;
+
+    rows.forEach(function(row) {
+      if (row.classList.contains('ember-summary-row')) {
+        let emberMatch = true;
+        if (query) {
+          const text = row.textContent.toLowerCase();
+          emberMatch = text.includes(query) || 'ember letters'.includes(query);
+        }
+        if (emberMatch) stageMatchCount++;
+        return;
+      }
+
+      const status = row.dataset.docStatus || '';
+      const title = (row.dataset.docTitle || '').toLowerCase();
+      const rowText = row.textContent.toLowerCase();
+
+      let statusOk = true;
+      if (activeFilter === 'not-uploaded') {
+        statusOk = (status === 'not-uploaded' || status === 'expired');
+      } else if (activeFilter === 'submitted') {
+        statusOk = (status === 'submitted');
+      }
+
+      let queryOk = true;
+      if (query) {
+        queryOk = title.includes(query) || rowText.includes(query);
+      }
+
+      let focusOk = true;
+      if (focusMode && status === 'submitted') {
+        focusOk = false;
+      }
+
+      if (statusOk && queryOk && focusOk) stageMatchCount++;
+    });
+
+    return stageMatchCount;
+  }
+
+  function applyFilters(opts) {
+    const options = opts || {};
+    const query = searchQuery.trim().toLowerCase();
+    const filterActive = query.length > 0 || activeFilter !== 'all' || focusMode;
     let totalMatchedDocs = 0;
+    const matchedStageIds = [];
+
+    if (!options.skipPersist) {
+      saveDocFilterState();
+    }
 
     const allSections = document.querySelectorAll('#stageSectionsRepository .doc-stage-section, #stageDocumentsBody .doc-stage-section');
 
     allSections.forEach(function(sec) {
       const stageId = sec.id;
-      const rows = sec.querySelectorAll('.doc-table tbody tr.doc-row');
-      let stageMatchCount = 0;
-
-      rows.forEach(function(row) {
-        if (row.classList.contains('ember-summary-row')) {
-          let emberMatch = true;
-          if (query) {
-            const text = row.textContent.toLowerCase();
-            emberMatch = text.includes(query) || 'ember letters'.includes(query);
-          }
-          row.style.display = emberMatch ? '' : 'none';
-          if (emberMatch) stageMatchCount++;
-          return;
-        }
-
-        const status = row.dataset.docStatus || '';
-        const title = (row.dataset.docTitle || '').toLowerCase();
-        const rowText = row.textContent.toLowerCase();
-
-        let statusOk = true;
-        if (activeFilter === 'not-uploaded') {
-          statusOk = (status === 'not-uploaded' || status === 'expired');
-        } else if (activeFilter === 'submitted') {
-          statusOk = (status === 'submitted');
-        }
-
-        let queryOk = true;
-        if (query) {
-          queryOk = title.includes(query) || rowText.includes(query);
-        }
-
-        let focusOk = true;
-        if (focusMode && status === 'submitted') {
-          focusOk = false;
-        }
-
-        const isVisible = statusOk && queryOk && focusOk;
-        row.style.display = isVisible ? '' : 'none';
-        if (isVisible) stageMatchCount++;
-      });
-
+      const stageMatchCount = getStageMatchCount(sec);
       totalMatchedDocs += stageMatchCount;
+      if (stageMatchCount > 0) matchedStageIds.push(stageId);
 
-      // Filter corresponding Hub Card
-      const hubCard = document.querySelector('.stage-hub-card[data-open-stage="' + CSS.escape(stageId) + '"]');
-      if (hubCard) {
-        if (query.length > 0 || activeFilter !== 'all' || focusMode) {
-          hubCard.style.display = (stageMatchCount === 0) ? 'none' : '';
-        } else {
-          hubCard.style.display = '';
-        }
-      }
-
-      // Filter corresponding nav pill
-      const pill = navPills.find(function(p) {
-        return (p.dataset.stageModal === stageId) ||
-               (p.dataset.docTarget === stageId) ||
-               (p.getAttribute('href') === '#' + stageId);
-      });
+      const pill = navPills.find(function(p) { return getPillTargetId(p) === stageId; });
       if (pill) {
-        if (query.length > 0 || activeFilter !== 'all' || focusMode) {
-          pill.style.opacity = (stageMatchCount === 0) ? '0.35' : '1';
+        if (filterActive) {
+          pill.classList.toggle('search-match', stageMatchCount > 0);
+          pill.classList.toggle('search-dimmed', stageMatchCount === 0);
         } else {
-          pill.style.opacity = '';
+          pill.classList.remove('search-match', 'search-dimmed');
         }
       }
     });
@@ -1353,103 +858,68 @@ body.modal-open .stage-floating-elevator {
       if (searchFeedback) searchFeedback.hidden = true;
       if (searchClearBtn) searchClearBtn.hidden = true;
     }
-    updatePageStageIndicator();
+
+    if (options.autoJump !== false && filterActive && matchedStageIds.length > 0 && !matchedStageIds.includes(activeStageId)) {
+      openStageInModal(matchedStageIds[0]);
+    } else if (activeStageNode) {
+      applyRowFiltersToModal(activeStageNode);
+    }
   }
 
-  function applyRowFiltersToModal(targetEl) {
-    if (!targetEl) return;
-    const rows = targetEl.querySelectorAll('.doc-table tbody tr.doc-row');
-    const query = searchQuery.trim().toLowerCase();
-
-    rows.forEach(function(row) {
-      if (row.classList.contains('ember-summary-row')) {
-        let emberMatch = true;
-        if (query) {
-          const text = row.textContent.toLowerCase();
-          emberMatch = text.includes(query) || 'ember letters'.includes(query);
-        }
-        row.style.display = emberMatch ? '' : 'none';
-        return;
-      }
-
-      const status = row.dataset.docStatus || '';
-      const title = (row.dataset.docTitle || '').toLowerCase();
-      const rowText = row.textContent.toLowerCase();
-
-      let statusOk = true;
-      if (activeFilter === 'not-uploaded') {
-        statusOk = (status === 'not-uploaded' || status === 'expired');
-      } else if (activeFilter === 'submitted') {
-        statusOk = (status === 'submitted');
-      }
-
-      let queryOk = true;
-      if (query) {
-        queryOk = title.includes(query) || rowText.includes(query);
-      }
-
-      let focusOk = true;
-      if (focusMode && status === 'submitted') {
-        focusOk = false;
-      }
-
-      row.style.display = (statusOk && queryOk && focusOk) ? '' : 'none';
-    });
+  function resetAllDocFilters() {
+    if (searchInput) searchInput.value = '';
+    searchQuery = '';
+    activeFilter = 'all';
+    filterPills.forEach(function(b) { b.classList.toggle('active', (b.dataset.docFilter || 'all') === 'all'); });
+    if (btnFocusMode && focusMode) {
+      focusMode = false;
+      btnFocusMode.classList.remove('active');
+      btnFocusMode.setAttribute('aria-pressed', 'false');
+      const labelSpan = btnFocusMode.querySelector('span');
+      if (labelSpan) labelSpan.textContent = 'Hide Complete';
+    }
+    applyFilters({ autoJump: false });
   }
 
   if (searchInput) {
     searchInput.addEventListener('input', function() {
       searchQuery = this.value;
-      applyFilters();
-      if (activeStageNode) applyRowFiltersToModal(activeStageNode);
+      applyFilters({ autoJump: true });
     });
     searchInput.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
         this.value = '';
         searchQuery = '';
-        applyFilters();
-        if (activeStageNode) applyRowFiltersToModal(activeStageNode);
+        applyFilters({ autoJump: false });
         this.blur();
       }
     });
   }
 
-  if (searchClearBtn) {
-    searchClearBtn.addEventListener('click', function() {
-      if (searchInput) {
-        searchInput.value = '';
-        searchInput.focus();
-      }
-      searchQuery = '';
-      applyFilters();
-      if (activeStageNode) applyRowFiltersToModal(activeStageNode);
-    });
-  }
+  searchClearBtn?.addEventListener('click', function() {
+    if (searchInput) {
+      searchInput.value = '';
+      searchInput.focus();
+    }
+    searchQuery = '';
+    applyFilters({ autoJump: false });
+  });
 
-  if (searchResetBtn) {
-    searchResetBtn.addEventListener('click', function() {
-      if (searchInput) searchInput.value = '';
-      searchQuery = '';
-      applyFilters();
-      if (activeStageNode) applyRowFiltersToModal(activeStageNode);
-    });
-  }
+  searchResetBtn?.addEventListener('click', function() {
+    if (searchInput) searchInput.value = '';
+    searchQuery = '';
+    applyFilters({ autoJump: false });
+  });
 
-  // Handle incoming 'q' query parameter (e.g. from Dashboard global search)
-  var urlParams = new URLSearchParams(window.location.search);
-  var incomingQ = urlParams.get('q');
-  if (incomingQ && searchInput) {
-    searchInput.value = incomingQ;
-    searchQuery = incomingQ;
-    applyFilters();
-  }
+  stageSearchResetBtn?.addEventListener('click', function() {
+    resetAllDocFilters();
+  });
 
   filterPills.forEach(function(btn) {
     btn.addEventListener('click', function() {
       filterPills.forEach(function(b) { b.classList.toggle('active', b === btn); });
       activeFilter = btn.dataset.docFilter || 'all';
-      applyFilters();
-      if (activeStageNode) applyRowFiltersToModal(activeStageNode);
+      applyFilters({ autoJump: true });
     });
   });
 
@@ -1462,31 +932,16 @@ body.modal-open .stage-floating-elevator {
       if (labelSpan) {
         labelSpan.textContent = focusMode ? 'Showing Incomplete Only' : 'Hide Complete';
       }
-      applyFilters();
-      if (activeStageNode) applyRowFiltersToModal(activeStageNode);
+      applyFilters({ autoJump: true });
     });
   }
 
-  // Sync elevator visibility with active tab
-  function syncElevatorWithActiveTab() {
+  // Sync top stage stepper with active tab (Checklist vs Ember Letters)
+  function syncControlsWithActiveTab() {
     const checklistTab = document.getElementById('tabChecklist');
     const isChecklistActive = checklistTab && !checklistTab.hidden &&
       (checklistTab.classList.contains('active') || checklistTab.style.display !== 'none');
-    const elevator = document.getElementById('stageFloatingElevator');
     const stepperCtrl = document.getElementById('stageStepperControl');
-
-    if (elevator) {
-      if (isChecklistActive) {
-        elevator.style.display = 'flex';
-        elevator.style.opacity = '1';
-        elevator.style.pointerEvents = 'auto';
-        elevator.style.transform = 'translateY(-50%)';
-      } else {
-        elevator.style.display = 'none';
-        elevator.style.opacity = '0';
-        elevator.style.pointerEvents = 'none';
-      }
-    }
     if (stepperCtrl) {
       stepperCtrl.style.display = isChecklistActive ? '' : 'none';
     }
@@ -1494,7 +949,7 @@ body.modal-open .stage-floating-elevator {
 
   document.querySelectorAll('.page-tabs [data-tab], [data-open-tab]').forEach(function(btn) {
     btn.addEventListener('click', function() {
-      setTimeout(syncElevatorWithActiveTab, 50);
+      setTimeout(syncControlsWithActiveTab, 50);
     });
   });
 
@@ -1502,13 +957,14 @@ body.modal-open .stage-floating-elevator {
   if (typeof origSelectTab === 'function') {
     window.selectTab = function() {
       origSelectTab.apply(this, arguments);
-      syncElevatorWithActiveTab();
+      syncControlsWithActiveTab();
     };
   }
 
-  // Keyboard shortcut: Escape, PageUp / ArrowLeft, PageDown / ArrowRight
+  // Keyboard navigation: Escape closes overlay modals; ArrowLeft/ArrowRight & PageUp/PageDown step stages
   document.addEventListener('keydown', function(e) {
-    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+    const activeEl = document.activeElement;
+    if (activeEl && (['INPUT', 'TEXTAREA', 'SELECT'].includes(activeEl.tagName) || activeEl.isContentEditable)) return;
 
     if (e.key === 'Escape') {
       const uploadModal = document.getElementById('clergyUploadModal');
@@ -1518,27 +974,24 @@ body.modal-open .stage-floating-elevator {
         syncBodyScrollLock();
         return;
       }
-      if (stageModal && stageModal.classList.contains('stage-modal-active')) {
-        closeStageModal(true);
-      }
-    } else if (stageModal && stageModal.classList.contains('stage-modal-active')) {
-      if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
-        e.preventDefault();
-        stagePrevBtn?.click();
-      } else if (e.key === 'ArrowRight' || e.key === 'PageDown') {
-        e.preventDefault();
-        stageNextBtn?.click();
-      }
-    } else if (e.key === 'PageDown' || (e.altKey && e.key === 'ArrowDown')) {
+      return;
+    }
+
+    if (document.querySelector('.modal-bg.show, .modal-bg.active')) return;
+    const checklistTab = document.getElementById('tabChecklist');
+    const isChecklistVisible = checklistTab && checklistTab.offsetParent !== null;
+    if (!isChecklistVisible) return;
+
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
       e.preventDefault();
-      scrollStage(1);
-    } else if (e.key === 'PageUp' || (e.altKey && e.key === 'ArrowUp')) {
+      stepStage(-1);
+    } else if (e.key === 'ArrowRight' || e.key === 'PageDown') {
       e.preventDefault();
-      scrollStage(-1);
+      stepStage(1);
     }
   });
 
-  // 5. In-App Document Preview Modal Interception
+  // 4. In-App Document Preview Modal Interception
   document.addEventListener('click', function(e) {
     const row = e.target.closest('.doc-row[data-view-url], .doc-bar[data-view-url]');
     if (!row) return;
@@ -1572,7 +1025,7 @@ body.modal-open .stage-floating-elevator {
     }
   });
 
-  // 6. Upload Modal Trigger and Form Persistence
+  // 5. Upload Modal Trigger and Form Persistence
   document.addEventListener('click', function(e) {
     const btn = e.target.closest('[data-open-upload]');
     if (!btn) return;
@@ -1600,7 +1053,6 @@ body.modal-open .stage-floating-elevator {
     }
   });
 
-  // Preserve open stage across form upload POST and reload
   document.getElementById('clergyUploadModalForm')?.addEventListener('submit', function() {
     try {
       if (activeStageId) {
@@ -1633,76 +1085,85 @@ body.modal-open .stage-floating-elevator {
     if (e.target === clergyUploadModalEl) e.preventDefault();
   }, { passive: false });
 
-  // 7. Auto-Reopen or Deep-Link Stage on Load
+  // 6. Landing Initialization: reopen saved stage -> URL stage/hash -> remembered carousel -> 1st stage pill
+  const urlParams = new URLSearchParams(window.location.search);
+  const incomingQ = urlParams.get('q') || '';
+  let reopenStage = '';
   try {
-    const reopenStage = sessionStorage.getItem(REOPEN_STAGE_KEY);
-    if (reopenStage) {
-      sessionStorage.removeItem(REOPEN_STAGE_KEY);
-      openStageInModal(reopenStage);
-    } else {
-      const hash = window.location.hash ? window.location.hash.substring(1) : '';
-      const stageParam = urlParams.get('stage');
-      const targetFromUrl = hash.startsWith('sec-doc-') ? hash : (stageParam ? ('sec-doc-' + stageParam) : '');
-      if (targetFromUrl && document.getElementById(targetFromUrl)) {
-        openStageInModal(targetFromUrl);
-      }
-    }
+    reopenStage = sessionStorage.getItem(REOPEN_STAGE_KEY) || '';
+    if (reopenStage) sessionStorage.removeItem(REOPEN_STAGE_KEY);
   } catch (_e) {}
 
-  let isScrollTicking = false;
-  window.addEventListener('scroll', function() {
-    if (document.body.classList.contains('modal-open')) return;
-    if (!isScrollTicking) {
-      window.requestAnimationFrame(function() {
-        updatePageStageIndicator();
-        isScrollTicking = false;
-      });
-      isScrollTicking = true;
-    }
-  }, { passive: true });
+  let savedActiveStage = '';
+  try {
+    savedActiveStage = sessionStorage.getItem(ACTIVE_STAGE_KEY) || '';
+  } catch (_e) {}
 
-  syncElevatorWithActiveTab();
-  setTimeout(function() { updatePageStageIndicator(0); }, 80);
+  let savedFilters = null;
+  try {
+    const rawFilters = sessionStorage.getItem(DOC_FILTERS_KEY);
+    if (rawFilters) savedFilters = JSON.parse(rawFilters);
+  } catch (_e) {}
+
+  const hash = window.location.hash ? window.location.hash.substring(1) : '';
+  const stageParam = urlParams.get('stage');
+  const targetFromUrl = hash.startsWith('sec-doc-') ? hash : (stageParam ? ('sec-doc-' + stageParam) : '');
+
+  let initialStageId = '';
+  let hasSavedStage = false;
+  if (reopenStage && document.getElementById(reopenStage)) {
+    initialStageId = reopenStage;
+  } else if (targetFromUrl && document.getElementById(targetFromUrl)) {
+    initialStageId = targetFromUrl;
+  } else if (savedActiveStage && document.getElementById(savedActiveStage)) {
+    initialStageId = savedActiveStage;
+    hasSavedStage = true;
+  } else if (navPills.length > 0) {
+    initialStageId = getPillTargetId(navPills[0]);
+  }
+
+  if (savedFilters && typeof savedFilters === 'object') {
+    if (['all', 'not-uploaded', 'submitted'].includes(savedFilters.filter)) {
+      activeFilter = savedFilters.filter;
+      filterPills.forEach(function(b) { b.classList.toggle('active', (b.dataset.docFilter || 'all') === activeFilter); });
+    }
+    if (savedFilters.focus) {
+      focusMode = true;
+      if (btnFocusMode) {
+        btnFocusMode.classList.add('active');
+        btnFocusMode.setAttribute('aria-pressed', 'true');
+        const labelSpan = btnFocusMode.querySelector('span');
+        if (labelSpan) labelSpan.textContent = 'Showing Incomplete Only';
+      }
+    }
+    if (!incomingQ && savedFilters.q && searchInput) {
+      searchInput.value = savedFilters.q;
+      searchQuery = savedFilters.q;
+    }
+  }
+
+  if (incomingQ && searchInput) {
+    searchInput.value = incomingQ;
+    searchQuery = incomingQ;
+  }
+
+  if (initialStageId) {
+    openStageInModal(initialStageId, { scrollPill: true, instantPill: true });
+  }
+
+  if (searchQuery.trim() || activeFilter !== 'all' || focusMode) {
+    applyFilters({
+      autoJump: !!incomingQ && !reopenStage && !targetFromUrl && !hasSavedStage,
+      skipPersist: true
+    });
+  }
+
+  syncControlsWithActiveTab();
 })();
 </script>
 {% endblock %}
 
 {% block modals %}
-<!-- Stage Documents Modal (opened by clicking stage pills or stage cards) -->
-<div class="modal-bg stage-modal-bg" id="stageDocumentsModal" role="dialog" aria-modal="true" style="display:none;">
-  <div class="modal stage-quick-modal">
-    <div class="modal-head">
-      <div>
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <h3 id="stageDocumentsModalTitle" style="margin:0;display:flex;align-items:center;gap:8px;">
-            <i class="fa-solid fa-folder-open" style="color:var(--blue);"></i>
-            <span>Stage Requirements</span>
-          </h3>
-          <span class="badge blue" id="stageDocumentsStepBadge" style="font-size:13px;padding:3px 8px;">Stage 1 of 6</span>
-          <span class="badge pending-b" id="stageDocumentsProgressBadge" style="font-size:13px;padding:3px 8px;">0 uploaded</span>
-        </div>
-        <p class="muted" id="stageDocumentsModalDesc" style="margin:4px 0 0;font-size:14px;">Requirements and attachments for this formation stage</p>
-      </div>
-      <button class="close" type="button" aria-label="Close" id="stageDocumentsCloseTop">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </div>
-
-    <div class="stage-modal-body" id="stageDocumentsBody"></div>
-
-    <div class="stage-modal-foot">
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button type="button" class="btn small secondary" id="stagePrevBtn"><i class="fa-solid fa-chevron-left"></i> Previous Stage</button>
-        <span class="stage-step-indicator" id="stageStepIndicator" aria-live="polite">1 / 6</span>
-        <button type="button" class="btn small secondary" id="stageNextBtn">Next Stage <i class="fa-solid fa-chevron-right"></i></button>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button type="button" class="btn secondary" id="stageDocumentsDoneBtn"><i class="fa-solid fa-xmark"></i> Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div class="modal-bg" id="clergyUploadModal" style="display:none;" role="dialog" aria-modal="true">
   <div class="modal" style="max-width:480px;">
     <div class="modal-head">

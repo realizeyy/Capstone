@@ -57,41 +57,7 @@
           </select>
           <button type="submit" class="btn secondary"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
         </form>
-        <div class="table-meta-bar top">
-          <div class="meta-count">
-            {% if page.paginator.count > 0 %}
-              Showing <strong>{{ page.start_index }} to {{ page.end_index }}</strong> of <strong>{{ page.paginator.count }}</strong> clergy records
-            {% else %}
-              <span>0 clergy records found</span>
-            {% endif %}
-          </div>
-          <div class="meta-controls">
-            <div class="per-page-select">
-              <label for="perPageSelect">Per page:</label>
-              <!-- ds-allow-native-select: table items-per-page selector -->
-              <select id="perPageSelect" class="select small" onchange="window.location.href='?{% if base_page_query %}{{ base_page_query }}&amp;{% endif %}per_page=' + this.value;">
-                {% for n in per_page_choices %}
-                  <option value="{{ n }}" {% if per_page == n %}selected{% endif %}>{{ n }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            {% if page.has_other_pages %}
-              <div class="pager-mini">
-                {% if page.has_previous %}
-                  <a class="btn small secondary" href="?{% if page_query %}{{ page_query }}&amp;{% endif %}page={{ page.previous_page_number }}"><i class="fa-solid fa-arrow-left"></i> Previous</a>
-                {% else %}
-                  <span class="btn small secondary disabled" aria-disabled="true"><i class="fa-solid fa-arrow-left"></i> Previous</span>
-                {% endif %}
-                <span class="page-indicator">Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
-                {% if page.has_next %}
-                  <a class="btn small btn-next" href="?{% if page_query %}{{ page_query }}&amp;{% endif %}page={{ page.next_page_number }}">Next <i class="fa-solid fa-arrow-right"></i></a>
-                {% else %}
-                  <span class="btn small secondary disabled" aria-disabled="true">Next <i class="fa-solid fa-arrow-right"></i></span>
-                {% endif %}
-              </div>
-            {% endif %}
-          </div>
-        </div>
+        {% include "registrar/_table_meta_bar.html" with position="top" select_id="perPageSelect" item_label="clergy records" %}
       </div>
       {% if showing_archived %}
         <div class="notice" id="noticeArchivedRecordsRegistrar">
@@ -179,37 +145,7 @@
       </div>
       <div id="clergyPagerSentinel" style="height: 1px;"></div>
       {% if page.has_other_pages or page.paginator.count > 0 %}
-        <div class="table-meta-bar bottom" id="clergyBottomPager">
-          <div class="meta-count">
-            Showing <strong>{{ page.start_index }} to {{ page.end_index }}</strong> of <strong>{{ page.paginator.count }}</strong> clergy records
-          </div>
-          <div class="meta-controls">
-            <div class="per-page-select">
-              <label for="bottomPerPageSelect">Per page:</label>
-              <!-- ds-allow-native-select: table items-per-page selector -->
-              <select id="bottomPerPageSelect" class="select small" onchange="window.location.href='?{% if base_page_query %}{{ base_page_query }}&amp;{% endif %}per_page=' + this.value;">
-                {% for n in per_page_choices %}
-                  <option value="{{ n }}" {% if per_page == n %}selected{% endif %}>{{ n }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            {% if page.has_other_pages %}
-              <div class="pager-mini">
-                {% if page.has_previous %}
-                  <a class="btn small secondary" href="?{% if page_query %}{{ page_query }}&amp;{% endif %}page={{ page.previous_page_number }}"><i class="fa-solid fa-arrow-left"></i> Previous</a>
-                {% else %}
-                  <span class="btn small secondary disabled" aria-disabled="true"><i class="fa-solid fa-arrow-left"></i> Previous</span>
-                {% endif %}
-                <span class="page-indicator">Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
-                {% if page.has_next %}
-                  <a class="btn small btn-next" href="?{% if page_query %}{{ page_query }}&amp;{% endif %}page={{ page.next_page_number }}">Next <i class="fa-solid fa-arrow-right"></i></a>
-                {% else %}
-                  <span class="btn small secondary disabled" aria-disabled="true">Next <i class="fa-solid fa-arrow-right"></i></span>
-                {% endif %}
-              </div>
-            {% endif %}
-          </div>
-        </div>
+        {% include "registrar/_table_meta_bar.html" with position="bottom" bar_id="clergyBottomPager" select_id="bottomPerPageSelect" item_label="clergy records" %}
       {% endif %}
     </div>
   </section>
@@ -380,5 +316,5 @@
   {{ deaneries_map|json_script:"deaneries-data" }}
 {% endblock %}
 {% block extra_js %}
-  <script src="{% static 'registrar/js/clergy-records.js' %}?v=16"></script>
+  <script src="{% static 'registrar/js/clergy-records.js' %}?v=17"></script>
 {% endblock %}

@@ -1,3 +1,5 @@
+import calendar
+import re
 import shutil
 import tempfile
 import threading
@@ -10,7 +12,7 @@ from django.db import IntegrityError
 from django.db import close_old_connections, transaction
 from django.test import TestCase, TransactionTestCase, override_settings, skipUnlessDBFeature
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import dateformat, timezone
 
 from accounts.testing import activate
 from clergy.models import ClergyChild, ClergyEducation, ClergyProfile
@@ -303,9 +305,66 @@ class PaginationAndQueryCountTests(TestCase):
         self.assertEqual(len(res.context['records']), 14)
         self.assertEqual(res.context['records'][0].doc_summary['submitted'], 1)
 
-        with self.assertNumQueries(10):
+        with self.assertNumQueries(11):
             res2 = self.client.get(reverse('registrar:documents_overview'))
         self.assertEqual(len(res2.context['rows']), 14)
+
+    def test_documents_overview_paginates_and_preserves_filters(self):
+        for i in range(1, 32):
+            ClergyRecord.objects.create(
+                id=f'DOC-{i:03d}',
+                name=f'Fr. Doc {i:03d}',
+                rank='priest' if i <= 28 else 'deacon',
+            )
+        page1 = self.client.get(reverse('registrar:documents_overview'), {'q': 'Doc', 'rank': 'priest'})
+        self.assertEqual(len(page1.context['rows']), 25)
+        self.assertTrue(page1.context['page'].has_next())
+        self.assertContains(page1, 'q=Doc&amp;rank=priest&amp;page=2')
+        self.assertContains(page1, 'id="clergyBottomPager"')
+        self.assertContains(page1, 'id="clergyPagerSentinel"')
+
+        page1_10 = self.client.get(
+            reverse('registrar:documents_overview'),
+            {'q': 'Doc', 'rank': 'priest', 'per_page': 10},
+        )
+        self.assertEqual(len(page1_10.context['rows']), 10)
+        self.assertContains(page1_10, 'per_page=10&amp;page=2')
+
+        page2_10 = self.client.get(
+            reverse('registrar:documents_overview'),
+            {'q': 'Doc', 'rank': 'priest', 'per_page': 10, 'page': 3},
+        )
+        self.assertEqual(len(page2_10.context['rows']), 8)
+
+    def test_centered_pager_structure_shared_across_registrar_tables(self):
+        future = date.today() + timedelta(days=90)
+        for i in range(1, 14):
+            ClergyRecord.objects.create(
+                id=f'PAG-{i:03d}',
+                name=f'Fr. Pager {i:03d}',
+                contract_end=future + timedelta(days=i),
+            )
+        for url_name in ('registrar:clergy_records', 'registrar:documents_overview', 'registrar:contract_review'):
+            res = self.client.get(reverse(url_name), {'per_page': 10})
+            html = res.content.decode('utf-8')
+            self.assertRegex(
+                html,
+                re.compile(
+                    r'<div class="table-meta-bar top">.*?<div class="meta-count">.*?'
+                    r'<nav class="pager-mini"[^>]*aria-label="Top pagination">.*?</nav>\s*'
+                    r'<div class="meta-controls">',
+                    re.S,
+                ),
+            )
+            self.assertRegex(
+                html,
+                re.compile(
+                    r'<div class="table-meta-bar bottom" id="clergyBottomPager">.*?<div class="meta-count">.*?'
+                    r'<nav class="pager-mini"[^>]*aria-label="Bottom pagination">.*?</nav>\s*'
+                    r'<div class="meta-controls">',
+                    re.S,
+                ),
+            )
 
     def test_clergy_records_paginates_at_100_per_page_preserving_filters(self):
         for i in range(1, 106):
@@ -812,27 +871,38 @@ class RegistrarRecordDetailModernizationTests(TestCase):
             place_of_birth='Bontoc',
         )
 
-    def test_record_detail_renders_hub_and_modals(self):
+    def test_record_detail_renders_inline_modals_and_edge_navigation(self):
         url = reverse('registrar:record_detail', args=[self.record.id])
         r = self.client.get(url)
         self.assertEqual(r.status_code, 200)
 
-        # Phase 2: Stages Summary Hub & Stage Documents Modal
-        self.assertContains(r, 'id="stagesSummaryHub"')
+        # Single-modal-at-a-time inline Documents workspace with edge navigation
+        self.assertNotContains(r, 'id="stagesSummaryHub"')
+        self.assertNotContains(r, 'id="stageFloatingElevator"')
+        self.assertNotContains(r, 'id="docFloatingNavBtn"')
         self.assertContains(r, 'id="stageDocumentsModal"')
+        self.assertContains(r, 'id="stageEdgePrevBtn"')
+        self.assertContains(r, 'id="stageEdgeNextBtn"')
         self.assertContains(r, 'id="stageSectionsRepository"')
-        self.assertContains(r, 'id="stageFloatingElevator"')
         self.assertContains(r, 'id="stageStepperControl"')
+        self.assertContains(r, 'id="stageStepIndicator"')
         self.assertContains(r, 'id="stageSearchEmpty"')
 
-        # Phase 3: Personal Information Hub & Quick-Edit Modal
-        self.assertContains(r, 'id="registrarSummaryHub"')
+        # Single-modal-at-a-time inline Personal Information workspace with edge navigation
+        self.assertNotContains(r, 'id="registrarSummaryHub"')
         self.assertContains(r, 'id="sectionQuickEditModal"')
+        self.assertContains(r, 'id="sectionEdgePrevBtn"')
+        self.assertContains(r, 'id="sectionEdgeNextBtn"')
         self.assertContains(r, 'id="sectionQuickEditStepBadge"')
+        self.assertContains(r, 'id="sectionDraftRestoredBadge"')
         self.assertContains(r, 'id="sectionQuickEditStepIndicator"')
         self.assertContains(r, 'id="profileStepperControl"')
         self.assertContains(r, 'id="profileSearchInput"')
         self.assertContains(r, 'id="profileSearchEmpty"')
+        self.assertContains(r, 'ednp_active_section_')
+        self.assertContains(r, 'ednp_active_stage_')
+        self.assertContains(r, 'ednp_doc_filters_')
+        self.assertContains(r, 'ednp:draft-restored')
 
         # Check parish address picker integration
         self.assertContains(r, 'data-picker-mode="parish"')
@@ -1020,6 +1090,133 @@ class GeneratedReportsSearchTests(TestCase):
         self.assertIn('Clerical Directory', titles)
         self.assertIn('Status Report', titles)
         self.assertNotIn('Archived Status Report', titles)
+
+
+class ContractReviewSearchAndPaginationTests(TestCase):
+    def setUp(self):
+        self.registrar = activate(User.objects.create_user('reg_contracts', password='pw12345!x', is_staff=True))
+        self.client.force_login(self.registrar)
+        self.deanery = Deanery.objects.create(name='Baguio Vicariate')
+        today = date.today()
+        expiring_end = today + timedelta(days=45)
+        soon_month = next(m for m in range(4, 13) if m != expiring_end.month)
+        self.soon_date = date(today.year + 2, soon_month, 15)
+        self.c_expired = ClergyRecord.objects.create(
+            id='CLG-501',
+            name='Fr. Expired Alpha',
+            assignment='St. Mark Mission',
+            status='Active',
+            contract_end=date(2025, 1, 10),
+        )
+        self.c_soon = ClergyRecord.objects.create(
+            id='CLG-502',
+            name='Fr. Soon Beta',
+            deanery=self.deanery,
+            assignment='St. Luke Parish',
+            status='Active',
+            contract_end=self.soon_date,
+        )
+        self.c_expiring = ClergyRecord.objects.create(
+            id='CLG-505',
+            name='Fr. Expiring Delta',
+            assignment='St. John Mission',
+            status='Active',
+            contract_end=expiring_end,
+        )
+        self.c_upcoming = ClergyRecord.objects.create(
+            id='CLG-503',
+            name='Fr. Upcoming Gamma',
+            assignment='Holy Cross Mission',
+            status='On Leave',
+            contract_end=date(2031, 3, 20),
+        )
+        self.c_none = ClergyRecord.objects.create(
+            id='CLG-504',
+            name='Fr. No Contract',
+            assignment='Cathedral Parish',
+            status='Active',
+            contract_end=None,
+        )
+
+    def _ids(self, response):
+        return [row['record'].id for row in response.context['rows']]
+
+    def test_search_matches_identity_deanery_status_and_contract_end_formats(self):
+        self.assertEqual(self._ids(self.client.get(reverse('registrar:contract_review'), {'q': 'Alpha'})), ['CLG-501'])
+        self.assertEqual(self._ids(self.client.get(reverse('registrar:contract_review'), {'q': 'CLG-502'})), ['CLG-502'])
+        self.assertEqual(self._ids(self.client.get(reverse('registrar:contract_review'), {'q': 'St. Luke'})), ['CLG-502'])
+        self.assertEqual(self._ids(self.client.get(reverse('registrar:contract_review'), {'q': 'Baguio'})), ['CLG-502'])
+        self.assertEqual(self._ids(self.client.get(reverse('registrar:contract_review'), {'q': 'On Leave'})), ['CLG-503'])
+
+        # Date search formats for self.soon_date
+        for date_query in (
+            self.soon_date.isoformat(),
+            str(self.soon_date.year),
+            calendar.month_name[self.soon_date.month],
+            f'{calendar.month_abbr[self.soon_date.month]} {self.soon_date.year}',
+            dateformat.format(self.soon_date, 'N j, Y'),
+            self.soon_date.strftime('%m/%d/%Y'),
+        ):
+            self.assertEqual(
+                self._ids(self.client.get(reverse('registrar:contract_review'), {'q': date_query})),
+                ['CLG-502'],
+                msg=f'Expected CLG-502 for contract query {date_query!r}',
+            )
+
+    def test_expiry_and_status_filters(self):
+        res_expired = self.client.get(reverse('registrar:contract_review'), {'expiry': 'expired'})
+        self.assertEqual(self._ids(res_expired), ['CLG-501'])
+
+        res_soon = self.client.get(reverse('registrar:contract_review'), {'expiry': 'expiring_soon'})
+        self.assertEqual(self._ids(res_soon), ['CLG-505'])
+
+        res_upcoming = self.client.get(reverse('registrar:contract_review'), {'expiry': 'upcoming'})
+        self.assertIn('CLG-502', self._ids(res_upcoming))
+        self.assertIn('CLG-503', self._ids(res_upcoming))
+        self.assertNotIn('CLG-501', self._ids(res_upcoming))
+        self.assertNotIn('CLG-505', self._ids(res_upcoming))
+
+        res_leave = self.client.get(reverse('registrar:contract_review'), {'status': 'On Leave'})
+        self.assertEqual(self._ids(res_leave), ['CLG-503'])
+
+        res_empty = self.client.get(reverse('registrar:contract_review'), {'q': 'NobodyMatches'})
+        self.assertEqual(self._ids(res_empty), [])
+        self.assertContains(res_empty, 'No contracts match your search criteria.')
+
+    def test_contract_review_paginates_preserving_search_and_filters(self):
+        base = date.today() + timedelta(days=30)
+        for i in range(1, 14):
+            ClergyRecord.objects.create(
+                id=f'CTR-{i:03d}',
+                name=f'Fr. Renewal {i:03d}',
+                status='Active',
+                contract_end=base + timedelta(days=i),
+            )
+        page1 = self.client.get(
+            reverse('registrar:contract_review'),
+            {'q': 'Renewal', 'status': 'Active', 'per_page': 10},
+        )
+        self.assertEqual(len(page1.context['rows']), 10)
+        self.assertTrue(page1.context['page'].has_next())
+        self.assertContains(page1, 'q=Renewal&amp;status=Active&amp;per_page=10&amp;page=2')
+        self.assertContains(page1, 'data-base-query="q=Renewal&amp;status=Active"')
+
+        page2 = self.client.get(
+            reverse('registrar:contract_review'),
+            {'q': 'Renewal', 'status': 'Active', 'per_page': 10, 'page': 2},
+        )
+        self.assertEqual(len(page2.context['rows']), 3)
+
+    def test_dashboard_search_catalog_indexes_contract_end_dates(self):
+        res = self.client.get(reverse('registrar:dashboard'))
+        self.assertEqual(res.status_code, 200)
+        catalog = res.context['portal_catalog']
+        clergy_item = next(item for item in catalog if item['title'] == 'Fr. Soon Beta')
+        self.assertIn(self.soon_date.isoformat(), clergy_item['keywords'])
+        self.assertIn(dateformat.format(self.soon_date, 'N j, Y').lower(), clergy_item['keywords'])
+        action_titles = [item['title'] for item in catalog if item['category'] == 'Administrative Actions']
+        self.assertIn('Contract Review', action_titles)
+
 
 
 

@@ -5,64 +5,107 @@
 {% block content %}
   <section class="page active">
     <div class="panel page-narrow">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert {% if 'error' in message.tags %}alert-error{% elif 'success' in message.tags %}alert-success{% endif %}" role="alert">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
       {% if preview_rows %}
-        <div class="panel-head">
-          <div>
-            <h3><i class="fa-solid fa-list-check"></i> Review before creating</h3>
-            <span class="muted">Untick anyone you don't want created. Nothing has been saved yet.</span>
+        <div id="bulkStatusBanner" class="bulk-status-banner" role="alert" tabindex="-1" hidden>
+          <div class="bulk-status-head">
+            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+            <div>
+              <h4 id="bulkStatusTitle" class="bulk-status-title">Bulk Account Creation Failed</h4>
+              <p id="bulkStatusMsg" class="bulk-status-msg"></p>
+            </div>
+          </div>
+          <div class="bulk-status-actions">
+            <button type="button" class="btn small" id="bulkRetryEditBtn"><i class="fa-solid fa-pen"></i> Edit names &amp; re-preview</button>
+            <a class="btn small secondary" href="{% url 'registrar:bulk_accounts' %}"><i class="fa-solid fa-rotate-left"></i> Start over</a>
+            <a class="btn small secondary" id="bulkCheckRecordsLink" href="{% url 'registrar:clergy_records' %}" hidden><i class="fa-solid fa-address-book"></i> Check Clergy Records</a>
           </div>
         </div>
-        <div class="alert">Each person gets a username (their record ID) and a random temporary password. The passwords appear <b>only once</b>, on the printable slips that open next: they cannot be shown again. Unactivated accounts stop working after {{ setup_window_days }} days.</div>
-        <form method="post" id="bulkConfirmForm" class="slip-form">
-          {% csrf_token %}
-          <input type="hidden" name="format" value="html">
-          <input type="hidden" name="step" value="confirm">
-          <input type="hidden" name="token" value="{{ token }}">
-          <table>
-            <thead>
-              <tr>
-                <th class="col-narrow"></th>
-                <th class="col-narrow">#</th>
-                <th>Full name</th>
-                <th>Check</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for row in preview_rows %}
-                <tr>
-                  <td>
-                    <input type="checkbox"
-                           class="pick"
-                           name="names"
-                           value="{{ row.name }}"
-                           {% if row.errors %}disabled{% elif not row.warnings %}checked{% endif %}
-                           aria-label="Create account for {{ row.name }}">
-                  </td>
-                  <td>{{ forloop.counter }}</td>
-                  <td><b>{{ row.name }}</b></td>
-                  <td>
-                    {% for e in row.errors %}<span class="badge inactive-b">{{ e }}</span>{% endfor %}
-                    {% for w in row.warnings %}<span class="badge pending-b">{{ w }}</span>{% endfor %}
-                    {% if not row.errors and not row.warnings %}<span class="badge active-b">OK</span>{% endif %}
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-          <p class="muted form-note">Names with a yellow note start unticked: tick them only if it really is a different person.</p>
-          <div class="modal-actions">
-            <a class="btn secondary"
-               href="{% url 'registrar:bulk_accounts' %}"><i class="fa-solid fa-rotate-left"></i> Start over</a>
-            <button class="btn secondary"
-                    type="submit"
-                    form="bulkEditInputForm"
-                    formnovalidate><i class="fa-solid fa-pen"></i> Edit names</button>
-            <button class="btn"
-                    type="submit"
-                    id="bulkConfirmBtn"
-                    data-confirm="Create portal accounts and generate printable login slips for the selected clergy members? Temporary passwords will be generated."><i class="fa-solid fa-print"></i> Create accounts &amp; open slips</button>
+        <div id="bulkReviewSection">
+          <div class="panel-head">
+            <div>
+              <h3><i class="fa-solid fa-list-check"></i> Review before creating</h3>
+              <span class="muted">Untick anyone you don't want created. Nothing has been saved yet.</span>
+            </div>
           </div>
-        </form>
+          <div class="alert">Each person gets a username (their record ID) and a random temporary password. The passwords appear <b>only once</b>, on the printable slips that open next: they cannot be shown again. Unactivated accounts stop working after {{ setup_window_days }} days.</div>
+          <form method="post" id="bulkConfirmForm" class="slip-form">
+            {% csrf_token %}
+            <input type="hidden" name="format" value="html">
+            <input type="hidden" name="step" value="confirm">
+            <input type="hidden" name="token" value="{{ token }}">
+            <table>
+              <thead>
+                <tr>
+                  <th class="col-narrow"></th>
+                  <th class="col-narrow">#</th>
+                  <th>Full name</th>
+                  <th>Check</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in preview_rows %}
+                  <tr>
+                    <td>
+                      <input type="checkbox"
+                             class="pick"
+                             name="names"
+                             value="{{ row.name }}"
+                             {% if row.errors %}disabled{% elif not row.warnings %}checked{% endif %}
+                             aria-label="Create account for {{ row.name }}">
+                    </td>
+                    <td>{{ forloop.counter }}</td>
+                    <td><b>{{ row.name }}</b></td>
+                    <td>
+                      {% for e in row.errors %}<span class="badge inactive-b">{{ e }}</span>{% endfor %}
+                      {% for w in row.warnings %}<span class="badge pending-b">{{ w }}</span>{% endfor %}
+                      {% if not row.errors and not row.warnings %}<span class="badge active-b">OK</span>{% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <p class="muted form-note">Names with a yellow note start unticked: tick them only if it really is a different person.</p>
+            <div class="modal-actions">
+              <a class="btn secondary"
+                 href="{% url 'registrar:bulk_accounts' %}"><i class="fa-solid fa-rotate-left"></i> Start over</a>
+              <button class="btn secondary"
+                      type="submit"
+                      form="bulkEditInputForm"
+                      formnovalidate><i class="fa-solid fa-pen"></i> Edit names</button>
+              <button class="btn"
+                      type="submit"
+                      id="bulkConfirmBtn"
+                      data-confirm="Create portal accounts and generate printable login slips for the selected clergy members? Temporary passwords will be generated."><i class="fa-solid fa-print"></i> Create accounts &amp; open slips</button>
+            </div>
+          </form>
+        </div>
+        <div id="bulkResultPanel" class="bulk-result-panel" hidden aria-live="polite">
+          <div class="bulk-result-head">
+            <div class="bulk-result-icon" aria-hidden="true">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+              <h3 id="bulkResultTitle" class="bulk-result-title">Bulk Accounts Created</h3>
+              <p id="bulkResultSummary" class="bulk-result-summary"></p>
+            </div>
+          </div>
+          <div class="bulk-result-note">
+            <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+            <span>Temporary passwords appear only on the generated login slips and cannot be retrieved again after leaving this page. Print all slips before leaving.</span>
+          </div>
+          <div class="bulk-result-actions">
+            <button type="button" class="btn" id="bulkReopenSlipsBtn"><i class="fa-solid fa-print"></i> Open Printable Login Slips</button>
+            <a class="btn secondary" id="bulkResultRecordsLink" href="{% url 'registrar:clergy_records' %}"><i class="fa-solid fa-address-book"></i> Go to Clergy Records</a>
+            <a class="btn secondary" href="{% url 'registrar:bulk_accounts' %}"><i class="fa-solid fa-users-gear"></i> Create Another Batch</a>
+          </div>
+        </div>
         <form method="post" id="bulkEditInputForm" hidden>
           {% csrf_token %}
           <input type="hidden" name="step" value="edit">
@@ -70,7 +113,7 @@
         </form>
       {% else %}
         <div class="panel-head"><div><h3><i class="fa-solid fa-users-gear"></i> Bulk Create Accounts</h3><span class="muted">Add several clergy at once. Everything except the name is filled in later.</span></div><a class="btn secondary" href="{% url 'registrar:clergy_records' %}"><i class="fa-solid fa-arrow-left"></i> Clergy Records</a></div>
-        <form method="post" enctype="multipart/form-data" autocomplete="off">
+        <form method="post" enctype="multipart/form-data" autocomplete="off" id="bulkPreviewForm">
           {% csrf_token %}
           <input type="hidden" name="step" value="preview">
           <div class="form-grid single-col">
@@ -98,5 +141,5 @@
   </section>
 {% endblock %}
 {% block extra_js %}
-  <script src="{% static 'registrar/js/bulk-accounts.js' %}"></script>
+  <script src="{% static 'registrar/js/bulk-accounts.js' %}?v=2"></script>
 {% endblock %}

@@ -1,0 +1,49 @@
+<div class="table-meta-bar {{ position }}"{% if bar_id %} id="{{ bar_id }}"{% endif %}>
+  <div class="meta-count">
+    {% if page.paginator.count > 0 %}
+      Showing <strong>{{ page.start_index }} to {{ page.end_index }}</strong> of <strong>{{ page.paginator.count }}</strong> {{ item_label }}
+    {% else %}
+      <span>0 {{ item_label }} found</span>
+    {% endif %}
+  </div>
+  {% if page.has_other_pages %}
+    <nav class="pager-mini"
+         aria-label="{% if position == 'bottom' %}Bottom pagination{% else %}Top pagination{% endif %}">
+      {% if page.has_previous %}
+        <a class="btn small secondary"
+           href="?{% if page_query %}{{ page_query }}&amp;{% endif %}page={{ page.previous_page_number }}">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Previous
+        </a>
+      {% else %}
+        <span class="btn small secondary disabled" aria-disabled="true">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Previous
+        </span>
+      {% endif %}
+      <span class="page-indicator">Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+      {% if page.has_next %}
+        <a class="btn small btn-next"
+           href="?{% if page_query %}{{ page_query }}&amp;{% endif %}page={{ page.next_page_number }}">
+          Next <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </a>
+      {% else %}
+        <span class="btn small secondary disabled" aria-disabled="true">
+          Next <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </span>
+      {% endif %}
+    </nav>
+  {% endif %}
+  <div class="meta-controls">
+    <div class="per-page-select">
+      <label for="{{ select_id }}">Per page:</label>
+      <!-- ds-allow-native-select: table items-per-page selector -->
+      <select id="{{ select_id }}"
+              class="select small"
+              data-per-page-select
+              data-base-query="{{ base_page_query|default:'' }}">
+        {% for n in per_page_choices %}
+          <option value="{{ n }}" {% if per_page == n %}selected{% endif %}>{{ n }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+</div>

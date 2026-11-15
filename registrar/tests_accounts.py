@@ -212,6 +212,85 @@ class BulkViewTests(TestCase):
         self.assertContains(r, 'Rev. Clergy 1')
         self.assertContains(r, f'Rev. Clergy {bulk.MAX_NAMES}')
 
+    def test_confirm_ajax_html_sets_x_slips_count_and_no_store(self):
+        token = self._preview('Fr. Alpha\nFr. Beta').context['token']
+        r = self.client.post(
+            self.url,
+            {'step': 'confirm', 'token': token, 'names': ['Fr. Alpha', 'Fr. Beta'], 'format': 'html'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+            HTTP_X_SLIP_FORMAT='html',
+        )
+        self.assertEqual(r.status_code, 200)
+        self.assertTrue(r['Content-Type'].startswith('text/html'))
+        self.assertEqual(r.get('X-Slips-Count'), '2')
+        self.assertIn('no-store', r.get('Cache-Control', ''))
+        self.assertContains(r, 'Fr. Alpha')
+        self.assertContains(r, 'Fr. Beta')
+        self.assertContains(r, 'credential-slips.css')
+
+    def test_confirm_pdf_returns_valid_pdf_with_x_slips_count(self):
+        token = self._preview('Fr. Gamma\nFr. Delta').context['token']
+        r = self.client.post(
+            self.url,
+            {'step': 'confirm', 'token': token, 'names': ['Fr. Gamma', 'Fr. Delta'], 'format': 'pdf'},
+        )
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r['Content-Type'], 'application/pdf')
+        self.assertEqual(r.get('X-Slips-Count'), '2')
+        self.assertTrue(r.content.startswith(b'%PDF-'))
+
+    def test_confirm_ajax_expired_or_reused_token_returns_json_error(self):
+        token = self._preview('Fr. Reuse').context['token']
+        first = self.client.post(
+            self.url,
+            {'step': 'confirm', 'token': token, 'names': ['Fr. Reuse'], 'format': 'html'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+        self.assertEqual(first.status_code, 200)
+
+        second = self.client.post(
+            self.url,
+            {'step': 'confirm', 'token': token, 'names': ['Fr. Reuse'], 'format': 'html'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+        self.assertEqual(second.status_code, 400)
+        self.assertTrue(second['Content-Type'].startswith('application/json'))
+        data = second.json()
+        self.assertFalse(data['ok'])
+        self.assertTrue(data.get('expired'))
+        self.assertTrue(data.get('message'))
+
+    def test_confirm_ajax_empty_selection_returns_json_error(self):
+        token = self._preview('Fr. Empty Test').context['token']
+        r = self.client.post(
+            self.url,
+            {'step': 'confirm', 'token': token, 'names': [], 'format': 'html'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+        self.assertEqual(r.status_code, 400)
+        self.assertTrue(r['Content-Type'].startswith('application/json'))
+        data = r.json()
+        self.assertFalse(data['ok'])
+        self.assertIn('Nothing selected to create', data['message'])
+
+    def test_confirm_ajax_provision_error_returns_json_error_without_creating_records(self):
+        from unittest.mock import patch
+        from .provisioning import ProvisionError
+
+        token = self._preview('Fr. Broken').context['token']
+        with patch('registrar.views.provision_account', side_effect=ProvisionError('Simulated username clash')):
+            r = self.client.post(
+                self.url,
+                {'step': 'confirm', 'token': token, 'names': ['Fr. Broken'], 'format': 'html'},
+                HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+            )
+        self.assertEqual(r.status_code, 400)
+        self.assertTrue(r['Content-Type'].startswith('application/json'))
+        data = r.json()
+        self.assertFalse(data['ok'])
+        self.assertIn('Simulated username clash', data['message'])
+        self.assertEqual(ClergyRecord.objects.count(), 0)
+
 
 class ResetAndLoginExpiryTests(TestCase):
     def setUp(self):
@@ -246,3 +325,64 @@ class ResetAndLoginExpiryTests(TestCase):
         self.assertGreater(self.user.security.setup_expires_at, timezone.now())
         self.user.refresh_from_db()
         self.assertFalse(self.user.check_password(self.password))
+
+    def test_ajax_link_account_when_already_linked_returns_json_error(self):
+        self.client.force_login(self.registrar)
+        r = self.client.post(
+            reverse('registrar:link_account', args=[self.record.id]),
+            {'format': 'html'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+        self.assertEqual(r.status_code, 400)
+        self.assertTrue(r['Content-Type'].startswith('application/json'))
+        data = r.json()
+        self.assertFalse(data['ok'])
+        self.assertTrue(data.get('message'))
+
+    def test_ajax_reset_account_invalid_states_return_json_error(self):
+        self.client.force_login(self.registrar)
+        unlinked = ClergyRecord.objects.create(id='CLG-999', name='Fr. Unlinked')
+        r_unlinked = self.client.post(
+            reverse('registrar:reset_account', args=[unlinked.id]),
+            {'format': 'html'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+        self.assertEqual(r_unlinked.status_code, 400)
+        self.assertTrue(r_unlinked['Content-Type'].startswith('application/json'))
+        self.assertFalse(r_unlinked.json()['ok'])
+
+        UserSecurity.objects.filter(user=self.user).update(activated_at=timezone.now())
+        r_active = self.client.post(
+            reverse('registrar:reset_account', args=[self.record.id]),
+            {'format': 'html'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+        self.assertEqual(r_active.status_code, 400)
+        self.assertTrue(r_active['Content-Type'].startswith('application/json'))
+        self.assertFalse(r_active.json()['ok'])
+
+    def test_ajax_create_record_returns_single_slip_with_x_slips_count(self):
+        self.client.force_login(self.registrar)
+        r = self.client.post(
+            reverse('registrar:create_record'),
+            {'name': 'Fr. Single Ajax', 'status': 'Active', 'rank': 'priest', 'format': 'html'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+            HTTP_X_SLIP_FORMAT='html',
+        )
+        self.assertEqual(r.status_code, 200)
+        self.assertTrue(r['Content-Type'].startswith('text/html'))
+        self.assertEqual(r.get('X-Slips-Count'), '1')
+        self.assertContains(r, 'Fr. Single Ajax')
+
+    def test_ajax_create_record_validation_error_returns_json_400(self):
+        self.client.force_login(self.registrar)
+        r = self.client.post(
+            reverse('registrar:create_record'),
+            {'name': '', 'status': 'Active', 'rank': 'priest', 'format': 'html'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+        self.assertEqual(r.status_code, 400)
+        self.assertTrue(r['Content-Type'].startswith('application/json'))
+        data = r.json()
+        self.assertFalse(data['ok'])
+        self.assertIn('name', data.get('errors', {}))

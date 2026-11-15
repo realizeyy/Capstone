@@ -6,45 +6,98 @@
 {% block content %}
   <section class="page active">
     <div class="panel">
-      <div class="panel-head">
-        <div>
-          <h3><i class="fa-solid fa-file-contract"></i> Contract Expiry Review</h3>
-          <span class="muted">Clergy contracts near expiration and post-notice status decisions</span>
+      <div id="clergyStickySentinel" aria-hidden="true"></div>
+      <div class="clergy-sticky-header" id="clergyStickyHeader">
+        <div class="panel-head">
+          <div>
+            <h3><i class="fa-solid fa-file-contract"></i> Contract Expiry Review</h3>
+            <span class="muted">Clergy contracts near expiration and post-notice status decisions</span>
+          </div>
         </div>
+        <form class="toolbar" method="get">
+          <input type="hidden" name="per_page" value="{{ per_page }}">
+          <input name="q"
+                 class="search"
+                 placeholder="Search by clergy name, ID, assignment, status or end date..."
+                 value="{{ search_query }}">
+          <!-- ds-allow-native-select: search filter dropdown -->
+          <select name="expiry" class="select" data-autosubmit>
+            <option value="">All Contract Windows</option>
+            {% for value, label in expiry_choices %}
+              <option value="{{ value }}"
+                      {% if expiry_filter == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <!-- ds-allow-native-select: search filter dropdown -->
+          <select name="status" class="select" data-autosubmit>
+            <option value="">All Status</option>
+            {% for value, label in status_choices %}
+              <option value="{{ value }}"
+                      {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <button type="submit" class="btn secondary"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+          {% if search_query or expiry_filter or status_filter %}
+            <a class="btn secondary" href="{% url 'registrar:contract_review' %}">Clear</a>
+          {% endif %}
+        </form>
+        {% include "registrar/_table_meta_bar.html" with position="top" select_id="perPageSelect" item_label="contracts" %}
       </div>
       <div class="alert">Advance notices should be generated when a contract term is near its end date.</div>
-      <table>
-        <thead>
-          <tr>
-            <th>Clergy</th>
-            <th>Assignment</th>
-            <th>Contract End</th>
-            <th>Days Left</th>
-            <th>Current Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in rows %}
+      <div class="table-wrap">
+        <table>
+          <thead>
             <tr>
-              <td><b>{{ row.record.name }}</b></td>
-              <td>{{ row.record.assignment|default:"Not assigned" }}</td>
-              <td>{{ row.record.contract_end }}</td>
-              <td><b>{{ row.days_left }}</b></td>
-              <td><span class="badge {{ row.record.status|status_badge_class }}">{{ row.record.status }}</span></td>
-              <td>
-                <a class="btn small secondary" href="{% url 'registrar:record_detail' row.record.id %}?edit=contract#sec-reg-status">
-                  <i class="fa-solid fa-pen-to-square"></i> Update Contract
-                </a>
-              </td>
+              <th>Clergy</th>
+              <th>Assignment</th>
+              <th>Contract End</th>
+              <th>Days Left</th>
+              <th>Current Status</th>
+              <th>Action</th>
             </tr>
-          {% empty %}
-            <tr>
-              <td colspan="6" class="empty">No contracts on file.</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+              <tr>
+                <td>
+                  <b>{{ row.record.name }}</b>
+                  <br>
+                  <small class="muted">{{ row.record.id }}</small>
+                </td>
+                <td>
+                  {{ row.record.assignment|default:"Not assigned" }}
+                  {% if row.record.deanery %}
+                    <br>
+                    <small class="muted">{{ row.record.deanery.name }}</small>
+                  {% endif %}
+                </td>
+                <td>{{ row.record.contract_end }}</td>
+                <td><b>{{ row.days_left }}</b></td>
+                <td><span class="badge {{ row.record.status|status_badge_class }}">{{ row.record.status }}</span></td>
+                <td>
+                  <a class="btn small secondary" href="{% url 'registrar:record_detail' row.record.id %}?edit=contract#sec-reg-status">
+                    <i class="fa-solid fa-pen-to-square"></i> Update Contract
+                  </a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="6" class="empty">
+                  {% if search_query or expiry_filter or status_filter %}
+                    No contracts match your search criteria.
+                  {% else %}
+                    No contracts on file.
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div id="clergyPagerSentinel" style="height: 1px;"></div>
+      {% if page.has_other_pages or page.paginator.count > 0 %}
+        {% include "registrar/_table_meta_bar.html" with position="bottom" bar_id="clergyBottomPager" select_id="bottomPerPageSelect" item_label="contracts" %}
+      {% endif %}
     </div>
   </section>
 {% endblock %}

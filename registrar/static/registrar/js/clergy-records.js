@@ -163,50 +163,5 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
-// Slips modal preview handled in ui.js
-
-// Floating bottom pagination dock when table extends beyond viewport
-function initFloatingPager() {
-  const pager = document.getElementById('clergyBottomPager');
-  const sentinel = document.getElementById('clergyPagerSentinel');
-  if (!pager || !sentinel) return;
-
-  function updateFloating() {
-    const sentinelRect = sentinel.getBoundingClientRect();
-    const isBelowViewport = sentinelRect.top > window.innerHeight;
-    if (isBelowViewport) {
-      pager.classList.add('is-floating');
-    } else {
-      pager.classList.remove('is-floating');
-    }
-  }
-
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          pager.classList.remove('is-floating');
-        } else {
-          const rect = entry.boundingClientRect;
-          if (rect.top > window.innerHeight) {
-            pager.classList.add('is-floating');
-          } else {
-            pager.classList.remove('is-floating');
-          }
-        }
-      });
-    }, { root: null, threshold: 0 });
-    observer.observe(sentinel);
-  }
-
-  window.addEventListener('scroll', updateFloating, { passive: true });
-  window.addEventListener('resize', updateFloating, { passive: true });
-  updateFloating();
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initFloatingPager);
-} else {
-  initFloatingPager();
-}
+// Slips modal preview and floating bottom pagination dock are handled in ui.js
 

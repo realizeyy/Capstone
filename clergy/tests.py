@@ -643,12 +643,38 @@ class EnhancedClergyProfileTests(TestCase):
         self.assertIn('/documents/', payload['view_url'])
 
     def test_ui_section_nav_and_terms_checkbox_persistence(self):
-        # 1. Clergy profile has sticky section navigation & Quick-Edit Section Modal
+        # 1. Clergy profile renders inline Quick-Edit Modal with edge navigation (no summary hub)
         clergy_page = self.client.get(reverse('clergy:my_profile'))
         self.assertContains(clergy_page, 'id="personalSectionNav"')
         self.assertContains(clergy_page, 'data-section-modal="sec-identity"')
         self.assertContains(clergy_page, 'id="sectionQuickEditModal"')
+        self.assertContains(clergy_page, 'id="sectionEdgePrevBtn"')
+        self.assertContains(clergy_page, 'id="sectionEdgeNextBtn"')
+        self.assertContains(clergy_page, 'id="sectionQuickEditStepIndicator"')
+        self.assertContains(clergy_page, 'id="profileStepperControl"')
+        self.assertContains(clergy_page, 'id="profilePhotoForm"')
         self.assertContains(clergy_page, 'id="sectionQuickEditSaveBtn"')
+        self.assertContains(clergy_page, 'id="sectionDraftRestoredBadge"')
+        self.assertContains(clergy_page, 'ednp_active_section_')
+        self.assertContains(clergy_page, 'ednp_profile_search_')
+        self.assertContains(clergy_page, 'ednp:draft-restored')
+        self.assertNotContains(clergy_page, 'id="clergySummaryHub"')
+        self.assertNotContains(clergy_page, 'id="profileFloatingElevator"')
+
+        # 1b. Clergy requirements renders inline Stage Documents Modal with edge navigation (no stages hub)
+        req_page = self.client.get(reverse('clergy:my_requirements'))
+        self.assertEqual(req_page.status_code, 200)
+        self.assertContains(req_page, 'id="documentsSectionNav"')
+        self.assertContains(req_page, 'id="stageDocumentsModal"')
+        self.assertContains(req_page, 'id="stageEdgePrevBtn"')
+        self.assertContains(req_page, 'id="stageEdgeNextBtn"')
+        self.assertContains(req_page, 'id="stageStepIndicator"')
+        self.assertContains(req_page, 'id="stageStepperControl"')
+        self.assertContains(req_page, 'ednp_active_stage_')
+        self.assertContains(req_page, 'ednp_doc_filters_')
+        self.assertNotContains(req_page, 'id="stagesSummaryHub"')
+        self.assertNotContains(req_page, 'id="stageFloatingElevator"')
+        self.assertNotContains(req_page, 'id="docFloatingNavBtn"')
 
         # 2. AJAX quick-save from the section modal saves changes and returns JSON
         ajax_save = self.client.post(

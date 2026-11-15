@@ -1,5 +1,7 @@
+import calendar
+import re
 import secrets
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 import urllib.parse
 
 from django.contrib import messages
@@ -37,6 +39,100 @@ NEAR_EXPIRY_WINDOW_DAYS = 180
 CLERGY_RECORDS_PER_PAGE = 25
 PER_PAGE_CHOICES = (10, 25, 50, 100)
 GENERATED_REPORTS_PER_PAGE = 10
+CONTRACT_EXPIRY_CHOICES = (
+    ('expired', 'Expired'),
+    ('expiring_soon', f'Expiring Within {NEAR_EXPIRY_WINDOW_DAYS} Days'),
+    ('upcoming', f'More Than {NEAR_EXPIRY_WINDOW_DAYS} Days Left'),
+)
+_MONTH_LOOKUP = {
+    name.lower(): idx
+    for idx in range(1, 13)
+    for name in (calendar.month_name[idx], calendar.month_abbr[idx])
+    if name
+}
+_DATE_SEARCH_FORMATS = (
+    '%Y-%m-%d',
+    '%b %d, %Y',
+    '%B %d, %Y',
+    '%b %d %Y',
+    '%B %d %Y',
+    '%m/%d/%Y',
+    '%d %b %Y',
+    '%d %B %Y',
+)
+
+
+def _paginate_queryset(request, queryset, page_params=None, default_per_page=CLERGY_RECORDS_PER_PAGE):
+    try:
+        per_page = int(request.GET.get('per_page', default_per_page))
+        if per_page not in PER_PAGE_CHOICES:
+            per_page = default_per_page
+    except (ValueError, TypeError):
+        per_page = default_per_page
+
+    page = Paginator(queryset, per_page).get_page(request.GET.get('page'))
+    params = {k: v for k, v in (page_params or {}).items() if v}
+    base_page_query = urlencode(params)
+    if per_page != default_per_page:
+        params['per_page'] = per_page
+    return {
+        'page': page,
+        'page_query': urlencode(params),
+        'base_page_query': base_page_query,
+        'per_page': per_page,
+        'per_page_choices': PER_PAGE_CHOICES,
+    }
+
+
+def _contract_search_q(query):
+    """Build a Q filter matching clergy identity, deployment, status, deanery, or contract end date."""
+    q_filter = (
+        db_models.Q(name__icontains=query)
+        | db_models.Q(assignment__icontains=query)
+        | db_models.Q(id__icontains=query)
+        | db_models.Q(status__icontains=query)
+        | db_models.Q(deanery__name__icontains=query)
+        | db_models.Q(contract_end__icontains=query)
+    )
+    normalized = re.sub(r'\s+', ' ', query.replace('.', '')).strip()
+    if re.fullmatch(r'\d{4}', normalized):
+        return q_filter | db_models.Q(contract_end__year=int(normalized))
+
+    for fmt in _DATE_SEARCH_FORMATS:
+        try:
+            parsed = datetime.strptime(normalized, fmt).date()
+            return q_filter | db_models.Q(contract_end=parsed)
+        except ValueError:
+            continue
+
+    lower_norm = normalized.lower()
+    if lower_norm in _MONTH_LOOKUP:
+        return q_filter | db_models.Q(contract_end__month=_MONTH_LOOKUP[lower_norm])
+
+    month_year = re.fullmatch(r'([a-z]+),?\s+(\d{4})', lower_norm)
+    if month_year and month_year.group(1) in _MONTH_LOOKUP:
+        return q_filter | db_models.Q(
+            contract_end__month=_MONTH_LOOKUP[month_year.group(1)],
+            contract_end__year=int(month_year.group(2)),
+        )
+
+    month_day = re.fullmatch(r'([a-z]+)\s+(\d{1,2})', lower_norm)
+    if month_day and month_day.group(1) in _MONTH_LOOKUP:
+        day = int(month_day.group(2))
+        if 1 <= day <= 31:
+            return q_filter | db_models.Q(
+                contract_end__month=_MONTH_LOOKUP[month_day.group(1)],
+                contract_end__day=day,
+            )
+
+    ym_match = re.fullmatch(r'(\d{4})[-/](\d{1,2})', normalized)
+    if ym_match and 1 <= int(ym_match.group(2)) <= 12:
+        return q_filter | db_models.Q(
+            contract_end__year=int(ym_match.group(1)),
+            contract_end__month=int(ym_match.group(2)),
+        )
+
+    return q_filter
 
 
 def _can_access_document(user, document):
@@ -281,6 +377,11 @@ def _build_registrar_search_catalog(user=None):
             assignment = r.assignment or 'Not assigned'
             status = r.status or 'Active'
             badge_class = 'green' if status == 'Active' else ('amber' if status == 'On Leave' else 'slate')
+            contract_kw = (
+                f" {r.contract_end:%Y-%m-%d} {r.contract_end:%b %d %Y} {r.contract_end:%B %d %Y} "
+                f"{dateformat.format(r.contract_end, 'N j, Y')}"
+                if r.contract_end else ''
+            )
 
             catalog.append({
                 'category': 'Clergy Records',
@@ -289,7 +390,7 @@ def _build_registrar_search_catalog(user=None):
                 'subtitle': f"{r.id} : {rank_disp} : {assignment} ({status})",
                 'badge': status,
                 'badge_class': badge_class,
-                'keywords': f"{r.name} {r.id} {r.rank} {rank_disp} {assignment} {status} {r.phone or ''} {r.email or ''}".lower(),
+                'keywords': f"{r.name} {r.id} {r.rank} {rank_disp} {assignment} {status} {r.phone or ''} {r.email or ''}{contract_kw}".lower(),
                 'url': reverse('registrar:record_detail', args=[r.id]),
             })
 
@@ -535,16 +636,21 @@ def clergy_records(request):
         else:
             records = records.none()
 
-    try:
-        per_page = int(request.GET.get('per_page', CLERGY_RECORDS_PER_PAGE))
-        if per_page not in PER_PAGE_CHOICES:
-            per_page = CLERGY_RECORDS_PER_PAGE
-    except (ValueError, TypeError):
-        per_page = CLERGY_RECORDS_PER_PAGE
+    page_params = {}
+    if showing_archived:
+        page_params['view'] = 'archived'
+    if query:
+        page_params['q'] = query
+    if status:
+        page_params['status'] = status
+    if deanery_filter:
+        page_params['deanery'] = deanery_filter
+    if rank_filter:
+        page_params['rank'] = rank_filter
 
     records = records.prefetch_related('documents__document_type')
-    page = Paginator(records, per_page).get_page(request.GET.get('page'))
-    records = list(page.object_list)
+    pagination = _paginate_queryset(request, records, page_params=page_params)
+    records = list(pagination['page'].object_list)
     required_types = list(DocumentType.objects.filter(is_required=True))
     for record in records:
         record.doc_summary = record.document_summary(required_types=required_types)
@@ -560,33 +666,13 @@ def clergy_records(request):
     for record in records:
         record.account = account_by_record.get(record.id)
 
-    page_params = {}
-    if showing_archived:
-        page_params['view'] = 'archived'
-    if query:
-        page_params['q'] = query
-    if status:
-        page_params['status'] = status
-    if deanery_filter:
-        page_params['deanery'] = deanery_filter
-    if rank_filter:
-        page_params['rank'] = rank_filter
-
-    base_page_params = dict(page_params)
-    if per_page != CLERGY_RECORDS_PER_PAGE:
-        page_params['per_page'] = per_page
-
     record_modal_draft = request.session.pop('record_modal_draft', None)
     record_modal_errors = request.session.pop('record_modal_errors', None)
 
     return render(request, 'registrar/clergy-records.html', {
         'active_page': 'clergy_records',
         'records': records,
-        'page': page,
-        'page_query': urlencode(page_params),
-        'base_page_query': urlencode(base_page_params),
-        'per_page': per_page,
-        'per_page_choices': PER_PAGE_CHOICES,
+        **pagination,
         'search_query': query,
         'status_filter': status,
         'status_choices': ClergyRecord.STATUS_CHOICES,
@@ -649,6 +735,13 @@ def _slip_entry(name, user, password):
     }
 
 
+def _is_ajax_request(request):
+    return (
+        request.headers.get('x-requested-with') == 'XMLHttpRequest' or
+        'application/json' in request.headers.get('accept', '')
+    )
+
+
 def _slips_response(request, entries):
     """The slips shown in the browser, ready to print. no-store keeps
     the plaintext passwords out of the browser's cache and back/forward
@@ -661,12 +754,14 @@ def _slips_response(request, entries):
         html = slips.render_slips_html(entries, portal_url)
         response = HttpResponse(html, content_type='text/html')
         response['Cache-Control'] = 'no-store'
+        response['X-Slips-Count'] = str(len(entries))
         return response
 
     pdf = slips.render_slips_pdf(entries, portal_url)
     response = HttpResponse(pdf, content_type='application/pdf')
     response['Content-Disposition'] = 'inline; filename="portal-login-slips.pdf"'
     response['Cache-Control'] = 'no-store'
+    response['X-Slips-Count'] = str(len(entries))
     return response
 
 
@@ -675,8 +770,7 @@ def create_record(request):
     if request.method != 'POST':
         return redirect('registrar:clergy_records')
 
-    is_ajax = (request.headers.get('x-requested-with') == 'XMLHttpRequest' or
-               'application/json' in request.headers.get('accept', ''))
+    is_ajax = _is_ajax_request(request)
 
     form = ClergyRecordForm(request.POST)
     if not form.is_valid():
@@ -735,8 +829,13 @@ def link_account(request, record_id):
     if request.method != 'POST':
         return redirect('registrar:clergy_records')
 
+    is_ajax = _is_ajax_request(request)
+
     if ClergyProfile.objects.filter(record=record).exists():
-        messages.error(request, f'{record.name} already has a portal account.')
+        err_msg = f'{record.name} already has a portal account.'
+        if is_ajax:
+            return JsonResponse({'ok': False, 'message': err_msg}, status=400)
+        messages.error(request, err_msg)
         return redirect('registrar:clergy_records')
 
     try:
@@ -744,8 +843,11 @@ def link_account(request, record_id):
             user, password = provision_account(record)
             audit.record(request.user, user, 'account_created', target_name=record.name)
             return _slips_response(request, [_slip_entry(record.name, user, password)])
-    except ProvisionError as exc:
-        messages.error(request, str(exc))
+    except (ProvisionError, PdfGenerationError) as exc:
+        err_msg = str(exc)
+        if is_ajax:
+            return JsonResponse({'ok': False, 'message': err_msg}, status=400)
+        messages.error(request, err_msg)
         return redirect('registrar:clergy_records')
 
 
@@ -765,9 +867,14 @@ def reset_account(request, record_id):
     if request.method != 'POST':
         return redirect('registrar:clergy_records')
 
+    is_ajax = _is_ajax_request(request)
+
     profile = ClergyProfile.objects.filter(record=record).select_related('user').first()
     if profile is None:
-        messages.error(request, f'{record.name} has no portal account to reset.')
+        err_msg = f'{record.name} has no portal account to reset.'
+        if is_ajax:
+            return JsonResponse({'ok': False, 'message': err_msg}, status=400)
+        messages.error(request, err_msg)
         return redirect('registrar:clergy_records')
 
     try:
@@ -780,7 +887,10 @@ def reset_account(request, record_id):
             notifications.account_reset(profile.user, action, request.user)
             return _slips_response(request, [_slip_entry(record.name, profile.user, password)])
     except (ProvisionError, PdfGenerationError) as exc:
-        messages.error(request, str(exc))
+        err_msg = str(exc)
+        if is_ajax:
+            return JsonResponse({'ok': False, 'message': err_msg}, status=400)
+        messages.error(request, err_msg)
         return redirect('registrar:clergy_records')
 
 
@@ -811,17 +921,24 @@ def reset_staff_account(request, user_id):
     reset_account)."""
     if request.method != 'POST':
         return redirect('registrar:account_security')
+    is_ajax = _is_ajax_request(request)
     target = get_object_or_404(get_user_model(), pk=user_id, is_staff=True)
     if target.pk == request.user.pk:
-        messages.error(request, "You can't reset your own account. Ask another registrar, or the person who manages the server.")
+        err_msg = "You can't reset your own account. Ask another registrar, or the person who manages the server."
+        if is_ajax:
+            return JsonResponse({'ok': False, 'message': err_msg}, status=400)
+        messages.error(request, err_msg)
         return redirect('registrar:account_security')
     try:
         with transaction.atomic():
             password = reset_lost_phone(target)
             audit.record(request.user, target, 'lost_phone_reset', request.POST.get('note', ''))
             return _slips_response(request, [_slip_entry(audit.display_name(target), target, password)])
-    except PdfGenerationError as exc:
-        messages.error(request, str(exc))
+    except (ProvisionError, PdfGenerationError) as exc:
+        err_msg = str(exc)
+        if is_ajax:
+            return JsonResponse({'ok': False, 'message': err_msg}, status=400)
+        messages.error(request, err_msg)
         return redirect('registrar:account_security')
 
 
@@ -849,16 +966,23 @@ def bulk_accounts(request):
         })
 
     if request.POST.get('step') == 'confirm':
+        is_ajax = _is_ajax_request(request)
         token = request.session.pop(BULK_TOKEN_SESSION_KEY, None)
         if not token or token != request.POST.get('token'):
-            messages.error(request, 'That import was already submitted or has expired. Start again.')
+            err_msg = 'That import was already submitted or has expired. Start again.'
+            if is_ajax:
+                return JsonResponse({'ok': False, 'message': err_msg, 'expired': True}, status=400)
+            messages.error(request, err_msg)
             return redirect('registrar:bulk_accounts')
 
         # Re-checked here, not trusted from the preview: the form fields are
         # editable by the browser.
         names = bulk.valid_names(bulk.build_preview(request.POST.getlist('names')))[:bulk.MAX_NAMES]
         if not names:
-            messages.error(request, 'Nothing selected to create.')
+            err_msg = 'Nothing selected to create.'
+            if is_ajax:
+                return JsonResponse({'ok': False, 'message': err_msg, 'expired': True}, status=400)
+            messages.error(request, err_msg)
             return redirect('registrar:bulk_accounts')
 
         try:
@@ -873,7 +997,10 @@ def bulk_accounts(request):
                     entries.append(_slip_entry(record.name, user, password))
                 return _slips_response(request, entries)
         except (ProvisionError, PdfGenerationError) as exc:
-            messages.error(request, f'Nothing was created. {exc}')
+            err_msg = f'Nothing was created. {exc}'
+            if is_ajax:
+                return JsonResponse({'ok': False, 'message': err_msg, 'expired': True}, status=400)
+            messages.error(request, err_msg)
             return redirect('registrar:bulk_accounts')
 
     try:
@@ -1060,10 +1187,15 @@ def documents_overview(request):
     if rank_filter:
         records = records.filter(rank__iexact=rank_filter)
     records = records.prefetch_related('documents__document_type')
-    rows = [{'record': r, 'summary': r.document_summary(required_types=required_types)} for r in records]
+    pagination = _paginate_queryset(request, records, page_params={'q': query, 'rank': rank_filter})
+    rows = [
+        {'record': r, 'summary': r.document_summary(required_types=required_types)}
+        for r in pagination['page'].object_list
+    ]
     return render(request, 'registrar/documents.html', {
         'active_page': 'documents',
         'rows': rows,
+        **pagination,
         'search_query': query,
         'rank_filter': rank_filter,
         'rank_choices': RANK_CHOICES,
@@ -1102,12 +1234,44 @@ def ordination_requirements(request):
 @registrar_required
 def contract_review(request):
     sync_expired_contracts()
-    records = ClergyRecord.objects.current().filter(contract_end__isnull=False).order_by('contract_end')
+    query = request.GET.get('q', '').strip()
+    expiry_filter = request.GET.get('expiry', '').strip()
+    status_filter = request.GET.get('status', '').strip()
+
     today = date.today()
-    rows = [{'record': r, 'days_left': (r.contract_end - today).days} for r in records]
+    soon_cutoff = today + timedelta(days=NEAR_EXPIRY_WINDOW_DAYS)
+    records = (
+        ClergyRecord.objects.current()
+        .select_related('deanery')
+        .filter(contract_end__isnull=False)
+        .order_by('contract_end')
+    )
+    if query:
+        records = records.filter(_contract_search_q(query))
+    if expiry_filter == 'expired':
+        records = records.filter(contract_end__lt=today)
+    elif expiry_filter == 'expiring_soon':
+        records = records.filter(contract_end__gte=today, contract_end__lte=soon_cutoff)
+    elif expiry_filter == 'upcoming':
+        records = records.filter(contract_end__gt=soon_cutoff)
+    if status_filter:
+        records = records.filter(status=status_filter)
+
+    pagination = _paginate_queryset(
+        request,
+        records,
+        page_params={'q': query, 'expiry': expiry_filter, 'status': status_filter},
+    )
+    rows = [{'record': r, 'days_left': (r.contract_end - today).days} for r in pagination['page'].object_list]
     return render(request, 'registrar/contract-review.html', {
         'active_page': 'contract_review',
         'rows': rows,
+        **pagination,
+        'search_query': query,
+        'expiry_filter': expiry_filter,
+        'expiry_choices': CONTRACT_EXPIRY_CHOICES,
+        'status_filter': status_filter,
+        'status_choices': ClergyRecord.STATUS_CHOICES,
     })
 
 

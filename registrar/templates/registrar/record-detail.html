@@ -163,226 +163,14 @@
     animation: fieldFlashHighlight 1.8s ease-out;
     border-radius: 8px;
   }
-  .modal-bg.section-modal-active {
-    position: fixed;
-    inset: 0;
-    z-index: 60;
-    background: rgba(15, 23, 42, 0.55);
-    backdrop-filter: blur(3px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  .modal.section-quick-modal {
-    width: min(820px, 95vw);
-    max-height: 88vh;
-    display: flex;
-    flex-direction: column;
-    background: #ffffff;
-    border-radius: 14px;
-    box-shadow: 0 24px 48px rgba(15, 23, 42, 0.28);
-    overflow: hidden;
-  }
-  .section-quick-modal .modal-head {
-    padding: 16px 20px;
-    border-bottom: 1px solid #e2e8f0;
-    background: #f8fafc;
-    margin: 0;
-  }
-  .section-quick-modal .section-modal-body {
-    padding: 18px 20px;
-    overflow-y: auto;
-    flex: 1;
-  }
-  .section-quick-modal .section-modal-body .section-card {
-    border: none;
-    box-shadow: none;
-    padding: 0;
-    margin: 0 !important;
-  }
-  .section-quick-modal .section-modal-foot {
-    padding: 12px 20px;
-    border-top: 1px solid #e2e8f0;
-    background: #f8fafc;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
   #quickUploadModal,
-  #addDeploymentModal {
+  #addDeploymentModal,
+  #notedRequirementModal {
     z-index: 80 !important;
   }
 
-  /* Summary Hub Cards (replaces long scrollable inputs on page) */
-  .hub-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-auto-rows: 176px;
-    gap: 16px;
-    margin-top: 16px;
-  }
-  .hub-card {
-    background: #ffffff;
-    border: 1px solid #dce4ef;
-    border-radius: 12px;
-    padding: 16px 20px 30px;
-    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
-    cursor: pointer;
-    height: 176px;
-    box-sizing: border-box;
-    overflow: hidden;
-    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
-                box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
-                border-color 0.18s ease,
-                height 0.24s cubic-bezier(0.16, 1, 0.3, 1);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    position: relative;
-    z-index: 1;
-  }
-  .hub-card::after {
-    content: "Hover to preview · Click to edit";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 36px;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, #ffffff 55%);
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding-bottom: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #64748b;
-    pointer-events: none;
-    transition: opacity 0.18s ease;
-  }
-  .hub-card:hover,
-  .hub-card:focus-visible {
-    height: min(310px, 60vh);
-    border-color: #2f6fed;
-    box-shadow: 0 18px 38px rgba(15, 23, 42, 0.16);
-    transform: translateY(-3px);
-    z-index: 15;
-  }
-  .hub-card:hover::after,
-  .hub-card:focus-visible::after {
-    content: "Click anywhere on card to open full section";
-    color: #2f6fed;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, #f8fafc 60%);
-  }
-  .hub-card.full {
-    grid-column: 1 / -1;
-  }
-  .hub-card-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    border-bottom: 1px solid #edf2f7;
-    padding-bottom: 10px;
-  }
-  .hub-card-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 17.5px;
-    font-weight: 700;
-    color: #17324d;
-    margin: 0;
-  }
-  .hub-card-title i {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: #eff6ff;
-    color: #2f6fed;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15.5px;
-    flex-shrink: 0;
-  }
-  .hub-edit-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 999px;
-    background: #f1f5f9;
-    color: #1e293b;
-    border: 1px solid #cbd5e1;
-    font-size: 14px;
-    font-weight: 600;
-    transition: all 0.15s ease;
-    pointer-events: auto;
-  }
-  .hub-card:hover .hub-edit-btn {
-    background: #2f6fed;
-    color: #ffffff;
-    border-color: #2f6fed;
-  }
-  .hub-kv-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px 16px;
-  }
-  .hub-kv.full {
-    grid-column: 1 / -1;
-  }
-  .hub-kv-label {
-    display: block;
-    font-size: 14px;
-    font-weight: 600;
-    color: #64748b;
-    margin-bottom: 3px;
-  }
-  .hub-kv-val {
-    font-size: 16px;
-    font-weight: 600;
-    color: #1e293b;
-    word-break: break-word;
-  }
-  .hub-kv-val.empty {
-    color: #94a3b8;
-    font-weight: 500;
-    font-style: italic;
-  }
-  .hub-att-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 999px;
-    margin-top: 4px;
-  }
-  .hub-att-tag.ok {
-    background: #ecfdf5;
-    color: #065f46;
-    border: 1px solid #a7f3d0;
-  }
-  .hub-att-tag.warn {
-    background: #fffbeb;
-    color: #92400e;
-    border: 1px solid #fde68a;
-  }
   .hub-hidden-sections {
     display: none !important;
-  }
-  @media (max-width: 800px) {
-    .hub-cards-grid {
-      grid-template-columns: 1fr;
-    }
-    .hub-kv-grid {
-      grid-template-columns: 1fr;
-    }
   }
   </style>
 {% endblock %}
@@ -444,231 +232,55 @@
               <a href="#sec-reg-family" class="nav-pill" data-section-modal="sec-reg-family" data-section-title="Family &amp; Educational Background"><i class="fa-solid fa-people-roof"></i> Family &amp; Education</a>
             </div>
             <div class="stage-stepper-control" id="profileStepperControl" aria-live="polite" title="Current profile section">
-              <span class="stepper-count" id="profileStepperCount">1 / 4</span>
-              <span class="stepper-label" id="profileStepperLabel">Identity · Contact</span>
+              <span class="stepper-count" id="profileStepperCount">1 / 7</span>
+              <span class="stepper-label" id="profileStepperLabel">Identity &amp; Basic Details</span>
             </div>
+          </div>
+          <div class="profile-search-feedback" id="profileSearchFeedback" hidden>
+            <span id="profileSearchFeedbackText">Matching sections</span>
+            <button type="button" class="doc-search-reset-btn" id="profileSearchFeedbackResetBtn">Clear search</button>
           </div>
         </nav>
 
-        <!-- Summary Hub Cards (click any card to pop up its section modal) -->
-        <div class="hub-cards-grid" id="registrarSummaryHub">
+        <div id="profileSearchEmpty" class="inline-search-empty" style="display:none;" role="status">
+          <i class="fa-solid fa-magnifying-glass" style="font-size:22px;color:#64748b;"></i>
+          <h4>No matching profile details</h4>
+          <p>No fields in personal information matched your search query. Try clearing the filter.</p>
+          <button type="button" class="btn small secondary" id="profileSearchResetBtn"><i class="fa-solid fa-rotate-left"></i> Reset Search</button>
+        </div>
 
-          <!-- 1. Identity & Basic Details -->
-          <div class="hub-card" data-open-section="sec-reg-identity" tabindex="0" role="button" aria-label="Edit Identity and Basic Details">
-            <div class="hub-card-head">
-              <h4 class="hub-card-title"><i class="fa-solid fa-id-card"></i> Identity &amp; Basic Details</h4>
-              <span class="hub-edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</span>
-            </div>
-            <div class="hub-kv-grid">
-              <div class="hub-kv">
-                <span class="hub-kv-label">Full Name</span>
-                <div class="hub-kv-val" data-hub-bind="name">{{ record.name|default:"Not set" }}</div>
-              </div>
-              <div class="hub-kv">
-                <span class="hub-kv-label">Record ID</span>
-                <div class="hub-kv-val">{{ record.id }}</div>
-              </div>
-              <div class="hub-kv">
-                <span class="hub-kv-label">Date of Birth</span>
-                <div class="hub-kv-val {% if not record.date_of_birth %}empty{% endif %}" data-hub-bind="date_of_birth">{{ record.date_of_birth|date:"M d, Y"|default:"Not set" }}</div>
-                {% with att=record.date_attachments_map.date_of_birth %}
-                {% if att.is_uploaded %}
-                  <span class="hub-att-tag ok" {% if att.doc_type %}data-hub-att-doc="{{ att.doc_type.id }}"{% endif %} data-hub-att-label="Birth Cert attached"><i class="fa-solid fa-circle-check"></i> Birth Cert attached</span>
-                {% else %}
-                  <span class="hub-att-tag warn" {% if att.doc_type %}data-hub-att-doc="{{ att.doc_type.id }}"{% endif %} data-hub-att-label="Birth Cert attached"><i class="fa-solid fa-clock"></i> Birth Cert not uploaded</span>
-                {% endif %}
-                {% endwith %}
-              </div>
-              <div class="hub-kv">
-                <span class="hub-kv-label">Gender</span>
-                <div class="hub-kv-val {% if not record.gender %}empty{% endif %}" data-hub-bind="gender">{{ record.gender|default:"Not set" }}</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 2. Contact & Residential Information -->
-          <div class="hub-card" data-open-section="sec-reg-contact" tabindex="0" role="button" aria-label="Edit Contact and Residential Information">
-            <div class="hub-card-head">
-              <h4 class="hub-card-title"><i class="fa-solid fa-address-book"></i> Contact &amp; Residence</h4>
-              <span class="hub-edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</span>
-            </div>
-            <div class="hub-kv-grid">
-              <div class="hub-kv full">
-                <span class="hub-kv-label">Residential Address</span>
-                <div class="hub-kv-val {% if not record.address %}empty{% endif %}" data-hub-bind="address">{{ record.address|default:"Not set" }}</div>
-              </div>
-              <div class="hub-kv">
-                <span class="hub-kv-label">Contact Number</span>
-                <div class="hub-kv-val {% if not record.phone %}empty{% endif %}">{{ record.phone|default:"Not set" }}</div>
-              </div>
-              <div class="hub-kv">
-                <span class="hub-kv-label">Email Address</span>
-                <div class="hub-kv-val {% if not record.email %}empty{% endif %}" data-hub-bind="email">{{ record.email|default:"Not set" }}</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 3. Sacramental Records -->
-          <div class="hub-card" data-open-section="sec-reg-sacraments" tabindex="0" role="button" aria-label="Edit Sacramental Records">
-            <div class="hub-card-head">
-              <h4 class="hub-card-title"><i class="fa-solid fa-water"></i> Sacramental Records</h4>
-              <span class="hub-edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</span>
-            </div>
-            <div class="hub-kv-grid">
-              <div class="hub-kv">
-                <span class="hub-kv-label">Date of Baptism</span>
-                <div class="hub-kv-val {% if not record.baptism_date %}empty{% endif %}" data-hub-bind="baptism_date">{{ record.baptism_date|date:"M d, Y"|default:"Not set" }}</div>
-                {% with att=record.date_attachments_map.baptism_date %}
-                {% if att.is_uploaded %}
-                  <span class="hub-att-tag ok" {% if att.doc_type %}data-hub-att-doc="{{ att.doc_type.id }}"{% endif %} data-hub-att-label="Cert attached"><i class="fa-solid fa-circle-check"></i> Cert attached</span>
-                {% else %}
-                  <span class="hub-att-tag warn" {% if att.doc_type %}data-hub-att-doc="{{ att.doc_type.id }}"{% endif %} data-hub-att-label="Cert attached"><i class="fa-solid fa-clock"></i> Cert not uploaded</span>
-                {% endif %}
-                {% endwith %}
-              </div>
-              <div class="hub-kv">
-                <span class="hub-kv-label">Place of Baptism</span>
-                <div class="hub-kv-val {% if not clergy_profile.baptism_place %}empty{% endif %}" data-hub-bind="baptism_place">{{ clergy_profile.baptism_place|default:"Not set" }}</div>
-              </div>
-              <div class="hub-kv">
-                <span class="hub-kv-label">Date of Confirmation</span>
-                <div class="hub-kv-val {% if not record.confirmation_date %}empty{% endif %}" data-hub-bind="confirmation_date">{{ record.confirmation_date|date:"M d, Y"|default:"Not set" }}</div>
-                {% with att=record.date_attachments_map.confirmation_date %}
-                {% if att.is_uploaded %}
-                  <span class="hub-att-tag ok" {% if att.doc_type %}data-hub-att-doc="{{ att.doc_type.id }}"{% endif %} data-hub-att-label="Cert attached"><i class="fa-solid fa-circle-check"></i> Cert attached</span>
-                {% else %}
-                  <span class="hub-att-tag warn" {% if att.doc_type %}data-hub-att-doc="{{ att.doc_type.id }}"{% endif %} data-hub-att-label="Cert attached"><i class="fa-solid fa-clock"></i> Cert not uploaded</span>
-                {% endif %}
-                {% endwith %}
-              </div>
-              <div class="hub-kv">
-                <span class="hub-kv-label">Place of Confirmation</span>
-                <div class="hub-kv-val {% if not clergy_profile.confirmation_place %}empty{% endif %}" data-hub-bind="confirmation_place">{{ clergy_profile.confirmation_place|default:"Not set" }}</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 4. Holy Orders & Ordination History -->
-          <div class="hub-card" data-open-section="sec-reg-orders" tabindex="0" role="button" aria-label="Edit Holy Orders and Ordination History">
-            <div class="hub-card-head">
-              <h4 class="hub-card-title"><i class="fa-solid fa-church"></i> Holy Orders</h4>
-              <span class="hub-edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</span>
-            </div>
-            <div class="hub-kv-grid">
-              <div class="hub-kv">
-                <span class="hub-kv-label">Diaconate Ordination</span>
-                <div class="hub-kv-val {% if not record.diaconate_date %}empty{% endif %}" data-hub-bind="diaconate_date">{{ record.diaconate_date|date:"M d, Y"|default:"Not set" }}</div>
-              </div>
-              <div class="hub-kv">
-                <span class="hub-kv-label">Priesthood Ordination</span>
-                <div class="hub-kv-val {% if not record.ordination_date %}empty{% endif %}" data-hub-bind="ordination_date">{{ record.ordination_date|date:"M d, Y"|default:"Not set" }}</div>
-              </div>
-              <div class="hub-kv">
-                <span class="hub-kv-label">Admitted as Holy Order</span>
-                <div class="hub-kv-val {% if not record.holy_orders_date %}empty{% endif %}" data-hub-bind="holy_orders_date">{{ record.holy_orders_date|date:"M d, Y"|default:"Not set" }}</div>
-              </div>
-              <div class="hub-kv">
-                <span class="hub-kv-label">Ordaining Bishop</span>
-                <div class="hub-kv-val {% if not record.bishop_name %}empty{% endif %}" data-hub-bind="bishop_name">{{ record.bishop_name|default:"Not set" }}</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 5. Deployment & Official Status -->
-          <div class="hub-card" data-open-section="sec-reg-status" tabindex="0" role="button" aria-label="Edit Deployment and Official Status">
-            <div class="hub-card-head">
-              <h4 class="hub-card-title"><i class="fa-solid fa-briefcase"></i> Status &amp; Tenure</h4>
-              <span class="hub-edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</span>
-            </div>
-            <div class="hub-kv-grid">
-              <div class="hub-kv">
-                <span class="hub-kv-label">Rank &amp; Status</span>
-                <div class="hub-kv-val"><span data-hub-bind="rank">{{ record.get_rank_display }}</span>, <span data-hub-bind="status">{{ record.status }}</span></div>
-              </div>
-              <div class="hub-kv">
-                <span class="hub-kv-label">Deanery</span>
-                <div class="hub-kv-val {% if not record.deanery %}empty{% endif %}" data-hub-bind="deanery">{{ record.deanery|default:"Not set" }}</div>
-              </div>
-              <div class="hub-kv">
-                <span class="hub-kv-label">Current Assignment</span>
-                <div class="hub-kv-val {% if not record.assignment %}empty{% endif %}" data-hub-bind="assignment">{{ record.assignment|default:"Not yet assigned" }}</div>
-              </div>
-              <div class="hub-kv">
-                <span class="hub-kv-label">Contract End Date</span>
-                <div class="hub-kv-val {% if not record.contract_end %}empty{% endif %}" data-hub-bind="contract_end">{{ record.contract_end|date:"M d, Y"|default:"Not set" }}</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 6. Deployments & Station History -->
-          <div class="hub-card" data-open-section="sec-reg-deployments" tabindex="0" role="button" aria-label="Manage Deployments and Station History">
-            <div class="hub-card-head">
-              <h4 class="hub-card-title"><i class="fa-solid fa-map-location-dot"></i> Deployments ({{ record.years_of_service_display }})</h4>
-              <span class="hub-edit-btn"><i class="fa-solid fa-list-check"></i> Manage</span>
-            </div>
-            <div class="hub-kv-grid">
-              <div class="hub-kv">
-                <span class="hub-kv-label">Total Service</span>
-                <div class="hub-kv-val">{{ record.years_of_service_display }}</div>
-              </div>
-              <div class="hub-kv">
-                <span class="hub-kv-label">Recorded Stations</span>
-                <div class="hub-kv-val">{{ record.deployments.count }} assignment{{ record.deployments.count|pluralize }}</div>
-              </div>
-              <div class="hub-kv full">
-                <span class="hub-kv-label">Recent Stations</span>
-                <div class="hub-kv-val">
-                  {% for dep in record.deployments.all|slice:":3" %}
-                    {{ dep.station_name }} ({{ dep.role }}{% if dep.is_current %} · Current{% endif %}){% if not forloop.last %}<br>{% endif %}
-                  {% empty %}
-                    <span class="empty">No deployments recorded yet</span>
-                  {% endfor %}
+        <div class="inline-modal-stage" id="sectionQuickEditModal" role="region" aria-label="Profile section editor">
+          <button type="button" class="modal-edge-nav-btn prev" id="sectionEdgePrevBtn" aria-label="Previous section" title="Previous section (Left arrow)" disabled>
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <div class="modal section-quick-modal inline-modal-card">
+            <div class="modal-head">
+              <div>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                  <h3 id="sectionQuickEditTitle" style="margin:0;"><i class="fa-solid fa-pen-to-square" style="color:#2f6fed;"></i> <span>Identity &amp; Basic Details</span></h3>
+                  <span class="badge blue" id="sectionQuickEditStepBadge" style="font-size:13px;padding:3px 8px;">Step 1 of 7</span>
+                  <span class="badge pending-b" id="sectionDraftRestoredBadge" style="display:none;font-size:12.5px;padding:3px 8px;" title="Unsaved edits from this session were kept across reload"><i class="fa-solid fa-clock-rotate-left"></i> Draft kept</span>
                 </div>
+                <span class="muted" style="margin-top:3px;display:block;">Navigate groups with the quick edit bar above or the left and right edge arrows.</span>
+              </div>
+            </div>
+            <div class="section-modal-body" id="sectionQuickEditBody"></div>
+            <div class="section-modal-foot">
+              <div style="display:flex;gap:8px;align-items:center;">
+                <button type="button" class="btn small secondary" id="sectionQuickEditPrevBtn"><i class="fa-solid fa-chevron-left"></i> Previous</button>
+                <span class="modal-step-indicator" id="sectionQuickEditStepIndicator" aria-live="polite">1 / 7</span>
+                <button type="button" class="btn small secondary" id="sectionQuickEditNextBtn">Next <i class="fa-solid fa-chevron-right"></i></button>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                {% if not record.is_archived %}
+                <button type="button" class="btn" id="sectionQuickEditSaveBtn"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                {% endif %}
               </div>
             </div>
           </div>
-
-          <!-- 7. Family & Educational Background (Filed by Clergy) -->
-          <div class="hub-card full" data-open-section="sec-reg-family" tabindex="0" role="button" aria-label="View Family and Educational Background">
-            <div class="hub-card-head">
-              <h4 class="hub-card-title"><i class="fa-solid fa-people-roof"></i> Family &amp; Educational Background <span class="badge blue" style="font-size:13px;font-weight:600;margin-left:6px;">Filed by Clergy</span></h4>
-              <span class="hub-edit-btn"><i class="fa-solid fa-eye"></i> View Details</span>
-            </div>
-            <div class="hub-kv-grid">
-              <div class="hub-kv">
-                <span class="hub-kv-label">Civil Status</span>
-                <div class="hub-kv-val">{{ clergy_profile.civil_status|default:"Not set" }}</div>
-              </div>
-              <div class="hub-kv">
-                <span class="hub-kv-label">Name of Spouse</span>
-                <div class="hub-kv-val {% if not clergy_profile.spouse_name %}empty{% endif %}">{{ clergy_profile.spouse_name|default:"Not set" }}</div>
-              </div>
-              <div class="hub-kv">
-                <span class="hub-kv-label">Children Recorded</span>
-                <div class="hub-kv-val">{{ clergy_profile.children.count }} child{{ clergy_profile.children.count|pluralize:" ,ren" }}</div>
-              </div>
-              <div class="hub-kv">
-                <span class="hub-kv-label">Structured Degrees</span>
-                <div class="hub-kv-val">{{ clergy_profile.educations.count }} degree{{ clergy_profile.educations.count|pluralize }} recorded</div>
-              </div>
-              <div class="hub-kv">
-                <span class="hub-kv-label">Place of Birth</span>
-                <div class="hub-kv-val {% if not clergy_profile.place_of_birth %}empty{% endif %}">{{ clergy_profile.place_of_birth|default:"Not set" }}</div>
-              </div>
-              <div class="hub-kv">
-                <span class="hub-kv-label">Date Married</span>
-                <div class="hub-kv-val {% if not clergy_profile.marriage_date %}empty{% endif %}">{{ clergy_profile.marriage_date|date:"M d, Y"|default:"Not set" }}</div>
-              </div>
-            </div>
-          </div>
-
-          <div id="profileSearchEmpty" class="search-empty-state" style="display:none;grid-column:1/-1;">
-            <i class="fa-solid fa-magnifying-glass search-empty-icon"></i>
-            <h4>No matching profile details</h4>
-            <p>No fields in personal information matched your search query. Try clearing the filter.</p>
-            <button type="button" class="btn small secondary" id="profileSearchResetBtn"><i class="fa-solid fa-rotate-left"></i> Reset Search</button>
-          </div>
-
+          <button type="button" class="modal-edge-nav-btn next" id="sectionEdgeNextBtn" aria-label="Next section" title="Next section (Right arrow)">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
         </div>
 
         <form method="post" id="recordPersonalForm" class="hub-hidden-sections">
@@ -1242,8 +854,8 @@
 
               <!-- Stage Group Stepper Indicator -->
               <div class="stage-stepper-control" id="stageStepperControl" aria-live="polite" title="Current stage group">
-                <span class="stepper-count" id="stageStepperCount">1 / 3</span>
-                <span class="stepper-label" id="stageStepperLabel">Postulancy · Diaconate</span>
+                <span class="stepper-count" id="stageStepperCount">1 / 1</span>
+                <span class="stepper-label" id="stageStepperLabel">Stage</span>
               </div>
 
               <button type="button" class="btn-focus-toggle" id="btnFocusMode" aria-pressed="false" title="Hide stages and requirements that are already 100% complete">
@@ -1259,104 +871,51 @@
           </div>
         </nav>
 
-        <!-- Stages Summary Hub (Click any card or quick jump pill to open the stage's full document table in a modal dialog) -->
-        <div class="stages-hub-grid" id="stagesSummaryHub" role="region" aria-label="Document Stages Overview">
-          {% if checklist.stages %}
-            {% for stage in checklist.stages %}
-            <div class="stage-hub-card" data-open-stage="sec-doc-{{ stage.slug }}" role="button" tabindex="0" aria-label="Open {{ stage.title }} requirements">
-              <div class="stage-hub-head">
-                <div class="stage-hub-title-wrap">
-                  <span class="stage-hub-icon"><i class="fa-solid {{ stage.icon }}"></i></span>
-                  <div>
-                    <h4 class="stage-hub-title">{{ stage.title }}</h4>
-                    <p class="stage-hub-desc">{{ stage.description }}</p>
-                  </div>
+        <div class="inline-modal-stage inline-modal-stage--wide" id="stageDocumentsModal" role="region" aria-label="Stage documents checklist">
+          <button type="button" class="modal-edge-nav-btn prev" id="stageEdgePrevBtn" aria-label="Previous stage" title="Previous stage (Left arrow)" disabled>
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <div class="modal stage-quick-modal inline-modal-card">
+            <div class="modal-head">
+              <div>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                  <h3 id="stageDocumentsModalTitle" style="margin:0;display:flex;align-items:center;gap:8px;">
+                    <i class="fa-solid fa-folder-open" style="color:var(--blue);"></i>
+                    <span>Stage Requirements</span>
+                  </h3>
+                  <span class="badge blue" id="stageDocumentsStepBadge" style="font-size:13px;padding:3px 8px;">Stage 1 of 1</span>
+                  <span class="badge pending-b" id="stageDocumentsProgressBadge" style="font-size:13px;padding:3px 8px;">0 uploaded</span>
                 </div>
-                <div class="stage-hub-actions">
-                  {% if stage.is_complete %}
-                    <span class="badge stage-complete-b"><i class="fa-solid fa-check"></i> Complete</span>
-                  {% else %}
-                    <span class="badge pending-b">{{ stage.submitted }}/{{ stage.total }}</span>
-                  {% endif %}
-                  <span class="stage-hub-open-btn"><i class="fa-solid fa-folder-open"></i> Open</span>
-                </div>
-              </div>
-
-              <div class="stage-hub-progress-wrap">
-                <div class="stage-hub-progress-meta">
-                  <span>Progress</span>
-                  <b>{% if stage.total > 0 %}{% widthratio stage.submitted stage.total 100 %}%{% else %}0%{% endif %} ({{ stage.submitted }} of {{ stage.total }})</b>
-                </div>
-                <div class="stage-hub-progress-track">
-                  <div class="stage-hub-progress-fill{% if stage.is_complete %} complete{% endif %}" style="width:{% if stage.total > 0 %}{% widthratio stage.submitted stage.total 100 %}%{% else %}0%{% endif %};"></div>
-                </div>
-              </div>
-
-              <div class="stage-hub-items-preview">
-                {% for item in stage.items|slice:":3" %}
-                <div class="stage-preview-row">
-                  <div class="stage-preview-name-wrap">
-                    <span class="stage-preview-dot {% if item.status == 'Submitted' %}ok{% else %}pending{% endif %}">
-                      <i class="fa-solid {% if item.status == 'Submitted' %}fa-circle-check{% else %}fa-circle-dot{% endif %}"></i>
-                    </span>
-                    <span class="stage-preview-name" title="{{ item.document_type.name }}">{{ item.document_type.name }}</span>
-                  </div>
-                  <span class="stage-preview-status badge {% if item.status == 'Submitted' %}active-b{% elif item.status == 'Expired' %}inactive-b{% else %}pending-b{% endif %}">
-                    {% if item.status == 'Submitted' %}Submitted{% elif item.status == 'Expired' %}Expired{% else %}Not Uploaded{% endif %}
-                  </span>
-                </div>
-                {% endfor %}
-                {% if stage.total > 3 %}
-                <div class="stage-preview-more">
-                  <span>+ {{ stage.total|add:"-3" }} more requirement{{ stage.total|add:"-3"|pluralize }}</span>
-                </div>
-                {% endif %}
-              </div>
-
-              <div class="stage-hub-card-foot">
-                <span>Click to view and manage stage documents <i class="fa-solid fa-arrow-right"></i></span>
+                <p class="muted" id="stageDocumentsModalDesc" style="margin:4px 0 0;font-size:14px;">Navigate stages with the tabs above or the left and right edge arrows.</p>
               </div>
             </div>
-            {% endfor %}
-          {% endif %}
 
-          <div class="stage-hub-card" data-open-stage="sec-doc-ember" role="button" tabindex="0" aria-label="Open Ember Letters">
-            <div class="stage-hub-head">
-              <div class="stage-hub-title-wrap">
-                <span class="stage-hub-icon"><i class="fa-solid fa-envelope-open-text"></i></span>
-                <div>
-                  <h4 class="stage-hub-title">Ember Letters</h4>
-                  <p class="stage-hub-desc">Quarterly Ember Letters grouped by year (Q1 to Q4)</p>
-                </div>
-              </div>
-              <div class="stage-hub-actions">
-                <span class="badge blue">{{ ember_summary.uploaded }}/{{ ember_summary.target }}</span>
-                <span class="stage-hub-open-btn"><i class="fa-solid fa-folder-open"></i> Open</span>
+            <div class="stage-modal-body" id="stageDocumentsBody">
+              <div id="stageSearchEmpty" class="inline-search-empty" style="display:none;" role="status">
+                <i class="fa-solid fa-folder-open" style="font-size:22px;color:#64748b;"></i>
+                <h4>No matching document requirements</h4>
+                <p>No document requirements matched your search query or current filter.</p>
+                <button type="button" class="btn small secondary" id="stageSearchResetBtn"><i class="fa-solid fa-rotate-left"></i> Reset Filter</button>
               </div>
             </div>
-            <div class="stage-hub-progress-wrap">
-              <div class="stage-hub-progress-meta">
-                <span>Progress</span>
-                <b>{% if ember_summary.target > 0 %}{% widthratio ember_summary.uploaded ember_summary.target 100 %}%{% else %}0%{% endif %} ({{ ember_summary.uploaded }} of {{ ember_summary.target }})</b>
+
+            <div class="stage-modal-foot">
+              <div style="display:flex;gap:8px;align-items:center;">
+                <button type="button" class="btn small secondary" id="stagePrevBtn"><i class="fa-solid fa-chevron-left"></i> Previous Stage</button>
+                <span class="stage-step-indicator" id="stageStepIndicator" aria-live="polite">1 / 1</span>
+                <button type="button" class="btn small secondary" id="stageNextBtn">Next Stage <i class="fa-solid fa-chevron-right"></i></button>
               </div>
-              <div class="stage-hub-progress-track">
-                <div class="stage-hub-progress-fill{% if ember_summary.uploaded >= ember_summary.target and ember_summary.target > 0 %} complete{% endif %}" style="width:{% if ember_summary.target > 0 %}{% widthratio ember_summary.uploaded ember_summary.target 100 %}%{% else %}0%{% endif %};"></div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <button type="button" class="btn small secondary" id="stageOpenEmberTabBtn" data-open-tab="ember"><i class="fa-solid fa-envelope-open-text"></i> Open Ember Letters Tab</button>
               </div>
-            </div>
-            <div class="stage-hub-card-foot">
-              <span>Click to view and manage quarterly letters <i class="fa-solid fa-arrow-right"></i></span>
             </div>
           </div>
-
-          <div id="stageSearchEmpty" class="search-empty-state" style="display:none;grid-column:1/-1;">
-            <i class="fa-solid fa-folder-open search-empty-icon"></i>
-            <h4>No matching document stages</h4>
-            <p>No document requirements matched your search query. Try clearing the filter.</p>
-            <button type="button" class="btn small secondary" id="stageSearchResetBtn"><i class="fa-solid fa-rotate-left"></i> Reset Filter</button>
-          </div>
+          <button type="button" class="modal-edge-nav-btn next" id="stageEdgeNextBtn" aria-label="Next stage" title="Next stage (Right arrow)">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
         </div>
 
-        <!-- Hidden Form / Section Repository (individual stages pop into #stageDocumentsModal when clicked) -->
+        <!-- Hidden Section Repository (individual stages mount inside #stageDocumentsBody one at a time) -->
         <div id="stageSectionsRepository" class="hub-hidden-sections">
         {% if checklist.stages %}
           {% for stage in checklist.stages %}
@@ -1635,21 +1194,6 @@
   {% include "_ember_letters.html" %}
 </div>
 </div>
-<div class="stage-floating-elevator" id="stageFloatingElevator" aria-label="Stage row elevator">
-  <button type="button" class="elevator-btn" id="elevatorUpBtn" aria-label="Scroll to previous stage" title="Previous stage (PageUp)">
-    <i class="fa-solid fa-chevron-up"></i>
-  </button>
-  <div class="elevator-info">
-    <span class="elevator-count" id="elevatorCount">1 / 3</span>
-  </div>
-  <button type="button" class="elevator-btn" id="elevatorDownBtn" aria-label="Scroll to next stage" title="Next stage (PageDown)">
-    <i class="fa-solid fa-chevron-down"></i>
-  </button>
-</div>
-<button type="button" id="docFloatingNavBtn" class="doc-floating-nav-btn" aria-label="Back to document stages">
-  <i class="fa-solid fa-arrow-up"></i>
-  <span>Back to Stages</span>
-</button>
 </section>
 {{ deaneries_map|json_script:"deaneries-data" }}
 {{ record_data|json_script:"record-data" }}
@@ -1780,71 +1324,6 @@
     </form>
   </div>
 </div>
-
-<div class="modal-bg" id="sectionQuickEditModal" role="dialog" aria-modal="true" style="display:none;">
-  <div class="modal section-quick-modal">
-    <div class="modal-head">
-      <div>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <h3 id="sectionQuickEditTitle" style="margin:0;"><i class="fa-solid fa-pen-to-square" style="color:#2f6fed;"></i> <span>Quick Edit Section</span></h3>
-          <span class="badge blue" id="sectionQuickEditStepBadge" style="font-size:13px;padding:3px 8px;">Step 1 of 7</span>
-        </div>
-        <span class="muted" style="margin-top:3px;display:block;">Changes save directly to clergy record. Close when finished.</span>
-      </div>
-      <button class="close" type="button" aria-label="Close" id="sectionQuickEditCloseTop">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </div>
-    <div class="section-modal-body" id="sectionQuickEditBody"></div>
-    <div class="section-modal-foot">
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button type="button" class="btn small secondary" id="sectionQuickEditPrevBtn"><i class="fa-solid fa-chevron-left"></i> Previous</button>
-        <span class="modal-step-indicator" id="sectionQuickEditStepIndicator" aria-live="polite">1 / 7</span>
-        <button type="button" class="btn small secondary" id="sectionQuickEditNextBtn">Next <i class="fa-solid fa-chevron-right"></i></button>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button type="button" class="btn secondary" id="sectionQuickEditDoneBtn"><i class="fa-solid fa-xmark"></i> Close</button>
-        {% if not record.is_archived %}
-        <button type="button" class="btn" id="sectionQuickEditSaveBtn"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal-bg" id="stageDocumentsModal" role="dialog" aria-modal="true" style="display:none;">
-  <div class="modal stage-quick-modal">
-    <div class="modal-head">
-      <div>
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <h3 id="stageDocumentsModalTitle" style="margin:0;display:flex;align-items:center;gap:8px;">
-            <i class="fa-solid fa-folder-open" style="color:var(--blue);"></i>
-            <span>Stage Requirements</span>
-          </h3>
-          <span class="badge blue" id="stageDocumentsStepBadge" style="font-size:13px;padding:3px 8px;">Stage 1 of 6</span>
-          <span class="badge pending-b" id="stageDocumentsProgressBadge" style="font-size:13px;padding:3px 8px;">0 uploaded</span>
-        </div>
-        <p class="muted" id="stageDocumentsModalDesc" style="margin:4px 0 0;font-size:14px;">Requirements and attachments for this formation stage</p>
-      </div>
-      <button class="close" type="button" aria-label="Close" id="stageDocumentsCloseTop">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </div>
-
-    <div class="stage-modal-body" id="stageDocumentsBody"></div>
-
-    <div class="stage-modal-foot">
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button type="button" class="btn small secondary" id="stagePrevBtn"><i class="fa-solid fa-chevron-left"></i> Previous Stage</button>
-        <span class="stage-step-indicator" id="stageStepIndicator" aria-live="polite">1 / 6</span>
-        <button type="button" class="btn small secondary" id="stageNextBtn">Next Stage <i class="fa-solid fa-chevron-right"></i></button>
-      </div>
-      <div>
-        <button type="button" class="btn small" id="stageDocumentsDoneBtn"><i class="fa-solid fa-check"></i> Done</button>
-      </div>
-    </div>
-  </div>
-</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -1856,9 +1335,17 @@
   (function() {
     const DRAFT_KEY = 'ednp_form_draft_' + window.location.pathname;
     const RETURN_FIELD_KEY = 'ednp_return_input_' + window.location.pathname;
+    const ACTIVE_SECTION_KEY = 'ednp_active_section_' + window.location.pathname;
+    const PROFILE_SEARCH_KEY = 'ednp_profile_search_' + window.location.pathname;
     const mainForm = document.getElementById('recordPersonalForm');
     let activeTriggerFieldEl = null;
     let activeTriggerInputName = '';
+    let serverBaselineJson = '';
+
+    function setDraftBadgeVisible(show) {
+      const badge = document.getElementById('sectionDraftRestoredBadge');
+      if (badge) badge.style.display = show ? 'inline-flex' : 'none';
+    }
 
     const rankSelect = document.getElementById('rankSelect');
     function updateOrdinationStages() {
@@ -1881,19 +1368,63 @@
       updateOrdinationStages();
     }
 
-    function saveDraftToSession() {
-      if (!mainForm) return;
+    const sectionModal = document.getElementById('sectionQuickEditModal');
+    const sectionModalBody = document.getElementById('sectionQuickEditBody');
+    let activeSectionNode = null;
+    let activeSectionPlaceholder = null;
+    let activeSectionId = '';
+
+    function queryFieldByName(name) {
+      if (!name) return null;
+      const sel = '[name="' + CSS.escape(name) + '"]';
+      return (mainForm && mainForm.querySelector(sel)) || (sectionModalBody && sectionModalBody.querySelector(sel)) || null;
+    }
+
+    function getAllFormControls() {
+      const seen = new Set();
+      const controls = [];
+      [mainForm, sectionModalBody].forEach(function(root) {
+        if (!root) return;
+        root.querySelectorAll('input[name], select[name], textarea[name]').forEach(function(el) {
+          if (!seen.has(el)) {
+            seen.add(el);
+            controls.push(el);
+          }
+        });
+      });
+      return controls;
+    }
+
+    function captureProfileSnapshot() {
+      if (!mainForm) return {};
       const draft = {};
-      mainForm.querySelectorAll('input[name], select[name], textarea[name]').forEach(function(el) {
+      getAllFormControls().forEach(function(el) {
         if (el.name === 'csrfmiddlewaretoken' || el.type === 'file' || el.readOnly) return;
-        if (el.type === 'checkbox' || el.type === 'radio') {
+        if (el.closest('#sec-reg-deployments, #sec-reg-family')) return;
+        if (el.type === 'checkbox') {
+          draft[el.name] = Boolean(el.checked);
+        } else if (el.type === 'radio') {
           if (el.checked) draft[el.name] = el.value;
+          else if (!(el.name in draft)) draft[el.name] = '';
         } else {
           draft[el.name] = el.value;
         }
       });
+      return draft;
+    }
+
+    function saveDraftToSession() {
+      if (!mainForm) return;
+      const draft = captureProfileSnapshot();
+      const draftJson = JSON.stringify(draft);
+      if (serverBaselineJson && draftJson === serverBaselineJson) {
+        try { sessionStorage.removeItem(DRAFT_KEY); } catch (_e) {}
+        setDraftBadgeVisible(false);
+        document.dispatchEvent(new CustomEvent('ednp:form-clean'));
+        return;
+      }
       try {
-        sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+        sessionStorage.setItem(DRAFT_KEY, draftJson);
       } catch (_e) {}
     }
 
@@ -1934,9 +1465,18 @@
 
         Object.keys(draft).forEach(function(name) {
           if (name === 'deanery' || name === 'assignment') return;
-          const el = mainForm.querySelector('[name="' + CSS.escape(name) + '"]');
-          if (el && !el.readOnly && el.type !== 'file') {
-            el.value = draft[name];
+          const sel = '[name="' + CSS.escape(name) + '"]';
+          const matches = Array.from((mainForm && mainForm.querySelectorAll(sel)) || [])
+            .concat(Array.from((sectionModalBody && sectionModalBody.querySelectorAll(sel)) || []));
+          if (!matches.length) return;
+          const first = matches[0];
+          if (first.readOnly || first.type === 'file') return;
+          if (first.type === 'checkbox') {
+            first.checked = Boolean(draft[name]);
+          } else if (first.type === 'radio') {
+            matches.forEach(function(r) { r.checked = (r.value === String(draft[name])); });
+          } else {
+            first.value = draft[name];
           }
         });
 
@@ -1944,8 +1484,18 @@
         if (typeof toggleLeaveReason === 'function') {
           toggleLeaveReason('editStatus', 'editLeaveReasonField');
         }
+
+        const restoredJson = JSON.stringify(captureProfileSnapshot());
+        if (serverBaselineJson && restoredJson === serverBaselineJson) {
+          try { sessionStorage.removeItem(DRAFT_KEY); } catch (_e) {}
+          setDraftBadgeVisible(false);
+          return false;
+        }
+
+        setDraftBadgeVisible(true);
         const saveBar = document.querySelector('.floating-save-bar');
         if (saveBar) saveBar.classList.add('visible');
+        document.dispatchEvent(new CustomEvent('ednp:draft-restored'));
         return true;
       } catch (_e) {
         return false;
@@ -1982,26 +1532,34 @@
       });
     }
 
-    document.getElementById('floatingDiscardBtn')?.addEventListener('click', function() {
+    if (sectionModalBody) {
+      sectionModalBody.addEventListener('input', function(e) {
+        if (e.target.closest('#sec-reg-deployments, #sec-reg-family')) return;
+        saveDraftToSession();
+      });
+      sectionModalBody.addEventListener('change', function(e) {
+        if (e.target.closest('#sec-reg-deployments, #sec-reg-family')) return;
+        saveDraftToSession();
+      });
+    }
+
+    document.addEventListener('ednp:form-discarded', function() {
       try {
         sessionStorage.removeItem(DRAFT_KEY);
         sessionStorage.removeItem(RETURN_FIELD_KEY);
       } catch (_e) {}
-    }, true);
+      setDraftBadgeVisible(false);
+    });
 
+    serverBaselineJson = JSON.stringify(captureProfileSnapshot());
     restoreDraftFromSession();
 
+    let pendingReturnInputEl = null;
     try {
       const savedInputName = sessionStorage.getItem(RETURN_FIELD_KEY);
       if (savedInputName) {
         sessionStorage.removeItem(RETURN_FIELD_KEY);
-        if (typeof selectTab === 'function') selectTab('personal', 'replace');
-        const inputEl = mainForm ? mainForm.querySelector('[name="' + CSS.escape(savedInputName) + '"]') : null;
-        if (inputEl) {
-          setTimeout(function() {
-            focusAndHighlightField(inputEl.closest('.edit-field, .field'), inputEl);
-          }, 120);
-        }
+        pendingReturnInputEl = queryFieldByName(savedInputName);
       }
     } catch (_e) {}
 
@@ -2084,14 +1642,9 @@
         }
       });
 
-      document.querySelectorAll('.hub-att-tag[data-hub-att-doc="' + docTypeId + '"]').forEach(function(tag) {
-        const label = tag.dataset.hubAttLabel || 'Cert attached';
-        tag.className = 'hub-att-tag ok';
-        tag.innerHTML = '<i class="fa-solid fa-circle-check"></i> ' + label;
-      });
-
       const row = document.getElementById('doc-row-' + docTypeId);
       if (row) {
+        const wasSubmitted = row.dataset.docStatus === 'submitted';
         row.classList.add('has-file');
         row.dataset.docStatus = 'submitted';
         if (data.view_url) {
@@ -2133,28 +1686,39 @@
             '<button type="button" class="doc-action-btn" data-print-url="' + (data.view_url || '#') + '" title="Print document"><i class="fa-solid fa-print"></i></button> ' +
             '<button type="button" class="doc-action-btn" data-quick-upload="' + docTypeId + '" data-doc-name="' + (data.document_name || '') + '" title="Replace file"><i class="fa-solid fa-rotate"></i></button>';
         }
-      }
 
-      const stageSec = row ? row.closest('.doc-stage-section') : null;
-      const stageSlug = stageSec ? stageSec.dataset.stageSlug : '';
-      if (stageSlug) {
-        const hubCard = document.querySelector('.stage-hub-card[data-open-stage="sec-doc-' + CSS.escape(stageSlug) + '"]');
-        if (hubCard) {
-          hubCard.querySelectorAll('.stage-preview-row').forEach(function(pRow) {
-            const pName = pRow.querySelector('.stage-preview-name');
-            if (pName && data.document_name && pName.textContent.trim().toLowerCase() === data.document_name.trim().toLowerCase()) {
-              const dot = pRow.querySelector('.stage-preview-dot');
-              if (dot) {
-                dot.className = 'stage-preview-dot ok';
-                dot.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
-              }
-              const stBadge = pRow.querySelector('.stage-preview-status');
-              if (stBadge) {
-                stBadge.className = 'stage-preview-status badge active-b';
-                stBadge.textContent = 'Submitted';
-              }
+        const stageSec = row.closest('.doc-stage-section');
+        if (!wasSubmitted && stageSec && stageSec.dataset.stageSubmitted !== undefined) {
+          const prevSub = parseInt(stageSec.dataset.stageSubmitted || '0', 10) || 0;
+          const totalNum = parseInt(stageSec.dataset.stageTotal || '0', 10) || 0;
+          const nextSub = totalNum > 0 ? Math.min(totalNum, prevSub + 1) : (prevSub + 1);
+          stageSec.dataset.stageSubmitted = String(nextSub);
+          const nowComplete = totalNum > 0 && nextSub >= totalNum;
+          stageSec.dataset.stageComplete = nowComplete ? '1' : '0';
+
+          const pill = document.querySelector('#docNavPills .doc-nav-pill[data-stage-modal="' + CSS.escape(stageSec.id) + '"]');
+          const pillBadge = pill ? pill.querySelector('.badge') : null;
+          if (pillBadge) {
+            if (nowComplete) {
+              pillBadge.className = 'badge stage-complete-b';
+              pillBadge.innerHTML = '<i class="fa-solid fa-check"></i> Complete';
+            } else {
+              pillBadge.className = 'badge pending-b';
+              pillBadge.textContent = nextSub + '/' + totalNum;
             }
-          });
+          }
+
+          const progressBadge = document.getElementById('stageDocumentsProgressBadge');
+          const stageModalTitleText = document.querySelector('#stageDocumentsModalTitle span')?.textContent?.trim();
+          if (progressBadge && stageModalTitleText && stageModalTitleText === (stageSec.dataset.stageTitle || '').trim()) {
+            if (nowComplete) {
+              progressBadge.className = 'badge stage-complete-b';
+              progressBadge.innerHTML = '<i class="fa-solid fa-check"></i> Complete';
+            } else {
+              progressBadge.className = 'badge pending-b';
+              progressBadge.textContent = nextSub + ' of ' + totalNum + ' uploaded';
+            }
+          }
         }
       }
 
@@ -2176,7 +1740,7 @@
         const origHtml = btn ? btn.innerHTML : '';
         if (btn) {
           btn.disabled = true;
-          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading…';
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
         }
 
         try {
@@ -2210,9 +1774,7 @@
           quickUploadForm.reset();
           if (typeof closeModal === 'function') closeModal('quickUploadModal');
 
-          const targetInput = (activeTriggerInputName && mainForm)
-            ? mainForm.querySelector('[name="' + CSS.escape(activeTriggerInputName) + '"]')
-            : null;
+          const targetInput = activeTriggerInputName ? queryFieldByName(activeTriggerInputName) : null;
           const fallbackField = activeTriggerFieldEl ||
             document.querySelector('.date-att-bar[data-att-doc-type="' + data.document_type_id + '"]')?.closest('.edit-field, .field');
           focusAndHighlightField(fallbackField, targetInput);
@@ -2229,19 +1791,15 @@
       });
     }
 
-    // Section Quick-Edit Modal (clicking Jump-to / Quick-Edit pills opens the section in a modal with its own Save Changes button)
-    const sectionModal = document.getElementById('sectionQuickEditModal');
-    const sectionModalBody = document.getElementById('sectionQuickEditBody');
+    // Inline Section Quick-Edit Workspace (one group/modal at a time)
     const sectionModalTitleSpan = document.querySelector('#sectionQuickEditTitle span');
     const sectionSaveBtn = document.getElementById('sectionQuickEditSaveBtn');
     const sectionPrevBtn = document.getElementById('sectionQuickEditPrevBtn');
     const sectionNextBtn = document.getElementById('sectionQuickEditNextBtn');
+    const sectionEdgePrevBtn = document.getElementById('sectionEdgePrevBtn');
+    const sectionEdgeNextBtn = document.getElementById('sectionEdgeNextBtn');
     const sectionPills = Array.from(document.querySelectorAll('#personalSectionNav .nav-pill[data-section-modal]'));
     const READONLY_SECTIONS = new Set(['sec-reg-deployments', 'sec-reg-family']);
-
-    let activeSectionNode = null;
-    let activeSectionPlaceholder = null;
-    let activeSectionId = '';
 
     function returnSectionToPage() {
       if (activeSectionNode && activeSectionPlaceholder && activeSectionPlaceholder.parentNode) {
@@ -2252,9 +1810,36 @@
       activeSectionPlaceholder = null;
     }
 
-    function openSectionInModal(sectionId, focusSelector) {
+    function getSectionSearchText(secEl) {
+      if (!secEl) return '';
+      const parts = [secEl.textContent || ''];
+      secEl.querySelectorAll('input, select, textarea').forEach(function(el) {
+        if (el.type === 'hidden' || el.type === 'file') return;
+        if (el.tagName === 'SELECT' && el.selectedIndex >= 0) {
+          parts.push(el.options[el.selectedIndex].text || '');
+        }
+        if (el.value) parts.push(el.value);
+      });
+      return parts.join(' ').toLowerCase();
+    }
+
+    function revealPersonalPillHorizontally(pill, smooth) {
+      if (!pill) return;
+      const container = pill.closest('.section-nav-inner');
+      if (!container || container.scrollWidth <= container.clientWidth) return;
+      const targetLeft = pill.offsetLeft - (container.clientWidth / 2) + (pill.offsetWidth / 2);
+      const clampedLeft = Math.max(0, Math.min(targetLeft, container.scrollWidth - container.clientWidth));
+      try {
+        container.scrollTo({ left: clampedLeft, behavior: smooth === false ? 'auto' : 'smooth' });
+      } catch (_e) {
+        container.scrollLeft = clampedLeft;
+      }
+    }
+
+    function openSectionInModal(sectionId, options) {
+      const opts = (typeof options === 'string') ? { focusSelector: options } : (options || {});
       const targetEl = document.getElementById(sectionId);
-      if (!targetEl || !sectionModal || !sectionModalBody) return;
+      if (!targetEl || !sectionModal || !sectionModalBody) return false;
 
       if (activeSectionNode && activeSectionId !== sectionId) {
         returnSectionToPage();
@@ -2268,53 +1853,70 @@
         activeSectionNode = targetEl;
       }
       activeSectionId = sectionId;
+      if (!opts.skipPersist) {
+        try { sessionStorage.setItem(ACTIVE_SECTION_KEY, sectionId); } catch (_e) {}
+      }
 
       const pill = sectionPills.find(function(p) { return p.dataset.sectionModal === sectionId; });
       sectionPills.forEach(function(p) { p.classList.toggle('active', p === pill); });
+      if (pill && opts.scrollPill !== false) {
+        revealPersonalPillHorizontally(pill, !opts.instantPill);
+      }
       if (sectionModalTitleSpan && pill) {
         sectionModalTitleSpan.textContent = pill.dataset.sectionTitle || pill.textContent.trim();
       }
 
       const idx = sectionPills.indexOf(pill);
-      const totalSections = sectionPills.length;
-      if (sectionPrevBtn) sectionPrevBtn.disabled = idx <= 0;
-      if (sectionNextBtn) sectionNextBtn.disabled = idx === -1 || idx >= totalSections - 1;
+      const totalSections = sectionPills.length || 7;
+      const currentStep = idx >= 0 ? (idx + 1) : 1;
+      const atStart = idx <= 0;
+      const atEnd = idx === -1 || idx >= totalSections - 1;
+
+      if (sectionPrevBtn) sectionPrevBtn.disabled = atStart;
+      if (sectionNextBtn) sectionNextBtn.disabled = atEnd;
+      if (sectionEdgePrevBtn) sectionEdgePrevBtn.disabled = atStart;
+      if (sectionEdgeNextBtn) sectionEdgeNextBtn.disabled = atEnd;
       if (sectionSaveBtn) {
         sectionSaveBtn.style.display = READONLY_SECTIONS.has(sectionId) ? 'none' : '';
       }
 
       const stepBadge = document.getElementById('sectionQuickEditStepBadge');
       if (stepBadge) {
-        stepBadge.textContent = 'Step ' + (idx >= 0 ? (idx + 1) : 1) + ' of ' + totalSections;
+        stepBadge.textContent = 'Step ' + currentStep + ' of ' + totalSections;
       }
       const stepIndicator = document.getElementById('sectionQuickEditStepIndicator');
       if (stepIndicator) {
-        stepIndicator.textContent = (idx >= 0 ? (idx + 1) : 1) + ' / ' + totalSections;
+        stepIndicator.textContent = currentStep + ' / ' + totalSections;
       }
       const pCount = document.getElementById('profileStepperCount');
       const pLabel = document.getElementById('profileStepperLabel');
       if (pCount) {
-        pCount.textContent = (idx >= 0 ? (idx + 1) : 1) + ' / ' + totalSections;
+        pCount.textContent = currentStep + ' / ' + totalSections;
       }
       if (pLabel && pill) {
-        pLabel.textContent = pill.dataset.sectionTitle || pill.textContent.trim();
+        pLabel.textContent = pill.textContent.trim();
       }
 
-      sectionModal.style.display = 'flex';
-      sectionModal.classList.add('show', 'section-modal-active');
+      sectionModal.style.display = '';
       sectionModalBody.scrollTop = 0;
 
-      const focusTarget = (typeof focusSelector === 'string')
-        ? targetEl.querySelector(focusSelector)
-        : (focusSelector || null);
-      const inputToFocus = focusTarget || targetEl.querySelector('input:not([type="hidden"]):not([type="file"]):not([readonly]), select, textarea');
+      if (!opts.skipAnimate) {
+        sectionModalBody.classList.remove('step-entering');
+        void sectionModalBody.offsetWidth;
+        sectionModalBody.classList.add('step-entering');
+      }
+
+      const focusTarget = opts.focusSelector
+        ? ((typeof opts.focusSelector === 'string') ? targetEl.querySelector(opts.focusSelector) : opts.focusSelector)
+        : null;
+      const inputToFocus = focusTarget || (opts.shouldFocus ? targetEl.querySelector('input:not([type="hidden"]):not([type="file"]):not([readonly]), select, textarea') : null);
       if (inputToFocus) {
         setTimeout(function() {
           try {
             if (focusTarget && typeof focusTarget.scrollIntoView === 'function') {
               focusTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-            inputToFocus.focus({ preventScroll: !!focusTarget });
+            inputToFocus.focus({ preventScroll: !!focusTarget || !focusTarget });
             if (focusTarget) {
               const container = focusTarget.closest('.edit-field, .field') || focusTarget;
               container.classList.remove('field-highlight-flash');
@@ -2322,145 +1924,16 @@
               container.classList.add('field-highlight-flash');
             }
           } catch (_e) {}
-        }, 140);
+        }, 120);
       }
+      return true;
     }
 
-    function syncHubCardsFromForm() {
-      document.querySelectorAll('[data-hub-bind]').forEach(function(el) {
-        const fieldName = el.dataset.hubBind;
-        const input = document.querySelector('[name="' + CSS.escape(fieldName) + '"]');
-        if (!input) return;
-        let val = (input.value || '').trim();
-        if (input.tagName === 'SELECT' && input.selectedIndex >= 0 && val) {
-          val = input.options[input.selectedIndex].text.trim();
-        }
-        if (!val) {
-          el.textContent = 'Not set';
-          el.classList.add('empty');
-        } else {
-          el.classList.remove('empty');
-          if (input.type === 'date') {
-            try {
-              const d = new Date((input.value || '').trim() + 'T00:00:00');
-              if (!isNaN(d.getTime())) {
-                el.textContent = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                return;
-              }
-            } catch (_e) {}
-          }
-          el.textContent = val;
-        }
-      });
-    }
-
-    function initProfileSearch() {
-      const searchInput = document.getElementById('profileSearchInput');
-      const clearBtn = document.getElementById('profileSearchClear');
-      const resetBtn = document.getElementById('profileSearchResetBtn');
-      const emptyState = document.getElementById('profileSearchEmpty');
-      const hubCards = Array.from(document.querySelectorAll('#registrarSummaryHub .hub-card'));
-
-      if (!searchInput || hubCards.length === 0) return;
-
-      function performSearch(query) {
-        const q = (query || '').trim().toLowerCase();
-        let matchCount = 0;
-
-        hubCards.forEach(function(card) {
-          if (!q) {
-            card.style.display = '';
-            matchCount++;
-            return;
-          }
-          const text = (card.textContent || '').toLowerCase();
-          const matches = text.includes(q);
-          card.style.display = matches ? '' : 'none';
-          if (matches) matchCount++;
-        });
-
-        sectionPills.forEach(function(pill) {
-          if (!q) {
-            pill.style.opacity = '';
-            pill.style.pointerEvents = '';
-            return;
-          }
-          const targetSectionId = pill.dataset.sectionModal;
-          const matchingCard = hubCards.find(function(c) {
-            return c.dataset.openSection === targetSectionId && c.style.display !== 'none';
-          });
-          if (matchingCard) {
-            pill.style.opacity = '1';
-            pill.style.pointerEvents = '';
-          } else {
-            pill.style.opacity = '0.45';
-            pill.style.pointerEvents = 'none';
-          }
-        });
-
-        if (clearBtn) {
-          clearBtn.hidden = !q;
-        }
-        if (emptyState) {
-          emptyState.style.display = (matchCount === 0 && q.length > 0) ? 'block' : 'none';
-        }
-      }
-
-      searchInput.addEventListener('input', function() {
-        performSearch(this.value);
-      });
-
-      searchInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-          this.value = '';
-          performSearch('');
-          this.blur();
-        }
-      });
-
-      if (clearBtn) {
-        clearBtn.addEventListener('click', function() {
-          searchInput.value = '';
-          performSearch('');
-          searchInput.focus();
-        });
-      }
-
-      if (resetBtn) {
-        resetBtn.addEventListener('click', function() {
-          searchInput.value = '';
-          performSearch('');
-          searchInput.focus();
-        });
-      }
-
-      try {
-        const params = new URLSearchParams(window.location.search || '');
-        const qParam = params.get('profile_search') || params.get('q') || '';
-        if (qParam) {
-          searchInput.value = qParam;
-          performSearch(qParam);
-        }
-      } catch (_e) {}
-    }
-    initProfileSearch();
-
-    function closeSectionModal(highlightCard) {
-      const lastId = activeSectionId;
-      returnSectionToPage();
-      activeSectionId = '';
-      if (sectionModal) {
-        sectionModal.classList.remove('show', 'section-modal-active');
-        sectionModal.style.display = 'none';
-      }
-      if (highlightCard && lastId) {
-        const card = document.querySelector('.hub-card[data-open-section="' + CSS.escape(lastId) + '"]') || document.getElementById(lastId);
-        if (card && card.offsetParent !== null) {
-          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          card.classList.remove('field-highlight-flash');
-          void card.offsetWidth;
-          card.classList.add('field-highlight-flash');
-        }
+    function stepSection(delta) {
+      const idx = sectionPills.findIndex(function(p) { return p.dataset.sectionModal === activeSectionId; });
+      const nextIdx = (idx === -1 ? 0 : idx) + delta;
+      if (nextIdx >= 0 && nextIdx < sectionPills.length) {
+        openSectionInModal(sectionPills[nextIdx].dataset.sectionModal, { shouldFocus: false });
       }
     }
 
@@ -2468,41 +1941,29 @@
       pill.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        openSectionInModal(pill.dataset.sectionModal);
+        openSectionInModal(pill.dataset.sectionModal, { shouldFocus: true });
       }, true);
     });
 
-    document.querySelectorAll('.hub-card[data-open-section]').forEach(function(card) {
-      card.addEventListener('click', function(e) {
-        if (e.target.closest('a, button')) return;
-        openSectionInModal(card.dataset.openSection);
-      });
-      card.querySelector('.hub-edit-btn')?.addEventListener('click', function(e) {
-        e.stopPropagation();
-        openSectionInModal(card.dataset.openSection);
-      });
-      card.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          openSectionInModal(card.dataset.openSection);
-        }
-      });
-    });
+    sectionPrevBtn?.addEventListener('click', function() { stepSection(-1); });
+    sectionNextBtn?.addEventListener('click', function() { stepSection(1); });
+    sectionEdgePrevBtn?.addEventListener('click', function() { stepSection(-1); });
+    sectionEdgeNextBtn?.addEventListener('click', function() { stepSection(1); });
 
-    document.getElementById('sectionQuickEditCloseTop')?.addEventListener('click', function() { closeSectionModal(true); });
-    document.getElementById('sectionQuickEditDoneBtn')?.addEventListener('click', function() { closeSectionModal(true); });
-    sectionModal?.addEventListener('click', function(e) {
-      if (e.target === sectionModal) closeSectionModal(false);
-    });
+    document.addEventListener('keydown', function(e) {
+      const personalTab = document.getElementById('tabPersonal');
+      if (!personalTab || personalTab.offsetParent === null || !sectionModal || sectionModal.offsetParent === null) return;
+      if (document.querySelector('.modal-bg.show, .modal-bg.active, .ph-picker-overlay')) return;
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (e.target && e.target.isContentEditable)) return;
 
-    sectionPrevBtn?.addEventListener('click', function() {
-      const idx = sectionPills.findIndex(function(p) { return p.dataset.sectionModal === activeSectionId; });
-      if (idx > 0) openSectionInModal(sectionPills[idx - 1].dataset.sectionModal);
-    });
-
-    sectionNextBtn?.addEventListener('click', function() {
-      const idx = sectionPills.findIndex(function(p) { return p.dataset.sectionModal === activeSectionId; });
-      if (idx >= 0 && idx < sectionPills.length - 1) openSectionInModal(sectionPills[idx + 1].dataset.sectionModal);
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        stepSection(-1);
+      } else if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+        e.preventDefault();
+        stepSection(1);
+      }
     });
 
     const AUTO_OPEN_SECTION_KEY = 'ednp_reopen_section_' + window.location.pathname;
@@ -2513,12 +1974,12 @@
       });
     });
 
-    // Ensure before mainForm submits for any reason, any section inside the modal is returned to mainForm
+    // Ensure before mainForm submits for any reason, any section inside the inline modal is returned to mainForm
     mainForm?.addEventListener('submit', function() {
       returnSectionToPage();
     }, true);
 
-    function checkHashOrParamsAndOpenModal() {
+    function resolvePersonalSectionFromUrl() {
       try {
         const hash = (window.location.hash || '').replace(/^#/, '').trim();
         const params = new URLSearchParams(window.location.search || '');
@@ -2536,7 +1997,7 @@
           if (directEl && (directEl.classList.contains('section-card') || directEl.classList.contains('edit-grid'))) {
             targetSectionId = directEl.id;
           }
-        } else if (hash) {
+        } else if (hash && hash.startsWith('sec-reg-')) {
           const directEl = document.getElementById(hash);
           if (directEl && (directEl.classList.contains('section-card') || directEl.classList.contains('edit-grid'))) {
             targetSectionId = directEl.id;
@@ -2550,30 +2011,191 @@
           targetFocusSelector = '[name="' + CSS.escape(focusParam) + '"]';
         }
 
-        if (targetSectionId) {
-          if (typeof selectTab === 'function') selectTab('personal', 'replace');
-          setTimeout(function() {
-            openSectionInModal(targetSectionId, targetFocusSelector);
-          }, 80);
-          return true;
-        }
-      } catch (_e) {}
-      return false;
+        return { sectionId: targetSectionId, focusSelector: targetFocusSelector };
+      } catch (_e) {
+        return { sectionId: '', focusSelector: '' };
+      }
     }
 
-    try {
-      const reopenSection = sessionStorage.getItem(AUTO_OPEN_SECTION_KEY);
-      if (reopenSection) {
-        sessionStorage.removeItem(AUTO_OPEN_SECTION_KEY);
-        if (typeof selectTab === 'function') selectTab('personal', 'replace');
-        openSectionInModal(reopenSection);
-      } else {
-        checkHashOrParamsAndOpenModal();
+    (function initProfileSearchAndInitialModal() {
+      const searchInput = document.getElementById('profileSearchInput');
+      const clearBtn = document.getElementById('profileSearchClear');
+      const feedbackBar = document.getElementById('profileSearchFeedback');
+      const feedbackText = document.getElementById('profileSearchFeedbackText');
+      const feedbackResetBtn = document.getElementById('profileSearchFeedbackResetBtn');
+      const emptyState = document.getElementById('profileSearchEmpty');
+      const resetBtn = document.getElementById('profileSearchResetBtn');
+
+      function performSearch(query, opts) {
+        const options = opts || {};
+        const trimmed = (query || '').trim();
+        const q = trimmed.toLowerCase();
+        if (clearBtn) clearBtn.hidden = !q;
+
+        if (!options.skipPersist) {
+          try {
+            if (trimmed) {
+              sessionStorage.setItem(PROFILE_SEARCH_KEY, trimmed);
+            } else {
+              sessionStorage.removeItem(PROFILE_SEARCH_KEY);
+            }
+          } catch (_e) {}
+        }
+
+        if (!q) {
+          sectionPills.forEach(function(p) {
+            p.classList.remove('search-match', 'search-dimmed');
+          });
+          if (feedbackBar) feedbackBar.hidden = true;
+          if (emptyState) emptyState.style.display = 'none';
+          if (sectionModal) sectionModal.style.display = '';
+          return;
+        }
+
+        const matchedIds = [];
+        sectionPills.forEach(function(pill) {
+          const secId = pill.dataset.sectionModal;
+          const secEl = document.getElementById(secId);
+          const pillText = (pill.dataset.sectionTitle || pill.textContent || '').toLowerCase();
+          const isMatch = pillText.includes(q) || getSectionSearchText(secEl).includes(q);
+          pill.classList.toggle('search-match', isMatch);
+          pill.classList.toggle('search-dimmed', !isMatch);
+          if (isMatch) matchedIds.push(secId);
+        });
+
+        if (feedbackBar && feedbackText) {
+          feedbackBar.hidden = false;
+          feedbackText.textContent = matchedIds.length === 0
+            ? 'No profile groups matched "' + query.trim() + '"'
+            : 'Matched ' + matchedIds.length + ' profile group' + (matchedIds.length === 1 ? '' : 's') + ' for "' + query.trim() + '"';
+        }
+
+        if (matchedIds.length === 0) {
+          if (emptyState) emptyState.style.display = 'block';
+          if (sectionModal) sectionModal.style.display = 'none';
+        } else {
+          if (emptyState) emptyState.style.display = 'none';
+          if (sectionModal) sectionModal.style.display = '';
+          if (options.autoJump !== false && !matchedIds.includes(activeSectionId)) {
+            openSectionInModal(matchedIds[0], { shouldFocus: false });
+          }
+        }
       }
-    } catch (_e) {}
+
+      function clearSearch() {
+        if (searchInput) searchInput.value = '';
+        performSearch('', { autoJump: false });
+      }
+
+      if (searchInput) {
+        searchInput.addEventListener('input', function() {
+          const personalTab = document.getElementById('tabPersonal');
+          if (this.value.trim() && personalTab && !personalTab.classList.contains('active') && typeof selectTab === 'function') {
+            selectTab('personal');
+          }
+          performSearch(this.value, { autoJump: true });
+        });
+        searchInput.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape') {
+            clearSearch();
+            this.blur();
+          }
+        });
+      }
+
+      clearBtn?.addEventListener('click', function() {
+        clearSearch();
+        searchInput?.focus();
+      });
+      feedbackResetBtn?.addEventListener('click', function() {
+        clearSearch();
+        searchInput?.focus();
+      });
+      resetBtn?.addEventListener('click', function() {
+        clearSearch();
+        searchInput?.focus();
+      });
+
+      // Landing priority: reopen saved section -> return field after upload -> URL section/hash -> remembered carousel -> Step 1
+      let reopenSection = '';
+      try {
+        reopenSection = sessionStorage.getItem(AUTO_OPEN_SECTION_KEY) || '';
+        if (reopenSection) sessionStorage.removeItem(AUTO_OPEN_SECTION_KEY);
+      } catch (_e) {}
+
+      let savedActiveSection = '';
+      try {
+        savedActiveSection = sessionStorage.getItem(ACTIVE_SECTION_KEY) || '';
+      } catch (_e) {}
+
+      let savedProfileSearch = '';
+      try {
+        savedProfileSearch = sessionStorage.getItem(PROFILE_SEARCH_KEY) || '';
+      } catch (_e) {}
+
+      const urlTarget = resolvePersonalSectionFromUrl();
+      const firstSectionId = sectionPills.length > 0 ? sectionPills[0].dataset.sectionModal : '';
+      let initialSectionId = firstSectionId;
+      let initialFocusSelector = '';
+      let forcePersonalTab = false;
+      let hasSavedStep = false;
+
+      if (reopenSection && document.getElementById(reopenSection)) {
+        initialSectionId = reopenSection;
+        forcePersonalTab = true;
+      } else if (pendingReturnInputEl) {
+        const returnSec = pendingReturnInputEl.closest('.edit-grid');
+        if (returnSec && returnSec.id) initialSectionId = returnSec.id;
+        forcePersonalTab = true;
+      } else if (urlTarget.sectionId && document.getElementById(urlTarget.sectionId)) {
+        initialSectionId = urlTarget.sectionId;
+        initialFocusSelector = urlTarget.focusSelector;
+        forcePersonalTab = true;
+      } else if (savedActiveSection && document.getElementById(savedActiveSection)) {
+        initialSectionId = savedActiveSection;
+        hasSavedStep = true;
+      }
+
+      if (forcePersonalTab && typeof selectTab === 'function') {
+        selectTab('personal', 'replace');
+      }
+
+      if (initialSectionId) {
+        openSectionInModal(initialSectionId, {
+          focusSelector: initialFocusSelector || null,
+          shouldFocus: false,
+          scrollPill: true,
+          instantPill: true,
+          skipAnimate: !forcePersonalTab
+        });
+      }
+
+      if (pendingReturnInputEl) {
+        setTimeout(function() {
+          focusAndHighlightField(pendingReturnInputEl.closest('.edit-field, .field'), pendingReturnInputEl);
+        }, 120);
+      }
+
+      try {
+        const params = new URLSearchParams(window.location.search || '');
+        const qParam = params.get('profile_search') || params.get('q') || '';
+        const initialQuery = qParam || savedProfileSearch;
+        if (initialQuery && searchInput) {
+          searchInput.value = initialQuery;
+          performSearch(initialQuery, {
+            autoJump: !reopenSection && !pendingReturnInputEl && !urlTarget.sectionId && !hasSavedStep,
+            skipPersist: true
+          });
+        }
+      } catch (_e) {}
+    })();
 
     window.addEventListener('hashchange', function() {
-      checkHashOrParamsAndOpenModal();
+      const urlTarget = resolvePersonalSectionFromUrl();
+      if (urlTarget.sectionId && document.getElementById(urlTarget.sectionId)) {
+        if (typeof selectTab === 'function') selectTab('personal', 'replace');
+        openSectionInModal(urlTarget.sectionId, { focusSelector: urlTarget.focusSelector || null });
+      }
     });
 
     sectionSaveBtn?.addEventListener('click', async function() {
@@ -2594,29 +2216,25 @@
       if (invalidControl) {
         const parentSec = invalidControl.closest('.edit-grid');
         const targetSecId = parentSec ? parentSec.id : savedSectionId;
-        openSectionInModal(targetSecId);
+        openSectionInModal(targetSecId, { shouldFocus: false });
         if (typeof showToast === 'function') {
           showToast('Please correct the highlighted field before saving.', 'warn');
         }
-        setTimeout(() => {
+        setTimeout(function() {
           if (typeof invalidControl.reportValidity === 'function') {
             invalidControl.reportValidity();
           }
-          invalidControl.focus();
+          try { invalidControl.focus(); } catch (_e) {}
         }, 150);
         return;
       }
-      openSectionInModal(savedSectionId);
 
       const origHtml = sectionSaveBtn.innerHTML;
       sectionSaveBtn.disabled = true;
       sectionSaveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
 
-      // Temporarily return the section node into mainForm so FormData(mainForm) captures all fields
-      returnSectionToPage();
       const formData = new FormData(mainForm);
-      // Put it back in modal while saving or close on success
-      openSectionInModal(savedSectionId);
+      openSectionInModal(savedSectionId, { shouldFocus: false, skipAnimate: true });
 
       try {
         const res = await fetch(mainForm.getAttribute('action') || window.location.href, {
@@ -2628,6 +2246,10 @@
         if (!data.ok) {
           if (typeof applyFormErrors === 'function' && data.errors) {
             applyFormErrors(mainForm, data.errors);
+            returnSectionToPage();
+            const errField = mainForm.querySelector('.has-error');
+            const errSec = errField ? errField.closest('.edit-grid') : null;
+            openSectionInModal(errSec ? errSec.id : savedSectionId, { shouldFocus: !!errSec });
           }
           if (typeof showToast === 'function') {
             showToast((data && data.error) || 'Please check the form and try again.', 'error');
@@ -2641,12 +2263,16 @@
           sessionStorage.removeItem(DRAFT_KEY);
           sessionStorage.removeItem(RETURN_FIELD_KEY);
         } catch (_e) {}
+        setDraftBadgeVisible(false);
+        returnSectionToPage();
+        serverBaselineJson = JSON.stringify(captureProfileSnapshot());
+        openSectionInModal(savedSectionId, { shouldFocus: false, scrollPill: false, skipAnimate: true });
         const saveBar = document.querySelector('.floating-save-bar');
         if (saveBar) saveBar.classList.remove('visible');
+        document.dispatchEvent(new CustomEvent('ednp:form-saved'));
         if (typeof showToast === 'function') {
           showToast(data.message || 'Changes saved successfully.', 'success');
         }
-        syncHubCardsFromForm();
         sectionSaveBtn.classList.add('saved-success');
         sectionSaveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
         setTimeout(function() {
@@ -2667,9 +2293,7 @@
       }
     });
 
-    let closeStageModalExternal = null;
-
-    // Documents Quick Navigation Pills, Stage Hub Cards & Filter Controls
+    // Documents Inline Stage Modal, Navigation Pills & Filter Controls
     (function initDocNavAndFilters() {
       const container = document.getElementById('tabDocuments');
       if (!container) return;
@@ -2680,7 +2304,7 @@
       const pillsContainer = document.getElementById('docNavPills');
       const scrollLeftBtn = document.getElementById('docNavScrollLeft');
       const scrollRightBtn = document.getElementById('docNavScrollRight');
-      const navPills = nav.querySelectorAll('.doc-nav-pill');
+      const navPills = Array.from(nav.querySelectorAll('.doc-nav-pill'));
       const searchInput = document.getElementById('docSearchInput');
       const searchClearBtn = document.getElementById('docSearchClear');
       const searchFeedback = document.getElementById('docSearchFeedback');
@@ -2688,13 +2312,47 @@
       const searchResetBtn = document.getElementById('docSearchResetBtn');
       const stageResetBtn = document.getElementById('stageSearchResetBtn');
       const stageSearchEmpty = document.getElementById('stageSearchEmpty');
-      const filterPills = nav.querySelectorAll('.filter-pill');
+      const filterPills = Array.from(nav.querySelectorAll('.filter-pill'));
       const btnFocusMode = document.getElementById('btnFocusMode');
-      const floatingBtn = document.getElementById('docFloatingNavBtn');
 
       let activeFilter = 'all';
       let searchQuery = '';
       let focusMode = false;
+
+      const REOPEN_STAGE_KEY = 'ednp_reopen_stage_' + window.location.pathname;
+      const ACTIVE_STAGE_KEY = 'ednp_active_stage_' + window.location.pathname;
+      const DOC_FILTERS_KEY = 'ednp_doc_filters_' + window.location.pathname;
+
+      function saveDocFilterState() {
+        try {
+          if (activeFilter === 'all' && !focusMode && !searchQuery.trim()) {
+            sessionStorage.removeItem(DOC_FILTERS_KEY);
+          } else {
+            sessionStorage.setItem(DOC_FILTERS_KEY, JSON.stringify({
+              filter: activeFilter,
+              focus: Boolean(focusMode),
+              q: searchQuery
+            }));
+          }
+        } catch (_e) {}
+      }
+
+      function revealDocPillHorizontally(pill, smooth) {
+        if (!pill || !pillsContainer || pillsContainer.scrollWidth <= pillsContainer.clientWidth) return;
+        const targetLeft = pill.offsetLeft - (pillsContainer.clientWidth / 2) + (pill.offsetWidth / 2);
+        const clampedLeft = Math.max(0, Math.min(targetLeft, pillsContainer.scrollWidth - pillsContainer.clientWidth));
+        try {
+          pillsContainer.scrollTo({ left: clampedLeft, behavior: smooth === false ? 'auto' : 'smooth' });
+        } catch (_e) {
+          pillsContainer.scrollLeft = clampedLeft;
+        }
+        setTimeout(updateScrollButtons, 180);
+      }
+
+      function getPillTargetId(pill) {
+        if (!pill) return '';
+        return pill.dataset.stageModal || pill.dataset.docTarget || (pill.getAttribute('href') ? pill.getAttribute('href').substring(1) : '');
+      }
 
       // 1. Stage Carousel Controls (Left/Right + Scroll update + Wheel tilt)
       function updateScrollButtons() {
@@ -2727,7 +2385,7 @@
         });
       }
 
-      // 2. Stage Modal Reparenting Engine
+      // 2. Inline Stage Modal Reparenting Engine
       const stageModal = document.getElementById('stageDocumentsModal');
       const stageModalBody = document.getElementById('stageDocumentsBody');
       const stageModalTitle = document.querySelector('#stageDocumentsModalTitle span');
@@ -2738,9 +2396,9 @@
       const stageStepIndicator = document.getElementById('stageStepIndicator');
       const stagePrevBtn = document.getElementById('stagePrevBtn');
       const stageNextBtn = document.getElementById('stageNextBtn');
-      const stageDoneBtn = document.getElementById('stageDocumentsDoneBtn');
-      const stageCloseTop = document.getElementById('stageDocumentsCloseTop');
-      const stageRepository = document.getElementById('stageSectionsRepository');
+      const stageEdgePrevBtn = document.getElementById('stageEdgePrevBtn');
+      const stageEdgeNextBtn = document.getElementById('stageEdgeNextBtn');
+      const stageOpenEmberBtn = document.getElementById('stageOpenEmberTabBtn');
 
       let activeStageNode = null;
       let activeStagePlaceholder = null;
@@ -2755,10 +2413,65 @@
         activeStagePlaceholder = null;
       }
 
-      function openStageInModal(stageId) {
-        if (!stageId) return;
+      function applyRowFiltersToModal(targetEl) {
+        if (!targetEl) return;
+        const rows = targetEl.querySelectorAll('.doc-table tbody tr.doc-row');
+        const query = searchQuery.trim().toLowerCase();
+        let visibleCount = 0;
+
+        rows.forEach(function(row) {
+          if (row.classList.contains('ember-summary-row')) {
+            let emberMatch = true;
+            if (query) {
+              const text = row.textContent.toLowerCase();
+              emberMatch = text.includes(query) || 'ember letters'.includes(query);
+            }
+            row.style.display = emberMatch ? '' : 'none';
+            if (emberMatch) visibleCount++;
+            return;
+          }
+
+          const status = row.dataset.docStatus || '';
+          const title = (row.dataset.docTitle || '').toLowerCase();
+          const rowText = row.textContent.toLowerCase();
+
+          let statusOk = true;
+          if (activeFilter === 'not-uploaded') {
+            statusOk = (status === 'not-uploaded' || status === 'expired');
+          } else if (activeFilter === 'submitted') {
+            statusOk = (status === 'submitted');
+          }
+
+          let queryOk = true;
+          if (query) {
+            queryOk = title.includes(query) || rowText.includes(query);
+          }
+
+          let focusOk = true;
+          if (focusMode && status === 'submitted') {
+            focusOk = false;
+          }
+
+          const isVisible = statusOk && queryOk && focusOk;
+          row.style.display = isVisible ? '' : 'none';
+          if (isVisible) visibleCount++;
+        });
+
+        const tableWrap = targetEl.querySelector('.doc-table-wrap');
+        const filterActive = query.length > 0 || activeFilter !== 'all' || focusMode;
+        if (tableWrap) {
+          tableWrap.style.display = (visibleCount === 0 && filterActive) ? 'none' : '';
+        }
+        if (stageSearchEmpty) {
+          stageSearchEmpty.style.display = (visibleCount === 0 && filterActive) ? 'block' : 'none';
+        }
+      }
+
+      function openStageInModal(stageId, opts) {
+        const options = opts || {};
+        if (!stageId) return false;
         const targetEl = document.getElementById(stageId);
-        if (!targetEl || !stageModal || !stageModalBody) return;
+        if (!targetEl || !stageModal || !stageModalBody) return false;
 
         if (activeStageNode && activeStageId !== stageId) {
           returnStageToRepo();
@@ -2768,24 +2481,34 @@
           activeStagePlaceholder = document.createElement('div');
           activeStagePlaceholder.style.display = 'none';
           targetEl.parentNode.insertBefore(activeStagePlaceholder, targetEl);
-          stageModalBody.appendChild(targetEl);
+          if (stageSearchEmpty && stageSearchEmpty.parentNode === stageModalBody) {
+            stageModalBody.insertBefore(targetEl, stageSearchEmpty);
+          } else {
+            stageModalBody.appendChild(targetEl);
+          }
           activeStageNode = targetEl;
         }
         activeStageId = stageId;
+        if (!options.skipPersist) {
+          try { sessionStorage.setItem(ACTIVE_STAGE_KEY, stageId); } catch (_e) {}
+        }
 
-        const stageCards = Array.from(document.querySelectorAll('#stagesSummaryHub .stage-hub-card[data-open-stage]'));
-        const stageIds = stageCards.map(function(c) { return c.dataset.openStage; });
+        const stageIds = navPills.map(getPillTargetId).filter(Boolean);
         const currentIdx = stageIds.indexOf(stageId);
         const totalStages = stageIds.length || 1;
+        const currentStep = currentIdx >= 0 ? (currentIdx + 1) : 1;
 
         navPills.forEach(function(p) {
-          const pTarget = p.dataset.stageModal || p.dataset.docTarget || (p.getAttribute('href') ? p.getAttribute('href').substring(1) : '');
-          p.classList.toggle('active', pTarget === stageId);
+          p.classList.toggle('active', getPillTargetId(p) === stageId);
         });
+        const activePill = navPills[currentIdx];
+        if (activePill && options.scrollPill !== false) {
+          revealDocPillHorizontally(activePill, !options.instantPill);
+        }
 
-        const title = targetEl.dataset.stageTitle || targetEl.querySelector('.doc-stage-title')?.textContent?.trim() || 'Stage Requirements';
-        const icon = targetEl.dataset.stageIcon || 'fa-folder-open';
-        const desc = targetEl.dataset.stageDesc || targetEl.querySelector('.doc-stage-desc')?.textContent?.trim() || '';
+        const title = targetEl.dataset.stageTitle || activePill?.dataset.stageTitle || targetEl.querySelector('.doc-stage-title')?.textContent?.trim() || 'Stage Requirements';
+        const icon = targetEl.dataset.stageIcon || (stageId === 'sec-doc-ember' ? 'fa-envelope-open-text' : 'fa-folder-open');
+        const desc = targetEl.dataset.stageDesc || targetEl.querySelector('.doc-stage-desc')?.textContent?.trim() || 'Navigate stages with the tabs above or the left and right edge arrows.';
         const submitted = targetEl.dataset.stageSubmitted;
         const total = targetEl.dataset.stageTotal;
         const isComplete = targetEl.dataset.stageComplete === '1';
@@ -2795,16 +2518,16 @@
         if (stageModalDesc) stageModalDesc.textContent = desc;
 
         if (stageStepBadge) {
-          stageStepBadge.textContent = 'Stage ' + (currentIdx >= 0 ? (currentIdx + 1) : 1) + ' of ' + totalStages;
+          stageStepBadge.textContent = 'Stage ' + currentStep + ' of ' + totalStages;
         }
         if (stageStepIndicator) {
-          stageStepIndicator.textContent = (currentIdx >= 0 ? (currentIdx + 1) : 1) + ' / ' + totalStages;
+          stageStepIndicator.textContent = currentStep + ' / ' + totalStages;
         }
         if (stageProgressBadge) {
           if (submitted !== undefined && total !== undefined) {
             if (isComplete) {
-              stageProgressBadge.className = 'badge active-b';
-              stageProgressBadge.textContent = 'All ' + total + ' on file';
+              stageProgressBadge.className = 'badge stage-complete-b';
+              stageProgressBadge.innerHTML = '<i class="fa-solid fa-check"></i> Complete';
             } else {
               stageProgressBadge.className = 'badge pending-b';
               stageProgressBadge.textContent = submitted + ' of ' + total + ' uploaded';
@@ -2815,219 +2538,150 @@
           }
         }
 
-        if (stagePrevBtn) stagePrevBtn.disabled = currentIdx <= 0;
-        if (stageNextBtn) stageNextBtn.disabled = currentIdx === -1 || currentIdx >= stageIds.length - 1;
+        if (stageOpenEmberBtn) {
+          stageOpenEmberBtn.style.display = (stageId === 'sec-doc-ember') ? '' : 'none';
+        }
+
+        const atStart = currentIdx <= 0;
+        const atEnd = currentIdx === -1 || currentIdx >= stageIds.length - 1;
+        if (stagePrevBtn) stagePrevBtn.disabled = atStart;
+        if (stageNextBtn) stageNextBtn.disabled = atEnd;
+        if (stageEdgePrevBtn) stageEdgePrevBtn.disabled = atStart;
+        if (stageEdgeNextBtn) stageEdgeNextBtn.disabled = atEnd;
 
         const stageStepperCount = document.getElementById('stageStepperCount');
         const stageStepperLabel = document.getElementById('stageStepperLabel');
-        if (stageStepperCount) stageStepperCount.textContent = (currentIdx >= 0 ? (currentIdx + 1) : 1) + ' / ' + totalStages;
+        if (stageStepperCount) stageStepperCount.textContent = currentStep + ' / ' + totalStages;
         if (stageStepperLabel) stageStepperLabel.textContent = title;
 
-        stageModal.style.display = 'flex';
-        stageModal.classList.add('show', 'stage-modal-active');
         stageModalBody.scrollTop = 0;
+        if (!options.skipAnimate) {
+          stageModalBody.classList.remove('step-entering');
+          void stageModalBody.offsetWidth;
+          stageModalBody.classList.add('step-entering');
+        }
+
+        applyRowFiltersToModal(targetEl);
+        return true;
       }
 
-      function closeStageModal(highlightCard) {
-        const lastId = activeStageId;
-        returnStageToRepo();
-        activeStageId = '';
-        if (stageModal) {
-          stageModal.classList.remove('show', 'stage-modal-active');
-          stageModal.style.display = 'none';
-        }
-        if (highlightCard && lastId) {
-          const card = document.querySelector('.stage-hub-card[data-open-stage="' + CSS.escape(lastId) + '"]');
-          if (card && card.offsetParent !== null) {
-            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            card.classList.remove('stage-card-flash');
-            void card.offsetWidth;
-            card.classList.add('stage-card-flash');
-          }
+      function stepStage(delta) {
+        const stageIds = navPills.map(getPillTargetId).filter(Boolean);
+        const idx = stageIds.indexOf(activeStageId);
+        const nextIdx = (idx === -1 ? 0 : idx) + delta;
+        if (nextIdx >= 0 && nextIdx < stageIds.length) {
+          openStageInModal(stageIds[nextIdx]);
         }
       }
-      closeStageModalExternal = closeStageModal;
 
       navPills.forEach(function(pill) {
         pill.addEventListener('click', function(e) {
           e.preventDefault();
-          const targetId = pill.dataset.stageModal || pill.dataset.docTarget || (pill.getAttribute('href') ? pill.getAttribute('href').substring(1) : '');
+          const targetId = getPillTargetId(pill);
           if (targetId) openStageInModal(targetId);
         });
       });
 
-      document.querySelectorAll('#stagesSummaryHub .stage-hub-card[data-open-stage]').forEach(function(card) {
-        card.addEventListener('click', function(e) {
-          if (e.target.closest('a, button')) return;
-          openStageInModal(card.dataset.openStage);
-        });
-        card.addEventListener('keydown', function(e) {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            openStageInModal(card.dataset.openStage);
-          }
-        });
-      });
-
-      stagePrevBtn?.addEventListener('click', function() {
-        const stageCards = Array.from(document.querySelectorAll('#stagesSummaryHub .stage-hub-card[data-open-stage]'));
-        const stageIds = stageCards.map(function(c) { return c.dataset.openStage; });
-        const idx = stageIds.indexOf(activeStageId);
-        if (idx > 0) openStageInModal(stageIds[idx - 1]);
-      });
-
-      stageNextBtn?.addEventListener('click', function() {
-        const stageCards = Array.from(document.querySelectorAll('#stagesSummaryHub .stage-hub-card[data-open-stage]'));
-        const stageIds = stageCards.map(function(c) { return c.dataset.openStage; });
-        const idx = stageIds.indexOf(activeStageId);
-        if (idx >= 0 && idx < stageIds.length - 1) openStageInModal(stageIds[idx + 1]);
-      });
-
-      stageDoneBtn?.addEventListener('click', function() { closeStageModal(true); });
-      stageCloseTop?.addEventListener('click', function() { closeStageModal(true); });
-      stageModal?.addEventListener('click', function(e) {
-        if (e.target === stageModal) closeStageModal(false);
-      });
-
-      // 3. Stage Floating Elevator
-      const stageElevator = document.getElementById('stageFloatingElevator');
-      const elevatorUpBtn = document.getElementById('elevatorUpBtn');
-      const elevatorDownBtn = document.getElementById('elevatorDownBtn');
-      const elevatorCount = document.getElementById('elevatorCount');
-      const stageHubCards = Array.from(document.querySelectorAll('#stagesSummaryHub .stage-hub-card'));
-      let currentElevatorIdx = 0;
-
-      function updateElevatorCount(idx) {
-        if (!elevatorCount || stageHubCards.length === 0) return;
-        currentElevatorIdx = Math.max(0, Math.min(idx, stageHubCards.length - 1));
-        elevatorCount.textContent = (currentElevatorIdx + 1) + ' / ' + stageHubCards.length;
-      }
-      updateElevatorCount(0);
-
-      function scrollToStageCard(idx) {
-        if (!stageHubCards[idx]) return;
-        updateElevatorCount(idx);
-        stageHubCards[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
-        stageHubCards[idx].classList.remove('stage-card-flash');
-        void stageHubCards[idx].offsetWidth;
-        stageHubCards[idx].classList.add('stage-card-flash');
-      }
-
-      elevatorUpBtn?.addEventListener('click', function() {
-        if (currentElevatorIdx > 0) {
-          scrollToStageCard(currentElevatorIdx - 1);
-        }
-      });
-
-      elevatorDownBtn?.addEventListener('click', function() {
-        if (currentElevatorIdx < stageHubCards.length - 1) {
-          scrollToStageCard(currentElevatorIdx + 1);
+      stagePrevBtn?.addEventListener('click', function() { stepStage(-1); });
+      stageNextBtn?.addEventListener('click', function() { stepStage(1); });
+      stageEdgePrevBtn?.addEventListener('click', function() { stepStage(-1); });
+      stageEdgeNextBtn?.addEventListener('click', function() { stepStage(1); });
+      stageOpenEmberBtn?.addEventListener('click', function() {
+        if (typeof selectTab === 'function') {
+          selectTab('ember');
+        } else {
+          document.getElementById('tabBtnEmber')?.click();
         }
       });
 
       document.addEventListener('keydown', function(e) {
         const docTab = document.getElementById('tabDocuments');
-        if (!docTab || docTab.offsetParent === null) return;
-        if (stageModal && stageModal.classList.contains('show')) return;
-        if (sectionModal && sectionModal.classList.contains('show')) return;
-        const activeTag = (document.activeElement?.tagName || '').toLowerCase();
-        if (activeTag === 'input' || activeTag === 'textarea' || activeTag === 'select') return;
+        if (!docTab || docTab.offsetParent === null || !stageModal || stageModal.offsetParent === null) return;
+        if (document.querySelector('.modal-bg.show, .modal-bg.active, .ph-picker-overlay')) return;
+        const activeEl = document.activeElement;
+        const activeTag = (activeEl?.tagName || '').toLowerCase();
+        if (activeTag === 'input' || activeTag === 'textarea' || activeTag === 'select' || (activeEl && activeEl.isContentEditable)) return;
 
-        if (e.key === 'PageUp') {
+        if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
           e.preventDefault();
-          if (currentElevatorIdx > 0) scrollToStageCard(currentElevatorIdx - 1);
-        } else if (e.key === 'PageDown') {
+          stepStage(-1);
+        } else if (e.key === 'ArrowRight' || e.key === 'PageDown') {
           e.preventDefault();
-          if (currentElevatorIdx < stageHubCards.length - 1) scrollToStageCard(currentElevatorIdx + 1);
+          stepStage(1);
         }
       });
 
-      if ('IntersectionObserver' in window && stageHubCards.length > 0) {
-        const cardObserver = new IntersectionObserver(function(entries) {
-          entries.forEach(function(entry) {
-            if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-              const idx = stageHubCards.indexOf(entry.target);
-              if (idx >= 0) updateElevatorCount(idx);
-            }
-          });
-        }, { threshold: [0.5] });
-
-        stageHubCards.forEach(function(c) { cardObserver.observe(c); });
-      }
-
-      // 4. Search, Status Filter & Focus Mode Engine
-      function applyFilters() {
-        const allSections = Array.from(document.querySelectorAll('.doc-stage-section'));
+      // 3. Search, Status Filter & Focus Mode Engine
+      function getStageMatchCount(sec) {
+        const rows = sec.querySelectorAll('.doc-table tbody tr.doc-row');
         const query = searchQuery.trim().toLowerCase();
-        let totalMatchingDocs = 0;
-        let visibleStagesCount = 0;
+        let stageMatchCount = 0;
 
-        allSections.forEach(function(sec) {
-          const rows = sec.querySelectorAll('.doc-table tbody tr.doc-row');
-          let secMatchCount = 0;
-
-          rows.forEach(function(row) {
-            if (row.classList.contains('ember-summary-row')) {
-              let emberMatch = true;
-              if (query) {
-                const text = row.textContent.toLowerCase();
-                emberMatch = text.includes(query) || 'ember letters'.includes(query);
-              }
-              row.style.display = emberMatch ? '' : 'none';
-              if (emberMatch) {
-                secMatchCount++;
-                totalMatchingDocs++;
-              }
-              return;
-            }
-
-            const status = row.dataset.docStatus || '';
-            const title = (row.dataset.docTitle || '').toLowerCase();
-            const rowText = row.textContent.toLowerCase();
-
-            let statusOk = true;
-            if (activeFilter === 'not-uploaded') {
-              statusOk = (status === 'not-uploaded' || status === 'expired');
-            } else if (activeFilter === 'submitted') {
-              statusOk = (status === 'submitted');
-            }
-
-            let queryOk = true;
+        rows.forEach(function(row) {
+          if (row.classList.contains('ember-summary-row')) {
+            let emberMatch = true;
             if (query) {
-              queryOk = title.includes(query) || rowText.includes(query);
+              const text = row.textContent.toLowerCase();
+              emberMatch = text.includes(query) || 'ember letters'.includes(query);
             }
-
-            let focusOk = true;
-            if (focusMode && status === 'submitted') {
-              focusOk = false;
-            }
-
-            const isVisible = statusOk && queryOk && focusOk;
-            row.style.display = isVisible ? '' : 'none';
-            if (isVisible) {
-              secMatchCount++;
-              totalMatchingDocs++;
-            }
-          });
-
-          const card = document.querySelector('.stage-hub-card[data-open-stage="' + CSS.escape(sec.id) + '"]');
-          if (card) {
-            let cardTextMatch = false;
-            if (query) {
-              const cardTitle = (card.querySelector('.stage-hub-title')?.textContent || '').toLowerCase();
-              const cardDesc = (card.querySelector('.stage-hub-desc')?.textContent || '').toLowerCase();
-              cardTextMatch = cardTitle.includes(query) || cardDesc.includes(query);
-            }
-            const stageMatches = (secMatchCount > 0) || cardTextMatch;
-            const shouldShow = (query.length === 0 && activeFilter === 'all' && !focusMode) ? true : stageMatches;
-            card.style.display = shouldShow ? '' : 'none';
-            if (shouldShow) visibleStagesCount++;
+            if (emberMatch) stageMatchCount++;
+            return;
           }
+
+          const status = row.dataset.docStatus || '';
+          const title = (row.dataset.docTitle || '').toLowerCase();
+          const rowText = row.textContent.toLowerCase();
+
+          let statusOk = true;
+          if (activeFilter === 'not-uploaded') {
+            statusOk = (status === 'not-uploaded' || status === 'expired');
+          } else if (activeFilter === 'submitted') {
+            statusOk = (status === 'submitted');
+          }
+
+          let queryOk = true;
+          if (query) {
+            queryOk = title.includes(query) || rowText.includes(query);
+          }
+
+          let focusOk = true;
+          if (focusMode && status === 'submitted') {
+            focusOk = false;
+          }
+
+          if (statusOk && queryOk && focusOk) stageMatchCount++;
         });
 
-        if (stageSearchEmpty) {
-          stageSearchEmpty.style.display = (visibleStagesCount === 0 && (query.length > 0 || activeFilter !== 'all' || focusMode)) ? 'block' : 'none';
+        return stageMatchCount;
+      }
+
+      function applyFilters(opts) {
+        const options = opts || {};
+        const query = searchQuery.trim().toLowerCase();
+        const filterActive = query.length > 0 || activeFilter !== 'all' || focusMode;
+        const allSections = Array.from(document.querySelectorAll('#stageSectionsRepository .doc-stage-section, #stageDocumentsBody .doc-stage-section'));
+        let totalMatchingDocs = 0;
+        const matchedStageIds = [];
+
+        if (!options.skipPersist) {
+          saveDocFilterState();
         }
+
+        allSections.forEach(function(sec) {
+          const secMatchCount = getStageMatchCount(sec);
+          totalMatchingDocs += secMatchCount;
+          if (secMatchCount > 0) matchedStageIds.push(sec.id);
+
+          const pill = navPills.find(function(p) { return getPillTargetId(p) === sec.id; });
+          if (pill) {
+            if (filterActive) {
+              pill.classList.toggle('search-match', secMatchCount > 0);
+              pill.classList.toggle('search-dimmed', secMatchCount === 0);
+            } else {
+              pill.classList.remove('search-match', 'search-dimmed');
+            }
+          }
+        });
 
         if (query.length > 0) {
           if (searchFeedback && searchFeedbackText) {
@@ -3039,18 +2693,39 @@
           if (searchFeedback) searchFeedback.hidden = true;
           if (searchClearBtn) searchClearBtn.hidden = true;
         }
+
+        if (options.autoJump !== false && filterActive && matchedStageIds.length > 0 && !matchedStageIds.includes(activeStageId)) {
+          openStageInModal(matchedStageIds[0]);
+        } else if (activeStageNode) {
+          applyRowFiltersToModal(activeStageNode);
+        }
+      }
+
+      function resetAllDocFilters() {
+        if (searchInput) searchInput.value = '';
+        searchQuery = '';
+        activeFilter = 'all';
+        filterPills.forEach(function(b) { b.classList.toggle('active', (b.dataset.docFilter || 'all') === 'all'); });
+        if (btnFocusMode && focusMode) {
+          focusMode = false;
+          btnFocusMode.classList.remove('active');
+          btnFocusMode.setAttribute('aria-pressed', 'false');
+          const labelSpan = btnFocusMode.querySelector('span');
+          if (labelSpan) labelSpan.textContent = 'Hide Complete';
+        }
+        applyFilters({ autoJump: false });
       }
 
       if (searchInput) {
         searchInput.addEventListener('input', function() {
           searchQuery = this.value;
-          applyFilters();
+          applyFilters({ autoJump: true });
         });
         searchInput.addEventListener('keydown', function(e) {
           if (e.key === 'Escape') {
             this.value = '';
             searchQuery = '';
-            applyFilters();
+            applyFilters({ autoJump: false });
             this.blur();
           }
         });
@@ -3063,7 +2738,7 @@
             searchInput.focus();
           }
           searchQuery = '';
-          applyFilters();
+          applyFilters({ autoJump: false });
         });
       }
 
@@ -3071,24 +2746,13 @@
         searchResetBtn.addEventListener('click', function() {
           if (searchInput) searchInput.value = '';
           searchQuery = '';
-          applyFilters();
+          applyFilters({ autoJump: false });
         });
       }
 
       if (stageResetBtn) {
         stageResetBtn.addEventListener('click', function() {
-          if (searchInput) searchInput.value = '';
-          searchQuery = '';
-          activeFilter = 'all';
-          filterPills.forEach(function(b) { b.classList.toggle('active', (b.dataset.docFilter || 'all') === 'all'); });
-          if (btnFocusMode && focusMode) {
-            focusMode = false;
-            btnFocusMode.classList.remove('active');
-            btnFocusMode.setAttribute('aria-pressed', 'false');
-            const labelSpan = btnFocusMode.querySelector('span');
-            if (labelSpan) labelSpan.textContent = 'Hide Complete';
-          }
-          applyFilters();
+          resetAllDocFilters();
         });
       }
 
@@ -3096,7 +2760,7 @@
         btn.addEventListener('click', function() {
           filterPills.forEach(function(b) { b.classList.toggle('active', b === btn); });
           activeFilter = btn.dataset.docFilter || 'all';
-          applyFilters();
+          applyFilters({ autoJump: true });
         });
       });
 
@@ -3109,25 +2773,106 @@
           if (labelSpan) {
             labelSpan.textContent = focusMode ? 'Showing Incomplete Only' : 'Hide Complete';
           }
-          applyFilters();
+          applyFilters({ autoJump: true });
         });
       }
 
-      // 4. Floating Return Button (appears on scroll past stage nav)
-      if (floatingBtn) {
-        window.addEventListener('scroll', function() {
-          const navRect = nav.getBoundingClientRect();
-          if (navRect.top < -200) {
-            floatingBtn.classList.add('visible');
-          } else {
-            floatingBtn.classList.remove('visible');
+      // 4. Persist active stage across Bishop Receipt confirmation and page reload
+      document.querySelector('#notedRequirementModal form')?.addEventListener('submit', function() {
+        try {
+          if (activeStageId) sessionStorage.setItem(REOPEN_STAGE_KEY, activeStageId);
+        } catch (_e) {}
+      });
+
+      // Landing state for Documents tab: saved reopen stage -> URL stage/hash -> remembered stage -> Stage 1
+      let reopenStageId = '';
+      try {
+        reopenStageId = sessionStorage.getItem(REOPEN_STAGE_KEY) || '';
+        if (reopenStageId) sessionStorage.removeItem(REOPEN_STAGE_KEY);
+      } catch (_e) {}
+
+      let savedActiveStageId = '';
+      try {
+        savedActiveStageId = sessionStorage.getItem(ACTIVE_STAGE_KEY) || '';
+      } catch (_e) {}
+
+      let savedDocFilters = null;
+      try {
+        const rawDocFilters = sessionStorage.getItem(DOC_FILTERS_KEY);
+        if (rawDocFilters) savedDocFilters = JSON.parse(rawDocFilters);
+      } catch (_e) {}
+
+      let targetStageId = '';
+      let forceDocTab = false;
+      try {
+        const hashId = (window.location.hash || '').replace(/^#/, '').trim();
+        const params = new URLSearchParams(window.location.search || '');
+        const stageParam = params.get('stage') || '';
+        if (reopenStageId && document.getElementById(reopenStageId)) {
+          targetStageId = reopenStageId;
+          forceDocTab = true;
+        } else if (stageParam) {
+          const matchPill = navPills.find(function(p) {
+            const tid = getPillTargetId(p);
+            return p.dataset.stageSlug === stageParam || tid === stageParam || tid === 'sec-doc-' + stageParam;
+          });
+          if (matchPill) {
+            targetStageId = getPillTargetId(matchPill);
+            forceDocTab = true;
           }
-        }, { passive: true });
+        } else if (hashId && hashId.startsWith('sec-doc-') && document.getElementById(hashId)) {
+          targetStageId = hashId;
+          forceDocTab = true;
+        } else if (savedActiveStageId && document.getElementById(savedActiveStageId)) {
+          targetStageId = savedActiveStageId;
+        }
+      } catch (_e) {}
 
-        floatingBtn.addEventListener('click', function() {
-          nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (savedDocFilters && typeof savedDocFilters === 'object') {
+        if (['all', 'not-uploaded', 'submitted'].includes(savedDocFilters.filter)) {
+          activeFilter = savedDocFilters.filter;
+          filterPills.forEach(function(b) { b.classList.toggle('active', (b.dataset.docFilter || 'all') === activeFilter); });
+        }
+        if (savedDocFilters.focus) {
+          focusMode = true;
+          if (btnFocusMode) {
+            btnFocusMode.classList.add('active');
+            btnFocusMode.setAttribute('aria-pressed', 'true');
+            const labelSpan = btnFocusMode.querySelector('span');
+            if (labelSpan) labelSpan.textContent = 'Showing Incomplete Only';
+          }
+        }
+        if (savedDocFilters.q && searchInput) {
+          searchInput.value = savedDocFilters.q;
+          searchQuery = savedDocFilters.q;
+        }
+      }
+
+      if (forceDocTab && typeof selectTab === 'function') {
+        selectTab('documents', 'replace');
+      }
+
+      const firstStageId = navPills.length > 0 ? getPillTargetId(navPills[0]) : '';
+      openStageInModal(targetStageId || firstStageId, {
+        scrollPill: true,
+        instantPill: true,
+        skipAnimate: !forceDocTab
+      });
+
+      if (searchQuery.trim() || activeFilter !== 'all' || focusMode) {
+        applyFilters({
+          autoJump: false,
+          skipPersist: true
         });
       }
+
+      window.addEventListener('hashchange', function() {
+        const hashId = (window.location.hash || '').replace(/^#/, '').trim();
+        if (hashId && hashId.startsWith('sec-doc-') && document.getElementById(hashId)) {
+          if (typeof selectTab === 'function') selectTab('documents', 'replace');
+          openStageInModal(hashId);
+        }
+      });
 
       // 5. Click table row to view uploaded document in in-app modal with Back & Print controls
       document.addEventListener('click', function(e) {
@@ -3188,21 +2933,17 @@
       });
     })();
 
-    // Global Escape key handler to dismiss active modals
+    // Global Escape key handler to dismiss active overlay modals
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
-        if (sectionModal && sectionModal.classList.contains('show')) {
-          closeSectionModal();
-          return;
-        }
-        if (typeof closeStageModalExternal === 'function' && document.getElementById('stageDocumentsModal')?.classList.contains('show')) {
-          closeStageModalExternal(false);
-          return;
-        }
         const openModalBg = document.querySelector('.modal-bg.active, .modal-bg.show');
         if (openModalBg) {
-          openModalBg.classList.remove('active', 'show');
-          openModalBg.style.display = 'none';
+          if (typeof closeModal === 'function' && openModalBg.id) {
+            closeModal(openModalBg.id);
+          } else {
+            openModalBg.classList.remove('active', 'show');
+            openModalBg.style.display = 'none';
+          }
         }
       }
     });

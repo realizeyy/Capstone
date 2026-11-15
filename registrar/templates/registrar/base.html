@@ -8,8 +8,8 @@
           content="{% block meta_description %}Electronic Diocese Network Portal - Clergy Records Management System.{% endblock %}">
     <title>EDNP - {% block page_name %}{% endblock %}</title>
     <link rel="icon" type="image/png" href="{% static 'ednp_logo.png' %}">
-    <link rel="stylesheet" href="{% static 'registrar/css/style.css' %}?v=22">
-    <link rel="stylesheet" href="{% static 'skeleton.css' %}?v=14">
+    <link rel="stylesheet" href="{% static 'registrar/css/style.css' %}?v=26">
+    <link rel="stylesheet" href="{% static 'skeleton.css' %}?v=15">
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
           crossorigin="anonymous"
@@ -84,8 +84,8 @@
     {% if messages %}
       <div id="flash-messages" hidden>{% for message in messages %}<span data-level="{{ message.tags }}">{{ message }}</span>{% endfor %}</div>
     {% endif %}
-    <script src="{% static 'skeleton.js' %}?v=14"></script>
-    <script src="{% static 'registrar/js/ui.js' %}?v=19"></script>
+    <script src="{% static 'skeleton.js' %}?v=15"></script>
+    <script src="{% static 'registrar/js/ui.js' %}?v=23"></script>
     {% block extra_js %}{% endblock %}
   </body>
 </html>

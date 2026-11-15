@@ -635,7 +635,7 @@ if(profilePicInput){
 
   if(!isQuickUpload&&!isDocCardUpload&&!isProfilePicAction)return;
 
-  const fileInput=form.querySelector('input[type="file"]');
+  const fileInput=form.querySelector('input[type="file"]')||(form.id?document.querySelector('input[type="file"][form="'+form.id+'"]'):null);
   const file=fileInput&&fileInput.files&&fileInput.files[0];
   if(file&&file.size>10*1024*1024){
    showToast('File is too large: maximum allowed is 10 MB for a photo or scan, and 5 MB for a PDF.','error');
@@ -672,12 +672,19 @@ if(profilePicInput){
     showToast(data.message||'Profile picture updated.','success');
     const previewImg=document.getElementById('profilePicPreviewImg');
     const initialsEl=document.getElementById('profilePicInitials');
+    const removeBtn=document.getElementById('removeProfilePicBtn');
+    const uploadBtn=document.getElementById('uploadProfilePicBtn');
     if(data.removed){
      if(previewImg){previewImg.src='';previewImg.classList.add('hidden');}
      if(initialsEl){initialsEl.textContent=data.initials||'';initialsEl.classList.remove('hidden');}
+     if(removeBtn)removeBtn.classList.add('hidden');
+     if(uploadBtn)uploadBtn.innerHTML='<i class="fa-solid fa-camera"></i> Upload Photo';
+     document.querySelectorAll('.sidebar-avatar img, .top-avatar img').forEach(img=>{img.remove();});
     }else if(data.picture_url){
      if(previewImg){previewImg.src=data.picture_url;previewImg.classList.remove('hidden');}
      if(initialsEl)initialsEl.classList.add('hidden');
+     if(removeBtn)removeBtn.classList.remove('hidden');
+     if(uploadBtn)uploadBtn.innerHTML='<i class="fa-solid fa-camera"></i> Replace Photo';
      document.querySelectorAll('.sidebar-avatar img, .top-avatar img').forEach(img=>{img.src=data.picture_url;});
     }
     if(profilePicInput)profilePicInput.value='';
@@ -706,9 +713,9 @@ if(profilePicInput){
   }
  },true);
 
- // 4. Sticky Sub-Section Navigation Scrollspy & Smooth Scrolling
+ // 4. Sticky Sub-Section Navigation Scrollspy & Smooth Scrolling (skipped on single-modal workspaces)
  const sectionNav=document.getElementById('personalSectionNav');
- if(sectionNav){
+ if(sectionNav&&!document.querySelector('.inline-modal-stage')){
   const pills=Array.from(sectionNav.querySelectorAll('.nav-pill'));
   const targets=pills.map(p=>document.querySelector(p.getAttribute('href'))).filter(Boolean);
 
@@ -768,6 +775,29 @@ if(profilePicInput){
    if(e.target.name==='profile_picture')return;
    markDirty();
   });
+  const secBody=document.getElementById('sectionQuickEditBody');
+  if(secBody){
+   secBody.addEventListener('input',function(e){
+    if(e.target.name==='profile_picture'||e.target.closest('#sec-deployments, #sec-medical'))return;
+    markDirty();
+   });
+   secBody.addEventListener('change',function(e){
+    if(e.target.name==='profile_picture'||e.target.closest('#sec-deployments, #sec-medical'))return;
+    markDirty();
+   });
+  }
+  document.addEventListener('ednp:form-saved',function(){
+   isDirty=false;
+   saveBar.classList.remove('visible');
+  });
+  document.addEventListener('ednp:draft-restored',function(){
+   saveBar.classList.add('visible');
+  });
+  document.addEventListener('ednp:form-dirty',markDirty);
+  document.addEventListener('ednp:form-clean',function(){
+   isDirty=false;
+   saveBar.classList.remove('visible');
+  });
   document.getElementById('addChildBtn')?.addEventListener('click',markDirty);
   document.getElementById('addEduBtn')?.addEventListener('click',markDirty);
 
@@ -782,6 +812,7 @@ if(profilePicInput){
    if(confirm('Discard your unsaved changes?')){
     isDirty=false;
     saveBar.classList.remove('visible');
+    document.dispatchEvent(new CustomEvent('ednp:form-discarded'));
     window.location.reload();
    }
   });

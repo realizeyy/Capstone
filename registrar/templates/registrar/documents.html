@@ -15,6 +15,7 @@
           </div>
         </div>
         <form class="toolbar" method="get">
+          <input type="hidden" name="per_page" value="{{ per_page }}">
           <input name="q"
                  class="search"
                  placeholder="Search by clergy name, assignment or ID..."
@@ -32,6 +33,7 @@
             <a class="btn secondary" href="{% url 'registrar:documents_overview' %}">Clear</a>
           {% endif %}
         </form>
+        {% include "registrar/_table_meta_bar.html" with position="top" select_id="perPageSelect" item_label="clergy records" %}
       </div>
       <div class="table-wrap">
         <table>
@@ -65,6 +67,10 @@
           </tbody>
         </table>
       </div>
+      <div id="clergyPagerSentinel" style="height: 1px;"></div>
+      {% if page.has_other_pages or page.paginator.count > 0 %}
+        {% include "registrar/_table_meta_bar.html" with position="bottom" bar_id="clergyBottomPager" select_id="bottomPerPageSelect" item_label="clergy records" %}
+      {% endif %}
     </div>
   </section>
 {% endblock %}
