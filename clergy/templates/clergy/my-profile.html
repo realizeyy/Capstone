@@ -4,8 +4,8 @@
 {% block page_name_heading %}My Profile{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'code-field.css' %}?v=15">
-<link rel="stylesheet" href="{% static 'password-guidelines.css' %}?v=14">
+<link rel="stylesheet" href="{% static 'code-field.css' %}?v=16">
+<link rel="stylesheet" href="{% static 'password-guidelines.css' %}?v=15">
 <style>
 .date-att-bar {
   display: flex;
@@ -44,7 +44,6 @@
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
-  margin-left: 8px;
 }
 .date-att-bar .att-btn {
   display: inline-flex;
@@ -248,13 +247,13 @@ body.modal-open {
     </div>
 
     {% if active_tab == 'security' %}
-    <p class="muted tab-intro">Your sign-in details, mobile number and the devices you've trusted. Your number is shown on My Profile too, but it can only be changed here.</p>
+    <p class="muted tab-intro">Manage sign-in details, trusted devices, and your mobile number (changed only here).</p>
     {% include '_security_sections.html' %}
     {% else %}
 
     <div class="notice" id="noticeClergyProfileScope">
       <div class="notice-content">
-        You can access only your own clergy profile. Your official Clergy ID, ecclesiastical status, deployment assignment, and contract terms are displayed on your Dashboard and maintained by the Registrar.
+        Official ID, status, assignment, and contract terms appear on your Dashboard (managed by the Registrar).
       </div>
       <button type="button" class="notice-dismiss" data-dismiss-notice="noticeClergyProfileScope" aria-label="Dismiss notice" title="Dismiss">
         <i class="fa-solid fa-xmark"></i>
@@ -302,8 +301,8 @@ body.modal-open {
           <div>
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
               <h3 id="sectionQuickEditTitle" style="margin:0;"><i class="fa-solid fa-pen-to-square" style="color:#2f6fed;"></i> <span>Identity &amp; Basic Information</span></h3>
-              <span class="badge blue" id="sectionQuickEditStepBadge" style="font-size:13px;padding:3px 8px;">Step 1 of 9</span>
-              <span class="badge pending-b" id="sectionDraftRestoredBadge" style="display:none;font-size:12.5px;padding:3px 8px;" title="Unsaved edits from this session were kept across reload"><i class="fa-solid fa-clock-rotate-left"></i> Draft kept</span>
+              <span class="badge blue" id="sectionQuickEditStepBadge" style="font-size:14px;padding:3px 9px;">Step 1 of 9</span>
+              <span class="badge pending-b" id="sectionDraftRestoredBadge" style="display:none;font-size:14px;padding:3px 9px;" title="Unsaved edits from this session were kept across reload"><i class="fa-solid fa-clock-rotate-left"></i> Draft kept</span>
             </div>
             <span class="muted" style="margin-top:3px;display:block;">Navigate sections with the quick bar above or the left and right edge arrows.</span>
           </div>
@@ -351,7 +350,7 @@ body.modal-open {
             </div>
             <div class="profile-pic-controls">
               <label for="profilePictureInput">Profile Picture</label>
-              <span class="muted">Upload a JPG or PNG image up to 5 MB (cropped to a square and shrunk automatically before storing).</span>
+              <span class="muted">JPG or PNG, up to 5 MB (cropped to square and resized automatically).</span>
               <div class="profile-pic-actions">
                 <input type="file" name="profile_picture" id="profilePictureInput" form="profilePhotoForm" accept=".jpg,.jpeg,.png">
                 <button type="submit" name="upload_profile_picture" value="1" id="uploadProfilePicBtn" form="profilePhotoForm" class="btn small" formnovalidate><i class="fa-solid fa-camera"></i> {% if profile.record.profile_picture %}Replace Photo{% else %}Upload Photo{% endif %}</button>
@@ -402,7 +401,7 @@ body.modal-open {
                   {% if att.can_clergy_upload and att.doc_type %}
                   <button type="button" class="att-btn upload" data-quick-upload="{{ att.doc_type.id }}" data-doc-name="{{ att.name }}"><i class="fa-solid fa-cloud-arrow-up"></i> Upload</button>
                   {% else %}
-                  <span class="muted" style="font-size:12.5px;">Provided by Registrar</span>
+                  <span class="muted" style="font-size:14px;">Provided by Registrar</span>
                   {% endif %}
                 {% endif %}
               </div>
@@ -414,7 +413,7 @@ body.modal-open {
             <label>Place of Birth <span class="req-mark">*</span></label>
             <div class="input-with-action">
               <input name="place_of_birth" id="placeOfBirthInput" value="{{ profile.place_of_birth }}" required>
-              <button type="button" class="ph-picker-btn" data-ph-picker-target="placeOfBirthInput" title="Choose from province / city / barangay list"><i class="fa-solid fa-location-dot"></i></button>
+              <button type="button" class="ph-picker-btn" data-ph-picker-target="placeOfBirthInput" aria-label="Choose place of birth from province, city, or barangay list" title="Choose from province / city / barangay list"><i class="fa-solid fa-location-dot"></i></button>
             </div>
           </div>
         </div>
@@ -428,7 +427,7 @@ body.modal-open {
             <label>Residential Address <span class="req-mark">*</span></label>
             <div class="input-with-action">
               <textarea name="address" id="addressInput" rows="2" required>{{ profile.record.address|default:'' }}</textarea>
-              <button type="button" class="ph-picker-btn" data-ph-picker-target="addressInput" title="Choose from province / city / barangay list"><i class="fa-solid fa-location-dot"></i></button>
+              <button type="button" class="ph-picker-btn" data-ph-picker-target="addressInput" aria-label="Choose residential address from province, city, or barangay list" title="Choose from province / city / barangay list"><i class="fa-solid fa-location-dot"></i></button>
             </div>
           </div>
 
@@ -441,7 +440,7 @@ body.modal-open {
           <div class="field">
             <label>Email Address <span class="req-mark">*</span></label>
             <input name="email" type="email" value="{{ profile.record.email|default:'' }}" pattern="[a-zA-Z0-9._%+-]+@[gG][mM][aA][iI][lL]\.[cC][oO][mM]" placeholder="example@gmail.com" title="Please enter a valid Gmail address (@gmail.com)" required>
-            <span class="muted" style="font-size: 13px; color: #64748b;">Only Gmail accounts (@gmail.com) are accepted at this time.</span>
+            <span class="muted" style="font-size: 14px; color: #64748b;">Only Gmail accounts (@gmail.com) are accepted at this time.</span>
           </div>
         </div>
 
@@ -468,7 +467,7 @@ body.modal-open {
                   {% if att.can_clergy_upload and att.doc_type %}
                   <button type="button" class="att-btn upload" data-quick-upload="{{ att.doc_type.id }}" data-doc-name="{{ att.name }}"><i class="fa-solid fa-cloud-arrow-up"></i> Upload</button>
                   {% else %}
-                  <span class="muted" style="font-size:12.5px;">Provided by Registrar</span>
+                  <span class="muted" style="font-size:14px;">Provided by Registrar</span>
                   {% endif %}
                 {% endif %}
               </div>
@@ -502,7 +501,7 @@ body.modal-open {
                   {% if att.can_clergy_upload and att.doc_type %}
                   <button type="button" class="att-btn upload" data-quick-upload="{{ att.doc_type.id }}" data-doc-name="{{ att.name }}"><i class="fa-solid fa-cloud-arrow-up"></i> Upload</button>
                   {% else %}
-                  <span class="muted" style="font-size:12.5px;">Provided by Registrar</span>
+                  <span class="muted" style="font-size:14px;">Provided by Registrar</span>
                   {% endif %}
                 {% endif %}
               </div>
@@ -524,7 +523,7 @@ body.modal-open {
       <div class="section-card" id="sec-orders" style="scroll-margin-top: 70px;">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
           <h3 style="margin: 0;"><i class="fa-solid fa-church"></i> Holy Orders &amp; Ordination History</h3>
-          <span class="badge" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-size: 13px; padding: 3px 8px; border-radius: 9999px; font-weight: 600;">
+          <span class="badge" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-size: 14px; padding: 3px 9px; border-radius: 9999px; font-weight: 600;">
             Rank: {{ profile.record.get_rank_display }}
           </span>
         </div>
@@ -533,7 +532,7 @@ body.modal-open {
           <div class="notice" id="noticeRankPostulancy" style="background: #f8fafc; border-color: #cbd5e1; color: #334155; margin-top: 10px;">
             <div class="notice-content">
               <i class="fa-solid fa-seedling" style="color: #0284c7;"></i>
-              <strong>Postulancy (Lay Candidate):</strong> You are currently registered in Postulancy as a candidate preparing for holy orders. Sacred ordination records (Diaconate, Priesthood, Episcopate) will be recorded here sequentially following your ordination to the Sacred Order of Deacons.
+              <strong>Postulancy (Lay Candidate):</strong> Ordination records unlock once ordained a Deacon.
             </div>
             <button type="button" class="notice-dismiss" data-dismiss-notice="noticeRankPostulancy" aria-label="Dismiss notice" title="Dismiss">
               <i class="fa-solid fa-xmark"></i>
@@ -543,11 +542,11 @@ body.modal-open {
           <div class="notice" id="noticeRankOrders" style="margin-top: 10px;">
             <div class="notice-content">
               {% if profile.record.rank == 'deacon' %}
-                <i class="fa-solid fa-info-circle"></i> <strong>Order of Deacons:</strong> As an ordained Deacon, your record reflects the First Order of Ministry.
+                <i class="fa-solid fa-info-circle"></i> <strong>Order of Deacons:</strong> Shows your Diaconate ordination.
               {% elif profile.record.rank == 'priest' %}
-                <i class="fa-solid fa-info-circle"></i> <strong>Order of Priests:</strong> Holy orders are cumulative: as an ordained Priest, your record preserves both your Diaconal ordination and your Priesthood ordination.
+                <i class="fa-solid fa-info-circle"></i> <strong>Order of Priests:</strong> Keeps your Diaconate and Priesthood ordinations.
               {% elif profile.record.rank == 'bishop' %}
-                <i class="fa-solid fa-info-circle"></i> <strong>The Episcopate:</strong> As a Bishop, your record reflects the complete three-fold progression of Holy Orders (Deacon, Priest, and Bishop).
+                <i class="fa-solid fa-info-circle"></i> <strong>The Episcopate:</strong> Keeps your Diaconate, Priesthood, and Bishop ordinations.
               {% endif %}
             </div>
             <button type="button" class="notice-dismiss" data-dismiss-notice="noticeRankOrders" aria-label="Dismiss notice" title="Dismiss">
@@ -574,7 +573,7 @@ body.modal-open {
                   {% if att.is_uploaded %}
                     <a href="{% url 'registrar:view_document' att.doc_id %}" target="_blank" class="att-btn view"><i class="fa-solid fa-eye"></i> View</a>
                   {% else %}
-                    <span class="muted" style="font-size:12.5px;">Provided by Registrar</span>
+                    <span class="muted" style="font-size:14px;">Provided by Registrar</span>
                   {% endif %}
                 </div>
               </div>
@@ -609,7 +608,7 @@ body.modal-open {
                   {% if att.is_uploaded %}
                     <a href="{% url 'registrar:view_document' att.doc_id %}" target="_blank" class="att-btn view"><i class="fa-solid fa-eye"></i> View</a>
                   {% else %}
-                    <span class="muted" style="font-size:12.5px;">Provided by Registrar</span>
+                    <span class="muted" style="font-size:14px;">Provided by Registrar</span>
                   {% endif %}
                 </div>
               </div>
@@ -645,7 +644,7 @@ body.modal-open {
                   {% if att.is_uploaded %}
                     <a href="{% url 'registrar:view_document' att.doc_id %}" target="_blank" class="att-btn view"><i class="fa-solid fa-eye"></i> View</a>
                   {% else %}
-                    <span class="muted" style="font-size:12.5px;">Provided by Registrar</span>
+                    <span class="muted" style="font-size:14px;">Provided by Registrar</span>
                   {% endif %}
                 </div>
               </div>
@@ -672,7 +671,7 @@ body.modal-open {
                   {% if att.is_uploaded %}
                     <a href="{% url 'registrar:view_document' att.doc_id %}" target="_blank" class="att-btn view"><i class="fa-solid fa-eye"></i> View</a>
                   {% else %}
-                    <span class="muted" style="font-size:12.5px;">Provided by Registrar</span>
+                    <span class="muted" style="font-size:14px;">Provided by Registrar</span>
                   {% endif %}
                 </div>
               </div>
@@ -692,14 +691,14 @@ body.modal-open {
       <div class="section-card" id="marriageFamilyCard">
         <h3><i class="fa-solid fa-people-roof"></i> Marriage &amp; Family Information</h3>
         <div class="notice" id="noticeMarriageFamily">
-          <div class="notice-content">Family details filed by you are recorded in your official Clergy Record and Clerical Directory profile.</div>
+          <div class="notice-content">Family details are saved to your official Clergy Record and directory profile.</div>
           <button type="button" class="notice-dismiss" data-dismiss-notice="noticeMarriageFamily" aria-label="Dismiss notice" title="Dismiss">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
 
         <div id="singleCivilStatusNotice" class="notice" style="display:none;background:#f8fafc;border:1px solid #cbd5e1;color:#334155;margin-top:12px;">
-          <i class="fa-solid fa-circle-info"></i> Spouse and children records are not applicable for <b>Single</b> civil status. If you are married or have dependents, update your <b>Civil Status</b> under Personal Information to enable these fields.
+          <i class="fa-solid fa-circle-info"></i> Not applicable for <b>Single</b> status. Change <b>Civil Status</b> under Identity to add family.
         </div>
 
         <div id="marriageFamilyFields">
@@ -725,11 +724,11 @@ body.modal-open {
               </div>
               <table class="table-subgrid" id="childrenTable" style="width:100%;border-collapse:collapse;margin-bottom:8px;">
                 <thead>
-                  <tr style="border-bottom:2px solid #e3e8ef;text-align:left;font-size:13px;color:#64748b;">
+                  <tr style="border-bottom:2px solid #e3e8ef;text-align:left;font-size:14px;color:#64748b;">
                     <th style="padding:6px;">Child Full Name</th>
                     <th style="padding:6px;width:180px;">Date of Birth</th>
                     <th style="padding:6px;width:140px;">Gender</th>
-                    <th style="padding:6px;width:60px;text-align:center;">Action</th>
+                    <th style="padding:6px;width:72px;text-align:center;">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -775,23 +774,34 @@ body.modal-open {
               <label style="margin:0;font-weight:700;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-award" style="color:#2f6fed;"></i> Degrees &amp; Graduations</label>
               <button type="button" class="btn small secondary" id="addEduBtn"><i class="fa-solid fa-plus"></i> Add Degree / Education</button>
             </div>
-            <table class="table-subgrid" id="educationTable" style="width:100%;border-collapse:collapse;margin-bottom:12px;">
+            <div class="edu-table-wrap">
+            <table class="table-subgrid edu-table" id="educationTable">
               <thead>
-                <tr style="border-bottom:2px solid #e3e8ef;text-align:left;font-size:13px;color:#64748b;">
+                <tr style="border-bottom:2px solid #e3e8ef;text-align:left;font-size:14px;color:#64748b;">
                   <th style="padding:6px;">Degree / Program</th>
-                  <th style="padding:6px;">Institution / Seminary / School</th>
-                  <th style="padding:6px;">Place / Location</th>
-                  <th style="padding:6px;width:110px;">Year Graduated</th>
-                  <th style="padding:6px;width:60px;text-align:center;">Action</th>
+                  <th style="padding:6px;min-width:210px;">Institution / Seminary / School</th>
+                  <th style="padding:6px;min-width:185px;">Place / Location</th>
+                  <th style="padding:6px;width:130px;">Year Graduated</th>
+                  <th style="padding:6px;width:72px;text-align:center;">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {% for edu in profile.educations.all %}
                 <tr style="border-bottom:1px solid #edf0f3;">
-                  <td style="padding:6px;"><input name="edu_degree" value="{{ edu.degree }}" placeholder="e.g. Master of Divinity" style="width:100%;padding:6px;border:1px solid #cbd5e1;border-radius:6px;box-sizing:border-box;" required></td>
-                  <td style="padding:6px;"><input name="edu_institution" value="{{ edu.institution }}" placeholder="e.g. St. Andrew's Seminary" style="width:100%;padding:6px;border:1px solid #cbd5e1;border-radius:6px;box-sizing:border-box;" required></td>
-                  <td style="padding:6px;"><input name="edu_place" value="{{ edu.place }}" placeholder="e.g. Quezon City" style="width:100%;padding:6px;border:1px solid #cbd5e1;border-radius:6px;box-sizing:border-box;"></td>
-                  <td style="padding:6px;"><input name="edu_year" type="number" min="1940" max="2099" value="{{ edu.year_graduated|default:'' }}" placeholder="YYYY" style="width:100%;padding:6px;border:1px solid #cbd5e1;border-radius:6px;box-sizing:border-box;"></td>
+                  <td style="padding:6px;"><input name="edu_degree" value="{{ edu.degree }}" placeholder="e.g. Master of Divinity" required></td>
+                  <td style="padding:6px;">
+                    <div class="input-with-action">
+                      <input name="edu_institution" value="{{ edu.institution }}" placeholder="e.g. St. Andrew's Seminary" required>
+                      <button type="button" class="ph-picker-btn" data-picker-mode="school" aria-label="Choose school or CHED institution" title="Choose from CHED institutions or Elementary schools"><i class="fa-solid fa-school"></i></button>
+                    </div>
+                  </td>
+                  <td style="padding:6px;">
+                    <div class="input-with-action">
+                      <input name="edu_place" value="{{ edu.place }}" placeholder="e.g. Quezon City">
+                      <button type="button" class="ph-picker-btn" aria-label="Choose place from province, city, or barangay list" title="Choose from province / city / barangay list"><i class="fa-solid fa-location-dot"></i></button>
+                    </div>
+                  </td>
+                  <td style="padding:6px;"><input name="edu_year" type="number" min="1940" max="2099" value="{{ edu.year_graduated|default:'' }}" placeholder="YYYY"></td>
                   <td style="padding:6px;text-align:center;"><button type="button" class="btn small danger remove-row-btn" title="Remove"><i class="fa-solid fa-trash"></i></button></td>
                 </tr>
                 {% empty %}
@@ -799,6 +809,7 @@ body.modal-open {
                 {% endfor %}
               </tbody>
             </table>
+            </div>
           </div>
           <div class="field full">
             <label>Other Educational Details / Continuing Studies</label>
@@ -846,14 +857,14 @@ body.modal-open {
         <button type="button" class="btn small secondary" onclick="openModal('addDeploymentModal')"><i class="fa-solid fa-plus"></i> Add Deployment</button>
       </div>
       <div class="notice" id="noticeDeployments">
-        <div class="notice-content">Record the date and location of each parish assignment or mission deployment. Both you and the Registrar can manage this history.</div>
+        <div class="notice-content">Log parish assignments and mission deployments. Both you and the Registrar can edit this list.</div>
         <button type="button" class="notice-dismiss" data-dismiss-notice="noticeDeployments" aria-label="Dismiss notice" title="Dismiss">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
       <table style="width:100%;border-collapse:collapse;margin-top:10px;">
         <thead>
-          <tr style="border-bottom:2px solid #e3e8ef;text-align:left;font-size:13px;color:#64748b;">
+          <tr style="border-bottom:2px solid #e3e8ef;text-align:left;font-size:14px;color:#64748b;">
             <th style="padding:8px;">Parish / Station / Mission</th>
             <th style="padding:8px;">Place / Location</th>
             <th style="padding:8px;">Role</th>
@@ -865,11 +876,11 @@ body.modal-open {
         <tbody>
           {% for dep in profile.record.deployments.all %}
           <tr style="border-bottom:1px solid #edf0f3;">
-            <td style="padding:8px;"><b>{{ dep.station_name }}</b>{% if dep.notes %}<br><span class="muted" style="font-size:13px;">{{ dep.notes }}</span>{% endif %}</td>
+            <td style="padding:8px;"><b>{{ dep.station_name }}</b>{% if dep.notes %}<br><span class="muted" style="font-size:14px;">{{ dep.notes }}</span>{% endif %}</td>
             <td style="padding:8px;">{{ dep.place_name|default:"-" }}</td>
             <td style="padding:8px;">{{ dep.role }}</td>
-            <td style="padding:8px;">{% if dep.start_date %}{{ dep.start_date|date:"M Y" }} to {% endif %}{% if dep.is_current %}<span class="badge active-b" style="background:#e9f7ef;color:#166534;padding:2px 6px;border-radius:4px;font-size:12.5px;font-weight:700;">Present</span>{% elif dep.end_date %}{% if not dep.start_date %}Ended {% endif %}{{ dep.end_date|date:"M Y" }}{% else %}-{% endif %}</td>
-            <td style="padding:8px;">{% if dep.is_current %}<span class="badge active-b" style="background:#e9f7ef;color:#166534;padding:2px 6px;border-radius:4px;font-size:12.5px;font-weight:700;">Current</span>{% else %}-{% endif %}</td>
+            <td style="padding:8px;">{% if dep.start_date %}{{ dep.start_date|date:"M Y" }} to {% endif %}{% if dep.is_current %}<span class="badge active-b" style="background:#e9f7ef;color:#166534;padding:3px 8px;border-radius:4px;font-size:14px;font-weight:700;">Present</span>{% elif dep.end_date %}{% if not dep.start_date %}Ended {% endif %}{{ dep.end_date|date:"M Y" }}{% else %}-{% endif %}</td>
+            <td style="padding:8px;">{% if dep.is_current %}<span class="badge active-b" style="background:#e9f7ef;color:#166534;padding:3px 8px;border-radius:4px;font-size:14px;font-weight:700;">Current</span>{% else %}-{% endif %}</td>
             <td style="padding:8px;text-align:center;">
               <form method="post" class="inline-form" data-confirm="Remove this deployment entry?">
                 {% csrf_token %}
@@ -892,7 +903,7 @@ body.modal-open {
         <a class="btn secondary small" href="{% url 'clergy:my_requirements' %}"><i class="fa-solid fa-arrow-right"></i> Manage in My Requirements</a>
       </div>
       <div class="notice" id="noticeMedical">
-        <div class="notice-content">Medical exam clearance and psychiatric evaluation submission status. Official psychiatric results are noted upon receipt by the Bishop without document upload.</div>
+        <div class="notice-content">Medical and psychiatric clearance status. Psychiatric results are noted by the Bishop with no upload needed.</div>
         <button type="button" class="notice-dismiss" data-dismiss-notice="noticeMedical" aria-label="Dismiss notice" title="Dismiss">
           <i class="fa-solid fa-xmark"></i>
         </button>
@@ -951,13 +962,16 @@ body.modal-open {
       <div class="form-grid">
         <div class="field full">
           <label>Parish / Mission / Station <span class="req-mark">*</span></label>
-          <input name="station_name" required placeholder="e.g. St. Barnabas Parish">
+          <div class="input-with-action">
+            <input name="station_name" id="depStationInput" required placeholder="e.g. St. Barnabas Parish">
+            <button type="button" class="ph-picker-btn" data-ph-picker-target="depStationInput" data-picker-mode="parish" aria-label="Select diocesan parish or mission station" title="Select diocesan parish or mission station"><i class="fa-solid fa-church"></i></button>
+          </div>
         </div>
         <div class="field">
           <label>Place / Location</label>
           <div class="input-with-action">
             <input name="place_name" id="depPlaceInput" placeholder="e.g. Alab, Bontoc">
-            <button type="button" class="ph-picker-btn" data-ph-picker-target="depPlaceInput" title="Choose from province / city / barangay list"><i class="fa-solid fa-location-dot"></i></button>
+            <button type="button" class="ph-picker-btn" data-ph-picker-target="depPlaceInput" aria-label="Choose place from province, city, or barangay list" title="Choose from province / city / barangay list"><i class="fa-solid fa-location-dot"></i></button>
           </div>
         </div>
         <div class="field">
@@ -1029,7 +1043,7 @@ body.modal-open {
 
 {% block extra_js %}
 {{ deaneries_map|json_script:"deaneries-data" }}
-<script src="{% static 'clergy/js/address-picker.js' %}?v=10"></script>
+<script src="{% static 'clergy/js/address-picker.js' %}?v=11"></script>
 <script src="{% static 'clergy/js/required-field-indicator.js' %}?v=6"></script>
 <script src="{% static 'code-field.js' %}?v=6"></script>
 <script src="{% static 'password-guidelines.js' %}?v=14"></script>
@@ -1085,10 +1099,20 @@ body.modal-open {
     tr.className = 'table-row-enter';
     tr.style.borderBottom = '1px solid #edf0f3';
     tr.innerHTML = `
-      <td style="padding:6px;"><input name="edu_degree" placeholder="e.g. Master of Divinity" style="width:100%;padding:6px;border:1px solid #cbd5e1;border-radius:6px;box-sizing:border-box;" required></td>
-      <td style="padding:6px;"><input name="edu_institution" placeholder="e.g. St. Andrew's Seminary" style="width:100%;padding:6px;border:1px solid #cbd5e1;border-radius:6px;box-sizing:border-box;" required></td>
-      <td style="padding:6px;"><input name="edu_place" placeholder="e.g. Quezon City" style="width:100%;padding:6px;border:1px solid #cbd5e1;border-radius:6px;box-sizing:border-box;"></td>
-      <td style="padding:6px;"><input name="edu_year" type="number" min="1940" max="2099" placeholder="YYYY" style="width:100%;padding:6px;border:1px solid #cbd5e1;border-radius:6px;box-sizing:border-box;"></td>
+      <td style="padding:6px;"><input name="edu_degree" placeholder="e.g. Master of Divinity" required></td>
+      <td style="padding:6px;">
+        <div class="input-with-action">
+          <input name="edu_institution" placeholder="e.g. St. Andrew's Seminary" required>
+          <button type="button" class="ph-picker-btn" data-picker-mode="school" aria-label="Choose school or CHED institution" title="Choose from CHED institutions or Elementary schools"><i class="fa-solid fa-school"></i></button>
+        </div>
+      </td>
+      <td style="padding:6px;">
+        <div class="input-with-action">
+          <input name="edu_place" placeholder="e.g. Quezon City">
+          <button type="button" class="ph-picker-btn" aria-label="Choose place from province, city, or barangay list" title="Choose from province / city / barangay list"><i class="fa-solid fa-location-dot"></i></button>
+        </div>
+      </td>
+      <td style="padding:6px;"><input name="edu_year" type="number" min="1940" max="2099" placeholder="YYYY"></td>
       <td style="padding:6px;text-align:center;"><button type="button" class="btn small danger remove-row-btn" title="Remove"><i class="fa-solid fa-trash"></i></button></td>
     `;
     if (degreeVal !== undefined) tr.querySelector('[name="edu_degree"]').value = degreeVal;

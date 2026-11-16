@@ -338,17 +338,18 @@ try{
    display: inline-flex;
    align-items: center;
    gap: 4px;
-   font-size: 11px;
+   font-size: 14px;
    font-weight: 600;
    color: #15803d;
    background: #dcfce7;
-   padding: 2px 7px;
+   padding: 3px 9px;
    border-radius: 9999px;
   }
   .floating-save-bar {
    position: fixed;
    bottom: 20px;
    right: 24px;
+   max-width: calc(100vw - 32px);
    z-index: 90;
    background: #0f172a;
    color: #ffffff;
@@ -357,8 +358,9 @@ try{
    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.35);
    display: flex;
    align-items: center;
+   flex-wrap: wrap;
    gap: 14px;
-   font-size: 13px;
+   font-size: 14px;
    transform: translateY(140%);
    opacity: 0;
    pointer-events: none;
@@ -384,7 +386,7 @@ try{
   }
   .field-error-msg {
    display: block;
-   font-size: 0.75rem;
+   font-size: 0.875rem;
    color: var(--red, #d9534f);
    margin-top: 0.25rem;
    font-weight: 500;
@@ -419,7 +421,7 @@ try{
     <div class="doc-preview-head">
      <div>
       <h3 id="docPreviewTitle"><i class="fa-solid fa-file-eye" style="color:#2f6fed;"></i> <span>Document Preview</span></h3>
-      <span class="muted" style="font-size:11px;">Review the attached document below, then confirm or return to the record.</span>
+      <span class="muted" style="font-size:14px;">Review the attached document below, then confirm or return to the record.</span>
      </div>
      <button type="button" class="close" id="docPreviewCloseTop" aria-label="Close preview">
       <i class="fa-solid fa-xmark"></i>
@@ -487,7 +489,7 @@ try{
   const frame=document.getElementById('docPreviewFrame');
   if(frame)frame.src='about:blank';
   if(activePreviewTrigger){
-   const field=activePreviewTrigger.closest('.field, .edit-field, .doc-card, .doc-row, .doc-bar');
+   const field=activePreviewTrigger.closest('.field, .edit-field, .doc-card, .doc-row, .doc-bar, .ember-quarter-row');
    if(field){
     field.scrollIntoView({behavior:'smooth',block:'center'});
    }
@@ -530,19 +532,19 @@ try{
  });
 
  document.addEventListener('click',function(e){
-  // 1. In-app document view links (including .doc-table-link, .att-btn.view, and direct /documents/.../view/ links)
-  const viewLink=e.target.closest('a.att-btn.view, a.doc-table-link, .doc-card .row-actions a[href*="/documents/"][href$="/view/"], a[href*="/documents/"][href$="/view/"]');
+  // 1. In-app document view links (including .doc-table-link, .att-btn.view, Ember Letters view links, and direct /view/ links)
+  const viewLink=e.target.closest('a.att-btn.view, a.doc-table-link, a.ember-view-link, .doc-card .row-actions a[href*="/documents/"][href$="/view/"], a[href*="/documents/"][href$="/view/"], a[href*="/ember-letters/"][href$="/view/"]');
   if(viewLink&&!e.metaKey&&!e.ctrlKey&&!e.shiftKey&&!e.altKey){
    const href=viewLink.getAttribute('href');
    if(href&&href!=='#'&&!href.startsWith('javascript:')){
     e.preventDefault();
     e.stopImmediatePropagation();
-    const cardOrBar=viewLink.closest('[data-doc-title], .doc-row, .doc-bar, .doc-card, .date-att-bar');
+    const cardOrBar=viewLink.closest('[data-doc-title], .doc-row, .doc-bar, .doc-card, .date-att-bar, .ember-quarter-row');
     const title=
      viewLink.dataset.docName||
      (cardOrBar&&cardOrBar.dataset.docTitle)||
      viewLink.querySelector('span')?.textContent||
-     (cardOrBar&&cardOrBar.querySelector('.doc-table-link span, .col-name span, .doc-card-head b')?.textContent)||
+     (cardOrBar&&cardOrBar.querySelector('.doc-table-link span, .col-name span, .doc-card-head b, .ember-q-filename')?.textContent)||
      'Document Preview';
     openDocPreview(href, title, viewLink);
     return;
@@ -909,18 +911,18 @@ try{
     }
     .slip-progress-elapsed {
      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
-     font-size: 12px !important;
+     font-size: 14px !important;
      font-weight: 600 !important;
      color: #334155 !important;
      background: #f1f5f9 !important;
      border: 1px solid #e2e8f0 !important;
      border-radius: 999px !important;
-     padding: 2px 8px !important;
+     padding: 2px 9px !important;
      white-space: nowrap !important;
     }
     .slip-progress-stage {
      margin: 4px 0 0 !important;
-     font-size: 13px !important;
+     font-size: 14px !important;
      color: #475569 !important;
      line-height: 1.4 !important;
     }
@@ -951,7 +953,7 @@ try{
      border: 1px solid #e2e8f0 !important;
      background: #f8fafc !important;
      color: #334155 !important;
-     font-size: 12.5px !important;
+     font-size: 14px !important;
      line-height: 1.45 !important;
     }
     .slip-progress-notice.show {
@@ -1189,7 +1191,7 @@ try{
      overflow-wrap: anywhere !important;
     }
     .slips-preview-head .muted {
-     font-size: 12px !important;
+     font-size: 14px !important;
      color: #475569 !important;
      display: block !important;
      line-height: 1.35 !important;
@@ -1205,7 +1207,7 @@ try{
      border: 1px solid #bbf7d0 !important;
      background: #f0fdf4 !important;
      color: #166534 !important;
-     font-size: 13px !important;
+     font-size: 14px !important;
      font-weight: 600 !important;
      flex-shrink: 0 !important;
      min-width: 0 !important;

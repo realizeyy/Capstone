@@ -6,82 +6,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EDNP Clergy Record - {{ profile.full_name }}</title>
   <link rel="stylesheet" href="{% static 'clergy/css/print-record.css' %}?v={% now 'U' %}">
-  <style>
-    /* Critical Inline Protection against stale browser cache */
-    .church-seal {
-      width: 48px !important;
-      height: 72px !important;
-      max-width: 48px !important;
-      max-height: 72px !important;
-      object-fit: contain !important;
-      display: block !important;
-    }
-    body {
-      background-color: #525659 !important;
-    }
-    .word-canvas {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 24px;
-      width: 100%;
-    }
-    .paper-sheet {
-      width: 210mm;
-      min-height: 297mm;
-      max-width: 100%;
-      background-color: #ffffff;
-      padding: 11mm 14mm;
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.15);
-      border-radius: 2px;
-      box-sizing: border-box;
-      position: relative;
-    }
-    @media print {
-      body { background-color: #ffffff !important; }
-      .word-canvas { display: block !important; }
-      .paper-sheet {
-        width: 100% !important;
-        min-height: 0 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        box-shadow: none !important;
-        border-radius: 0 !important;
-        page-break-after: always !important;
-        break-after: page !important;
-      }
-      .paper-sheet:last-child {
-        page-break-after: avoid !important;
-        break-after: avoid !important;
-      }
-    }
-  </style>
 </head>
 <body>
-  <!-- Screen-Only Actions Toolbar -->
-  <div class="actions" role="toolbar" aria-label="Print controls">
-    <a class="download-btn" href="{% url 'clergy:my_profile' %}" data-back-page data-back-url="{% url 'clergy:my_profile' %}">&larr; Back to Record</a>
-    <button type="button" class="print-btn" data-print-page>Print Record</button>
-    {% if download_url %}
-    <a class="download-btn" href="{{ download_url }}">Download PDF</a>
-    {% endif %}
-  </div>
+  <!-- Screen-Only Docked Actions Toolbar -->
+  <header class="actions" role="toolbar" aria-label="Print controls">
+    <div class="toolbar-brand">
+      <span class="toolbar-title">Clergy Personal Record</span>
+      <span class="toolbar-meta">{{ profile.full_name }} &bull; {{ profile.record.id|default:"Pending ID" }}</span>
+    </div>
+    <div class="toolbar-buttons">
+      <a class="download-btn" href="{% url 'clergy:my_profile' %}" data-back-page data-back-url="{% url 'clergy:my_profile' %}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Back to Record
+      </a>
+      {% if download_url %}
+      <a class="download-btn" href="{{ download_url }}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Download PDF
+      </a>
+      {% endif %}
+      <button type="button" class="print-btn" data-print-page>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        Print Record
+      </button>
+    </div>
+  </header>
 
-  <!-- Word Processor Canvas Layout -->
-  <div class="word-canvas">
-
-    <!-- ====================================================================
-         PAGE 1: Physical Paper Sheet 1
-         ==================================================================== -->
-    <article class="paper-sheet" id="sheet-1">
+  <main class="word-canvas">
+    <article class="paper-sheet">
       <div class="doc-watermark" aria-hidden="true">OFFICIAL COPY</div>
 
       <div class="sheet-content">
-        <!-- 1. Diocesan Letterhead & Official Header -->
+        <!-- Diocesan Letterhead & Official Header -->
         <header class="doc-header">
           <div class="letterhead-top">
             <div class="seal-col">
-              <img src="{% static 'ednp_logo.png' %}" alt="EDNP Seal" class="church-seal" width="48" height="72" style="width: 48px !important; height: 72px !important; max-width: 48px !important; max-height: 72px !important; object-fit: contain; display: block;">
+              <img src="{% static 'ednp_logo.png' %}" alt="EDNP Seal" class="church-seal" width="48" height="72">
             </div>
             <div class="masthead-col">
               <div class="church-name">The Episcopal Church in the Philippines</div>
@@ -103,13 +63,17 @@
           <div class="document-title-bar">
             <div class="title-wrap">
               <h2 class="doc-main-title">Clergy Personal Record</h2>
-              <span class="doc-subtitle">Official Personnel Extract &bull; Point-in-Time Diocesan Record</span>
+              <span class="doc-subtitle">
+                Official Personnel Extract &bull; Extracted {% if generated_at %}{{ generated_at|date:"F d, Y g:i A" }}{% else %}{% now "F d, Y g:i A" %}{% endif %}
+              </span>
             </div>
             <div class="doc-meta-pills">
               {% if profile.record.status == 'Active' %}
               <span class="badge badge-active">Active Status</span>
               {% elif profile.record.status == 'On Leave' %}
               <span class="badge badge-warning">On Leave</span>
+              {% elif profile.record.status == 'Missionary to Other Diocese' %}
+              <span class="badge badge-info">Missionary</span>
               {% elif profile.record.status == 'Retired' %}
               <span class="badge badge-neutral">Retired</span>
               {% else %}
@@ -125,8 +89,8 @@
           </div>
         </header>
 
-        <!-- Hero Profile Summary & Key Metrics -->
-        <section class="hero-summary-card">
+        <!-- Hero Profile Summary & Key Ministerial Metrics -->
+        <section class="hero-summary-card" aria-label="Ministerial summary">
           <div class="hero-main-row">
             <div class="hero-identity">
               <div class="hero-name">{{ profile.full_name }}</div>
@@ -149,7 +113,7 @@
           </div>
         </section>
 
-        <!-- 2. Personal & Civic Profile -->
+        <!-- 1. Personal & Civic Profile -->
         <section class="doc-section">
           <h3 class="section-title"><span class="section-num">1</span> Personal &amp; Civic Profile</h3>
           <table class="grid-table">
@@ -158,27 +122,27 @@
                 <th class="grid-label">Full Name</th>
                 <td class="grid-value"><b>{{ profile.full_name }}</b></td>
                 <th class="grid-label">Gender</th>
-                <td class="grid-value">{{ profile.record.gender|default:"Not specified" }}</td>
+                <td class="grid-value">{% if profile.record.gender %}{{ profile.record.gender }}{% else %}<span class="muted-value">Not specified</span>{% endif %}</td>
               </tr>
               <tr>
                 <th class="grid-label">Date of Birth</th>
-                <td class="grid-value">{% if profile.record.date_of_birth %}{{ profile.record.date_of_birth|date:"F d, Y" }}{% else %}Not specified{% endif %}</td>
+                <td class="grid-value">{% if profile.record.date_of_birth %}{{ profile.record.date_of_birth|date:"F d, Y" }}{% else %}<span class="muted-value">Not specified</span>{% endif %}</td>
                 <th class="grid-label">Place of Birth</th>
-                <td class="grid-value">{{ profile.place_of_birth|default:"Not specified" }}</td>
+                <td class="grid-value">{% if profile.place_of_birth %}{{ profile.place_of_birth }}{% else %}<span class="muted-value">Not specified</span>{% endif %}</td>
               </tr>
               <tr>
                 <th class="grid-label">Civil Status</th>
-                <td class="grid-value">{{ profile.civil_status|default:"Not specified" }}</td>
+                <td class="grid-value">{% if profile.civil_status %}{{ profile.civil_status }}{% else %}<span class="muted-value">Not specified</span>{% endif %}</td>
                 <th class="grid-label">Contact Phone</th>
-                <td class="grid-value">{{ profile.record.phone|default:"Not specified" }}</td>
+                <td class="grid-value">{% if profile.record.phone %}{{ profile.record.phone }}{% else %}<span class="muted-value">Not specified</span>{% endif %}</td>
               </tr>
               <tr>
                 <th class="grid-label">Email Address</th>
-                <td class="grid-value" colspan="3">{{ profile.record.email|default:"Not specified" }}</td>
+                <td class="grid-value" colspan="3">{% if profile.record.email %}{{ profile.record.email }}{% else %}<span class="muted-value">Not specified</span>{% endif %}</td>
               </tr>
               <tr>
                 <th class="grid-label">Residential Address</th>
-                <td class="grid-value" colspan="3">{{ profile.record.address|default:"Not specified" }}</td>
+                <td class="grid-value" colspan="3">{% if profile.record.address %}{{ profile.record.address }}{% else %}<span class="muted-value">Not specified</span>{% endif %}</td>
               </tr>
               {% if profile.sss_number or profile.philhealth_number or profile.pagibig_number %}
               <tr>
@@ -194,7 +158,7 @@
           </table>
         </section>
 
-        <!-- 3. Sacramental & Holy Orders History -->
+        <!-- 2. Sacramental & Holy Orders History -->
         <section class="doc-section">
           <h3 class="section-title"><span class="section-num">2</span> Sacramental &amp; Holy Orders History</h3>
           <table class="grid-table">
@@ -202,54 +166,48 @@
               <tr>
                 <th class="grid-label">Holy Orders Status</th>
                 <td class="grid-value" colspan="3">
-                  {% if profile.record.rank == 'postulancy' %}
-                  Postulancy (Lay Candidate in Preparation)
-                  {% else %}
                   Admitted to Holy Orders &bull; {{ profile.record.get_rank_display|default:"Clergy"|title }}
-                  {% endif %}
                 </td>
               </tr>
               <tr>
                 <th class="grid-label">Date Admitted as Holy Order</th>
-                <td class="grid-value">{% if profile.record.holy_orders_date %}{{ profile.record.holy_orders_date|date:"F d, Y" }}{% else %}Not specified{% endif %}</td>
+                <td class="grid-value">{% if profile.record.holy_orders_date %}{{ profile.record.holy_orders_date|date:"F d, Y" }}{% else %}<span class="muted-value">Not recorded</span>{% endif %}</td>
                 <th class="grid-label">Presiding Bishop</th>
-                <td class="grid-value">{{ profile.record.bishop_name|default:"Not specified" }}</td>
+                <td class="grid-value">{% if profile.record.bishop_name %}{{ profile.record.bishop_name }}{% else %}<span class="muted-value">Not recorded</span>{% endif %}</td>
               </tr>
-              {% if profile.record.rank != 'postulancy' %}
-                {% if profile.record.can_have_diaconate %}
-                <tr>
-                  <th class="grid-label">Diaconate Ordination</th>
-                  <td class="grid-value">{% if profile.record.diaconate_date %}{{ profile.record.diaconate_date|date:"F d, Y" }}{% else %}Not specified{% endif %}</td>
-                  <th class="grid-label">Place of Diaconate</th>
-                  <td class="grid-value">{{ profile.record.diaconate_place|default:"Not specified" }}</td>
-                </tr>
-                {% endif %}
-                {% if profile.record.can_have_priesthood %}
-                <tr>
-                  <th class="grid-label">Priesthood Ordination</th>
-                  <td class="grid-value">{% if profile.record.ordination_date %}{{ profile.record.ordination_date|date:"F d, Y" }}{% else %}Not specified{% endif %}</td>
-                  <th class="grid-label">Place of Priesthood</th>
-                  <td class="grid-value">{{ profile.record.ordination_place|default:"Not specified" }}</td>
-                </tr>
-                {% endif %}
-                {% if profile.record.can_have_consecration %}
-                <tr>
-                  <th class="grid-label">Episcopate Consecration</th>
-                  <td class="grid-value" colspan="3">{% if profile.record.consecration_date %}{{ profile.record.consecration_date|date:"F d, Y" }}{% else %}Not specified{% endif %}</td>
-                </tr>
-                {% endif %}
+              {% if profile.record.can_have_diaconate %}
+              <tr>
+                <th class="grid-label">Diaconate Ordination</th>
+                <td class="grid-value">{% if profile.record.diaconate_date %}{{ profile.record.diaconate_date|date:"F d, Y" }}{% else %}<span class="muted-value">Not recorded</span>{% endif %}</td>
+                <th class="grid-label">Place of Diaconate</th>
+                <td class="grid-value">{% if profile.record.diaconate_place %}{{ profile.record.diaconate_place }}{% else %}<span class="muted-value">Not recorded</span>{% endif %}</td>
+              </tr>
+              {% endif %}
+              {% if profile.record.can_have_priesthood %}
+              <tr>
+                <th class="grid-label">Priesthood Ordination</th>
+                <td class="grid-value">{% if profile.record.ordination_date %}{{ profile.record.ordination_date|date:"F d, Y" }}{% else %}<span class="muted-value">Not recorded</span>{% endif %}</td>
+                <th class="grid-label">Place of Priesthood</th>
+                <td class="grid-value">{% if profile.record.ordination_place %}{{ profile.record.ordination_place }}{% else %}<span class="muted-value">Not recorded</span>{% endif %}</td>
+              </tr>
+              {% endif %}
+              {% if profile.record.can_have_consecration %}
+              <tr>
+                <th class="grid-label">Episcopate Consecration</th>
+                <td class="grid-value" colspan="3">{% if profile.record.consecration_date %}{{ profile.record.consecration_date|date:"F d, Y" }}{% else %}<span class="muted-value">Not recorded</span>{% endif %}</td>
+              </tr>
               {% endif %}
               <tr>
                 <th class="grid-label">Holy Baptism</th>
-                <td class="grid-value">{% if profile.record.baptism_date %}{{ profile.record.baptism_date|date:"F d, Y" }}{% else %}Not specified{% endif %}</td>
+                <td class="grid-value">{% if profile.record.baptism_date %}{{ profile.record.baptism_date|date:"F d, Y" }}{% else %}<span class="muted-value">Not recorded</span>{% endif %}</td>
                 <th class="grid-label">Baptism Place</th>
-                <td class="grid-value">{{ profile.baptism_place|default:"Not specified" }}</td>
+                <td class="grid-value">{% if profile.baptism_place %}{{ profile.baptism_place }}{% else %}<span class="muted-value">Not recorded</span>{% endif %}</td>
               </tr>
               <tr>
                 <th class="grid-label">Holy Confirmation</th>
-                <td class="grid-value">{% if profile.record.confirmation_date %}{{ profile.record.confirmation_date|date:"F d, Y" }}{% else %}Not specified{% endif %}</td>
+                <td class="grid-value">{% if profile.record.confirmation_date %}{{ profile.record.confirmation_date|date:"F d, Y" }}{% else %}<span class="muted-value">Not recorded</span>{% endif %}</td>
                 <th class="grid-label">Confirmation Place</th>
-                <td class="grid-value">{{ profile.confirmation_place|default:"Not specified" }}</td>
+                <td class="grid-value">{% if profile.confirmation_place %}{{ profile.confirmation_place }}{% else %}<span class="muted-value">Not recorded</span>{% endif %}</td>
               </tr>
               {% if profile.record.leave_reason %}
               <tr>
@@ -267,100 +225,127 @@
           </table>
         </section>
 
-        <!-- 4. Deployments & Station History -->
+        <!-- 3. Deployments & Station History -->
         <section class="doc-section">
           <h3 class="section-title"><span class="section-num">3</span> Deployments &amp; Station History</h3>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Parish / Station / Mission</th>
-                <th>Location</th>
-                <th>Canonical Role</th>
-                <th>Period of Service</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for dep in profile.record.deployments.all %}
-              <tr>
-                <td>
-                  <b>{{ dep.station_name }}</b>
-                  {% if dep.notes %}<div class="cell-subtext">{{ dep.notes }}</div>{% endif %}
-                </td>
-                <td>{{ dep.place_name|default:"Not specified" }}</td>
-                <td>{{ dep.role }}</td>
-                <td>
-                  {% if dep.start_date %}{{ dep.start_date|date:"M Y" }} to {% endif %}
-                  {% if dep.is_current %}Present{% elif dep.end_date %}{{ dep.end_date|date:"M Y" }}{% else %}Not recorded{% endif %}
-                </td>
-                <td>
-                  {% if dep.is_current %}
-                  <span class="badge badge-active">Current</span>
-                  {% else %}
-                  <span class="badge badge-neutral">Completed</span>
-                  {% endif %}
-                </td>
-              </tr>
-              {% empty %}
-              <tr>
-                <td colspan="5" class="empty-cell">
-                  {% if profile.record.assignment %}
-                  <b>Current Assignment:</b> {{ profile.record.assignment }} (Deanery: {{ profile.record.deanery|default:"EDNP" }})
-                  {% if profile.record.service_history %}<br><small>{{ profile.record.service_history }}</small>{% endif %}
-                  {% else %}
-                  No parish deployments recorded in diocesan archives.
-                  {% endif %}
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+          {% if profile.record.deployments.exists %}
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Parish / Station / Mission</th>
+                  <th>Location</th>
+                  <th>Canonical Role</th>
+                  <th>Period of Service</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for dep in profile.record.deployments.all %}
+                <tr>
+                  <td>
+                    <b>{{ dep.station_name }}</b>
+                    {% if dep.notes %}<div class="cell-subtext">{{ dep.notes }}</div>{% endif %}
+                  </td>
+                  <td>{% if dep.place_name %}{{ dep.place_name }}{% else %}<span class="muted-value">Not recorded</span>{% endif %}</td>
+                  <td>{{ dep.role }}</td>
+                  <td>
+                    {% if dep.start_date %}{{ dep.start_date|date:"M Y" }} to {% endif %}
+                    {% if dep.is_current %}Present{% elif dep.end_date %}{{ dep.end_date|date:"M Y" }}{% else %}Not recorded{% endif %}
+                  </td>
+                  <td>
+                    {% if dep.is_current %}
+                    <span class="badge badge-active">Current</span>
+                    {% else %}
+                    <span class="badge badge-neutral">Completed</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% elif profile.record.assignment %}
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Parish / Station / Mission</th>
+                  <th>Deanery</th>
+                  <th>Canonical Role</th>
+                  <th>Period of Service</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><b>{{ profile.record.assignment }}</b></td>
+                  <td>{{ profile.record.deanery|default:"EDNP" }}</td>
+                  <td>{{ profile.record.get_rank_display|default:"Clergy"|title }}</td>
+                  <td>Current Assignment</td>
+                  <td><span class="badge badge-active">Current</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          {% if profile.record.service_history %}
+          <div class="note-box">
+            <b>Service History Notes:</b> {{ profile.record.service_history|linebreaksbr }}
+          </div>
+          {% endif %}
+          {% else %}
+          <div class="info-callout">
+            No parish deployments recorded in diocesan archives.
+          </div>
+          {% endif %}
         </section>
 
-        <!-- 5. Family Background -->
+        <!-- 4. Family Background -->
         <section class="doc-section">
           <h3 class="section-title"><span class="section-num">4</span> Family Background</h3>
           {% if profile.civil_status == 'Married' or profile.spouse_name or profile.children.exists or profile.children_names %}
             {% if profile.spouse_name or profile.marriage_date %}
-            <table class="grid-table" style="margin-bottom: 8px;">
+            <table class="grid-table">
               <tbody>
                 <tr>
                   <th class="grid-label">Spouse Name</th>
                   <td class="grid-value"><b>{{ profile.spouse_name|default:"Not recorded" }}</b></td>
                   <th class="grid-label">Spouse Birth Date</th>
-                  <td class="grid-value">{% if profile.spouse_birth_date %}{{ profile.spouse_birth_date|date:"F d, Y" }}{% else %}Not recorded{% endif %}</td>
+                  <td class="grid-value">{% if profile.spouse_birth_date %}{{ profile.spouse_birth_date|date:"F d, Y" }}{% else %}<span class="muted-value">Not recorded</span>{% endif %}</td>
                 </tr>
                 <tr>
                   <th class="grid-label">Marriage Date</th>
-                  <td class="grid-value">{% if profile.marriage_date %}{{ profile.marriage_date|date:"F d, Y" }}{% else %}Not recorded{% endif %}</td>
+                  <td class="grid-value">{% if profile.marriage_date %}{{ profile.marriage_date|date:"F d, Y" }}{% else %}<span class="muted-value">Not recorded</span>{% endif %}</td>
                   <th class="grid-label">Marriage Place</th>
-                  <td class="grid-value">{{ profile.marriage_place|default:"Not recorded" }}</td>
+                  <td class="grid-value">{% if profile.marriage_place %}{{ profile.marriage_place }}{% else %}<span class="muted-value">Not recorded</span>{% endif %}</td>
                 </tr>
               </tbody>
             </table>
             {% endif %}
 
             {% if profile.children.exists %}
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Child Name</th>
-                  <th>Date of Birth</th>
-                  <th>Age</th>
-                  <th>Gender</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for child in profile.children.all %}
-                <tr>
-                  <td><b>{{ child.name }}</b></td>
-                  <td>{% if child.birth_date %}{{ child.birth_date|date:"F d, Y" }}{% else %}Not recorded{% endif %}</td>
-                  <td>{% if child.age %}{{ child.age }} yrs{% else %}Not specified{% endif %}</td>
-                  <td>{{ child.gender|default:"Not specified" }}</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+            <div class="table-scroll">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Child Name</th>
+                    <th>Date of Birth</th>
+                    <th>Age</th>
+                    <th>Gender</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for child in profile.children.all %}
+                  <tr>
+                    <td><b>{{ child.name }}</b></td>
+                    <td>{% if child.birth_date %}{{ child.birth_date|date:"F d, Y" }}{% else %}<span class="muted-value">Not recorded</span>{% endif %}</td>
+                    <td>{% if child.age %}{{ child.age }} yrs{% else %}<span class="muted-value">Not specified</span>{% endif %}</td>
+                    <td>{{ child.gender|default:"Not specified" }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
             {% elif profile.children_names %}
             <div class="note-box">
               <b>Children Registered:</b> {{ profile.children_names|linebreaksbr }}
@@ -373,32 +358,34 @@
           {% endif %}
         </section>
 
-        <!-- 6. Educational Background -->
+        <!-- 5. Educational Background -->
         <section class="doc-section">
           <h3 class="section-title"><span class="section-num">5</span> Educational Background</h3>
           {% if profile.educations.exists %}
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Degree / Academic Program</th>
-                <th>Institution / Seminary / School</th>
-                <th>Location</th>
-                <th>Year Graduated</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for edu in profile.educations.all %}
-              <tr>
-                <td><b>{{ edu.degree }}</b></td>
-                <td>{{ edu.institution }}</td>
-                <td>{{ edu.place|default:"Not recorded" }}</td>
-                <td>{{ edu.year_graduated|default:"Not recorded" }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Degree / Academic Program</th>
+                  <th>Institution / Seminary / School</th>
+                  <th>Location</th>
+                  <th>Year Graduated</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for edu in profile.educations.all %}
+                <tr>
+                  <td><b>{{ edu.degree }}</b></td>
+                  <td>{{ edu.institution }}</td>
+                  <td>{% if edu.place %}{{ edu.place }}{% else %}<span class="muted-value">Not recorded</span>{% endif %}</td>
+                  <td>{% if edu.year_graduated %}{{ edu.year_graduated }}{% else %}<span class="muted-value">Not recorded</span>{% endif %}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
           {% if profile.education %}
-          <div class="note-box" style="margin-top: 6px;">
+          <div class="note-box">
             <b>Additional Studies &amp; Formation:</b> {{ profile.education|linebreaksbr }}
           </div>
           {% endif %}
@@ -412,29 +399,8 @@
           </div>
           {% endif %}
         </section>
-      </div>
 
-      <!-- Sheet 1 Footer -->
-      <footer class="sheet-footer">
-        <span class="sheet-footer-left">Episcopal Diocese of Northern Philippines (EDNP) &bull; Personnel Records Registry</span>
-        <span class="sheet-footer-right">Page 1 of 2</span>
-      </footer>
-    </article>
-
-    <!-- ====================================================================
-         PAGE 2: Physical Paper Sheet 2
-         ==================================================================== -->
-    <article class="paper-sheet" id="sheet-2">
-      <div class="doc-watermark" aria-hidden="true">OFFICIAL COPY</div>
-
-      <div class="sheet-content">
-        <!-- Sheet 2 Running Top Header -->
-        <div class="sheet-top-header">
-          <span class="sheet-top-title">Episcopal Diocese of Northern Philippines &bull; Clergy Personal Record</span>
-          <span class="sheet-top-meta">{{ profile.full_name }} [{{ profile.record.id|default:"Pending" }}]</span>
-        </div>
-
-        <!-- 7. Canonical Requirements & Attachments -->
+        <!-- 6. Canonical Requirements & Attachments -->
         <section class="doc-section">
           <div class="section-header-split">
             <h3 class="section-title"><span class="section-num">6</span> Canonical Requirements &amp; Attachments</h3>
@@ -443,7 +409,6 @@
             </div>
           </div>
 
-          <!-- Visual Progress Metric -->
           <div class="progress-wrap">
             <div class="progress-info">
               <span class="progress-label">Filing Status Summary</span>
@@ -460,7 +425,6 @@
             </div>
           </div>
 
-          <!-- Categorized Canonical Stages -->
           {% if checklist_grouped.stages %}
             {% for stage in checklist_grouped.stages %}
             <div class="stage-block">
@@ -468,16 +432,54 @@
                 <span class="stage-name">{{ stage.title }}</span>
                 <span class="stage-count">{{ stage.submitted }}/{{ stage.total }} Completed</span>
               </div>
+              <div class="table-scroll">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th class="col-req-name">Document Requirement</th>
+                      <th class="col-req-status">Filing Status</th>
+                      <th class="col-req-date">Date Recorded</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in stage.items %}
+                    <tr>
+                      <td><b>{{ item.document_type.name }}</b></td>
+                      <td>
+                        {% if item.status == 'Submitted' %}
+                        <span class="badge badge-submitted">Submitted</span>
+                        {% elif item.status == 'Expired' %}
+                        <span class="badge badge-danger">Expired</span>
+                        {% else %}
+                        <span class="badge badge-neutral">Not Uploaded</span>
+                        {% endif %}
+                      </td>
+                      <td>
+                        {% if item.document.submitted_date %}
+                        {{ item.document.submitted_date|date:"M d, Y" }}
+                        {% else %}
+                        <span class="muted-dash">Pending</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="table-scroll">
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th style="width: 58%;">Document Requirement</th>
-                    <th style="width: 22%;">Filing Status</th>
-                    <th style="width: 20%;">Date Recorded</th>
+                    <th class="col-req-name">Document Requirement</th>
+                    <th class="col-req-status">Filing Status</th>
+                    <th class="col-req-date">Date Recorded</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {% for item in stage.items %}
+                  {% for item in checklist %}
                   <tr>
                     <td><b>{{ item.document_type.name }}</b></td>
                     <td>
@@ -497,93 +499,69 @@
                       {% endif %}
                     </td>
                   </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="3" class="empty-cell">No requirements configured in diocesan database.</td>
+                  </tr>
                   {% endfor %}
                 </tbody>
               </table>
             </div>
-            {% endfor %}
-          {% else %}
-            <!-- Fallback List if Stages Not Loaded -->
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th style="width: 58%;">Document Requirement</th>
-                  <th style="width: 22%;">Filing Status</th>
-                  <th style="width: 20%;">Date Recorded</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for item in checklist %}
-                <tr>
-                  <td><b>{{ item.document_type.name }}</b></td>
-                  <td>
-                    {% if item.status == 'Submitted' %}
-                    <span class="badge badge-submitted">Submitted</span>
-                    {% elif item.status == 'Expired' %}
-                    <span class="badge badge-danger">Expired</span>
-                    {% else %}
-                    <span class="badge badge-neutral">Not Uploaded</span>
-                    {% endif %}
-                  </td>
-                  <td>
-                    {% if item.document.submitted_date %}
-                    {{ item.document.submitted_date|date:"M d, Y" }}
-                    {% else %}
-                    <span class="muted-dash">Pending</span>
-                    {% endif %}
-                  </td>
-                </tr>
-                {% empty %}
-                <tr>
-                  <td colspan="3" class="empty-cell">No requirements configured in diocesan database.</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
           {% endif %}
         </section>
 
-        <!-- 8. Certification & Seal Sign-Off Area -->
-        <section class="doc-section certification-section">
-          <div class="sign-grid">
-            <div class="sign-block">
-              <div class="sign-heading">Clergy Member Attestation</div>
-              <p class="sign-text">I hereby attest that the personal, ministerial, and educational information stated herein is true and complete to the best of my knowledge.</p>
-              <div class="sign-space"></div>
-              <div class="sign-line"></div>
-              <div class="sign-name">{{ profile.full_name }}</div>
-              <div class="sign-caption">Clergy Member Signature &bull; Date</div>
-            </div>
-
-            <div class="sign-block registrar-block">
-              <div class="sign-heading">Diocesan Registry Certification</div>
-              <p class="sign-text">Certified official record extract from the database of the Episcopal Diocese of Northern Philippines.</p>
-              <div class="stamp-box">
-                <div class="stamp-inner-circle">
-                  <span class="stamp-text-org">EDNP REGISTRAR</span>
-                  <span class="stamp-text-loc">OFFICIAL SEAL</span>
+        <!-- 7. Certification, Official Seal & Privacy Notice -->
+        <div class="closing-block">
+          <section class="doc-section certification-section">
+            <div class="sign-grid">
+              <div class="sign-block">
+                <div>
+                  <div class="sign-heading">Clergy Member Attestation</div>
+                  <p class="sign-text">I hereby attest that the personal, ministerial, and educational information stated herein is true and complete to the best of my knowledge.</p>
+                </div>
+                <div>
+                  <div class="sign-space"></div>
+                  <div class="sign-line"></div>
+                  <div class="sign-name">{{ profile.full_name }}</div>
+                  <div class="sign-caption">Clergy Member Signature &bull; Date</div>
                 </div>
               </div>
-              <div class="sign-line"></div>
-              <div class="sign-name">Office of the Diocesan Registrar</div>
-              <div class="sign-caption">Diocesan Center &bull; Bontoc, Mountain Province</div>
-            </div>
-          </div>
-        </section>
 
-        <!-- Privacy Notice -->
-        <div class="footer-notice">
-          <b>Privacy Notice:</b> This document contains an extract of the logged-in clergy member's official personnel record on file with the Episcopal Diocese of Northern Philippines. For official credentials or external certification, please contact the Diocesan Registrar.
+              <div class="sign-block registrar-block">
+                <div>
+                  <div class="sign-heading">Diocesan Registry Certification</div>
+                  <p class="sign-text">Certified official record extract from the database of the Episcopal Diocese of Northern Philippines.</p>
+                </div>
+                <div>
+                  <div class="stamp-box">
+                    <div class="stamp-inner-circle">
+                      <div class="stamp-ring">
+                        <span class="stamp-text-org">EDNP</span>
+                        <span class="stamp-text-org">REGISTRAR</span>
+                        <span class="stamp-text-loc">OFFICIAL SEAL</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="sign-line"></div>
+                  <div class="sign-name">Office of the Diocesan Registrar</div>
+                  <div class="sign-caption">Diocesan Center &bull; Bontoc, Mountain Province</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="footer-notice">
+            <b>Privacy Notice:</b> This document contains an extract of the logged-in clergy member's official personnel record on file with the Episcopal Diocese of Northern Philippines as of {% if generated_at %}{{ generated_at|date:"F d, Y" }}{% else %}{% now "F d, Y" %}{% endif %}. For official credentials or external certification, please contact the Diocesan Registrar.
+          </div>
         </div>
       </div>
 
-      <!-- Sheet 2 Footer -->
       <footer class="sheet-footer">
         <span class="sheet-footer-left">Episcopal Diocese of Northern Philippines (EDNP) &bull; Personnel Records Registry</span>
-        <span class="sheet-footer-right">Page 2 of 2</span>
+        <span class="sheet-footer-right">Generated {% if generated_at %}{{ generated_at|date:"M d, Y g:i A" }}{% else %}{% now "M d, Y g:i A" %}{% endif %}</span>
       </footer>
     </article>
-  </div>
+  </main>
 
   <script src="{% static 'print-page.js' %}"></script>
 </body>

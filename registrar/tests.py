@@ -775,6 +775,35 @@ class ClericalDirectoryReportTests(TestCase):
         pdf = reports.render_pdf(report)
         self.assertTrue(pdf.startswith(b'%PDF'))
 
+    def test_all_report_types_render_kpis_badges_and_valid_pdfs(self):
+        from django.template.loader import render_to_string
+        deanery = Deanery.objects.create(name='Northern Deanery')
+        DocumentType.objects.get_or_create(name='Declaration of Conformity', defaults={'is_required': True})
+        ClergyRecord.objects.create(
+            id='CLG-509',
+            name='Fr. Missionary Sample',
+            rank='priest',
+            status='Missionary to Other Diocese',
+            deanery=deanery,
+            assignment='Diocesan Mission',
+        )
+
+        for rtype in ('clerical_directory', 'status_report', 'per_deanery', 'ordination_documents'):
+            report = reports.build_report(rtype)
+            self.assertTrue(report.get('summary'), f'{rtype} should include summary KPIs')
+            html = render_to_string('registrar/report_pdf.html', {'report': report})
+            self.assertIn('kpi-strip', html)
+            self.assertIn('closing-block', html)
+            self.assertIn('stamp-ring', html)
+            self.assertIn('badge-info', html)
+            if rtype == 'ordination_documents':
+                self.assertIn('doc-progress-track', html)
+                self.assertIn('missing-tag', html)
+            if rtype == 'per_deanery':
+                self.assertIn('section-count-pill', html)
+            pdf = reports.render_pdf(report)
+            self.assertTrue(pdf.startswith(b'%PDF'), f'{rtype} failed PDF render')
+
     def test_clerical_directory_fallbacks_for_empty_fields(self):
         minimal = ClergyRecord.objects.create(id='CLG-502', name='Fr. Minimal', rank='deacon')
         report = reports.build_report('clerical_directory')
@@ -904,16 +933,41 @@ class RegistrarRecordDetailModernizationTests(TestCase):
         self.assertContains(r, 'ednp_doc_filters_')
         self.assertContains(r, 'ednp:draft-restored')
 
-        # Check parish address picker integration
+        # Single-year inline Ember Letters workspace markers
+        self.assertContains(r, 'id="emberSectionNav"')
+        self.assertContains(r, 'id="emberNavPills"')
+        self.assertContains(r, 'id="emberYearModal"')
+        self.assertContains(r, 'id="emberEdgePrevBtn"')
+        self.assertContains(r, 'id="emberEdgeNextBtn"')
+        self.assertContains(r, 'id="emberYearTrigger"')
+        self.assertContains(r, 'id="emberYearListbox"')
+        self.assertContains(r, 'id="emberSearchInput"')
+        self.assertContains(r, 'id="emberStepperControl"')
+        self.assertContains(r, 'id="emberStepIndicator"')
+        ember_chunk = r.content.decode('utf-8').split('id="emberLettersRoot"', 1)[1].split('id="ember-config-data"', 1)[0]
+        self.assertNotIn('<select', ember_chunk)
+
+        # Check parish, deployment station, place of birth, and address picker integration
         self.assertContains(r, 'data-picker-mode="parish"')
         self.assertContains(r, 'data-ph-picker-target="baptismPlaceInputRegistrar"')
         self.assertContains(r, 'data-ph-picker-target="confirmationPlaceInputRegistrar"')
+        self.assertContains(r, 'data-ph-picker-target="depStationInputRegistrar"')
+        self.assertContains(r, 'data-ph-picker-target="placeOfBirthInputRegistrar"')
+        self.assertContains(r, '<textarea name="address" id="addressInput" rows="2">')
+
+        html = r.content.decode('utf-8')
+        identity_chunk = html.split('id="sec-reg-identity"', 1)[1].split('id="sec-reg-contact"', 1)[0]
+        family_chunk = html.split('id="sec-reg-family"', 1)[1].split('id="tabDocuments"', 1)[0]
+        self.assertIn('name="place_of_birth"', identity_chunk)
+        self.assertNotIn('Place of Birth', family_chunk)
 
     def test_record_detail_ajax_save(self):
         url = reverse('registrar:record_detail', args=[self.record.id])
         payload = {
             'action': 'save_record',
             'name': 'The Rev. Fr. Matthew Mark Updated',
+            'place_of_birth': 'Sagada, Mountain Province',
+            'address': 'Poblacion, Bontoc, Mountain Province',
             'rank': 'priest',
             'status': 'Active',
             'assignment': 'St. Barnabas Parish',
@@ -923,7 +977,10 @@ class RegistrarRecordDetailModernizationTests(TestCase):
         data = r.json()
         self.assertTrue(data.get('ok'))
         self.record.refresh_from_db()
+        self.profile.refresh_from_db()
         self.assertEqual(self.record.name, 'The Rev. Fr. Matthew Mark Updated')
+        self.assertEqual(self.record.address, 'Poblacion, Bontoc, Mountain Province')
+        self.assertEqual(self.profile.place_of_birth, 'Sagada, Mountain Province')
 
 
 class PostulancyRemovalAndReportsTests(TestCase):
@@ -1005,6 +1062,22 @@ class PostulancyRemovalAndReportsTests(TestCase):
         self.assertContains(res, '<h4><i class="fa-solid fa-clipboard-check"></i> Holy Order</h4>')
         self.assertContains(res, 'Letter of Intention (Postulancy)')
         self.assertContains(res, 'Date admitted as Holy Order')
+
+    def test_ordination_requirements_preserves_read_only_req_grid_layout(self):
+        DocumentType.objects.get_or_create(
+            name='Letter of Intention (Postulancy)',
+            defaults={'required_from_rank': 'postulancy', 'uploaded_by': 'clergy', 'is_required': True},
+        )
+        DocumentType.objects.get_or_create(
+            name='Declaration of Conformity',
+            defaults={'required_from_rank': 'deacon', 'uploaded_by': 'clergy', 'is_required': True},
+        )
+        res = self.client.get(reverse('registrar:ordination_requirements'))
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, 'class="req-grid"')
+        self.assertContains(res, 'class="req-card"')
+        self.assertNotContains(res, 'id="reqSectionNav"')
+        self.assertNotContains(res, 'id="reqRankModal"')
 
 
 class GeneratedReportsSearchTests(TestCase):

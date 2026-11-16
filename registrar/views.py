@@ -1136,11 +1136,14 @@ def record_detail(request, record_id):
             profile = getattr(record, 'profile', None)
             if profile:
                 profile_changed = False
+                if 'place_of_birth' in request.POST:
+                    profile.place_of_birth = request.POST.get('place_of_birth', '').strip()[:150]
+                    profile_changed = True
                 if 'baptism_place' in request.POST:
-                    profile.baptism_place = request.POST.get('baptism_place', '').strip()
+                    profile.baptism_place = request.POST.get('baptism_place', '').strip()[:150]
                     profile_changed = True
                 if 'confirmation_place' in request.POST:
-                    profile.confirmation_place = request.POST.get('confirmation_place', '').strip()
+                    profile.confirmation_place = request.POST.get('confirmation_place', '').strip()[:150]
                     profile_changed = True
                 if profile_changed:
                     profile.save()

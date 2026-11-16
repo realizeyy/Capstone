@@ -451,6 +451,22 @@ class EnhancedClergyProfileTests(TestCase):
         self.assertContains(res, 'Holy Trinity Mission')
         self.assertContains(res, 'Ben Skywalker')
         self.assertContains(res, 'B.Th.')
+        self.assertContains(res, 'Extracted ')
+        self.assertContains(res, 'stamp-ring')
+        self.assertNotContains(res, 'id="sheet-1"')
+        self.assertNotContains(res, 'Page 1 of 2')
+
+        # Missionary status renders styled info badge and PDF export compiles cleanly
+        self.record.status = 'Missionary to Other Diocese'
+        self.record.save(update_fields=['status'])
+        missionary_res = self.client.get(reverse('clergy:print_own_record'))
+        self.assertContains(missionary_res, 'badge-info')
+        self.assertContains(missionary_res, 'Missionary')
+
+        pdf_res = self.client.get(reverse('clergy:download_own_record'))
+        self.assertEqual(pdf_res.status_code, 200)
+        self.assertEqual(pdf_res['Content-Type'], 'application/pdf')
+        self.assertTrue(pdf_res.content.startswith(b'%PDF'))
 
     def test_date_attachments_map_and_quick_upload_flow(self):
         from django.core.files.uploadedfile import SimpleUploadedFile
@@ -661,7 +677,7 @@ class EnhancedClergyProfileTests(TestCase):
         self.assertNotContains(clergy_page, 'id="clergySummaryHub"')
         self.assertNotContains(clergy_page, 'id="profileFloatingElevator"')
 
-        # 1b. Clergy requirements renders inline Stage Documents Modal with edge navigation (no stages hub)
+        # 1b. Clergy requirements renders inline Stage Documents Modal & Ember Letters single-year workspace
         req_page = self.client.get(reverse('clergy:my_requirements'))
         self.assertEqual(req_page.status_code, 200)
         self.assertContains(req_page, 'id="documentsSectionNav"')
@@ -675,6 +691,20 @@ class EnhancedClergyProfileTests(TestCase):
         self.assertNotContains(req_page, 'id="stagesSummaryHub"')
         self.assertNotContains(req_page, 'id="stageFloatingElevator"')
         self.assertNotContains(req_page, 'id="docFloatingNavBtn"')
+
+        # Ember Letters single-year inline workspace markers
+        self.assertContains(req_page, 'id="emberSectionNav"')
+        self.assertContains(req_page, 'id="emberNavPills"')
+        self.assertContains(req_page, 'id="emberYearModal"')
+        self.assertContains(req_page, 'id="emberEdgePrevBtn"')
+        self.assertContains(req_page, 'id="emberEdgeNextBtn"')
+        self.assertContains(req_page, 'id="emberYearTrigger"')
+        self.assertContains(req_page, 'id="emberYearListbox"')
+        self.assertContains(req_page, 'id="emberStepperControl"')
+        self.assertContains(req_page, 'id="emberStepIndicator"')
+        self.assertContains(req_page, 'ednpEmberSearch')
+        ember_chunk = req_page.content.decode('utf-8').split('id="emberLettersRoot"', 1)[1].split('id="ember-config-data"', 1)[0]
+        self.assertNotIn('<select', ember_chunk)
 
         # 2. AJAX quick-save from the section modal saves changes and returns JSON
         ajax_save = self.client.post(
@@ -751,6 +781,92 @@ class DashboardSearchAndWelcomeTests(TestCase):
         self.assertFalse(response.context['show_welcome'])
         self.assertNotContains(response, 'id="clergyWelcomeBanner"')
         self.assertContains(response, 'id="dashboardSearchInput"')
+
+
+class SchoolPickerIntegrationTests(TestCase):
+    """Static school catalogs and Educational Background picker wiring on My Profile."""
+
+    def setUp(self):
+        self.record = ClergyRecord.objects.create(
+            id='CLG-EDU-1',
+            name='Fr. School Picker Test',
+            date_of_birth=date(1985, 4, 12),
+            gender='Male',
+            address='Bontoc, Mountain Province',
+            email='edu@gmail.com',
+            baptism_date=date(1985, 5, 1),
+            confirmation_date=date(1997, 5, 1),
+        )
+        self.user = activate(User.objects.create_user('CLG-EDU-1', password='pw12345!x'))
+        self.profile = ClergyProfile.objects.create(
+            user=self.user,
+            record=self.record,
+            place_of_birth='Bantay, Ilocos Sur',
+        )
+        ClergyEducation.objects.create(
+            profile=self.profile,
+            degree='Bachelor of Theology',
+            institution='Saint Andrew Theological Seminary',
+            place='Quezon City',
+            year_graduated=2008,
+        )
+
+    def test_static_school_json_catalogs_are_complete_and_valid(self):
+        import json
+        from pathlib import Path
+
+        data_dir = Path(__file__).resolve().parent / 'static' / 'clergy' / 'data'
+        ched = json.loads((data_dir / 'ched_institutions.json').read_text(encoding='utf-8'))
+        elem = json.loads((data_dir / 'elementary_schools.json').read_text(encoding='utf-8'))
+
+        self.assertEqual(len(ched['regions']), 19)
+        self.assertEqual(len(ched['items']), 2408)
+        self.assertTrue(all(0 <= item['r'] < 19 and item['n'] and len(item['n']) <= 150 for item in ched['items']))
+
+        self.assertEqual(elem['region'], 'Region I')
+        self.assertEqual(elem['province'], 'Ilocos Sur')
+        self.assertEqual(len(elem['municipalities']), 34)
+        self.assertEqual(len(elem['items']), 557)
+        self.assertTrue(all(0 <= item['m'] < 34 and item['n'] and len(item['n']) <= 150 for item in elem['items']))
+
+    def test_my_profile_renders_school_and_place_pickers_for_education(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('clergy:my_profile'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'address-picker.js?v=11')
+        self.assertContains(response, 'data-picker-mode="school"')
+        self.assertContains(response, 'aria-label="Choose school or CHED institution"')
+        self.assertContains(response, 'aria-label="Choose place from province, city, or barangay list"')
+        self.assertContains(response, 'data-ph-picker-target="depStationInput"')
+        self.assertContains(response, 'id="depStationInput"')
+
+    def test_save_education_from_ched_and_elementary_catalogs(self):
+        self.client.force_login(self.user)
+        long_ched = 'NOTRE DAME HOSPITAL AND SIENA COLLEGE OF COTABATO, INC.(formerly: Notre Dame Hospital and School of Midwifery)'
+        post_data = {
+            'name': 'Fr. School Picker Test',
+            'date_of_birth': '1985-04-12',
+            'place_of_birth': 'Bantay, Ilocos Sur',
+            'gender': 'Male',
+            'civil_status': 'Single',
+            'baptism_date': '1985-05-01',
+            'confirmation_date': '1997-05-01',
+            'address': 'Bontoc, Mountain Province',
+            'email': 'edu@gmail.com',
+            'edu_degree': ['Elementary', 'Bachelor of Science'],
+            'edu_institution': ['Burgos Memorial School West', long_ched],
+            'edu_place': ['City Of Vigan (Capital), Ilocos Sur', 'Cotabato City'],
+            'edu_year': ['1997', '2007'],
+        }
+        res = self.client.post(reverse('clergy:my_profile'), post_data, follow=True)
+        self.assertEqual(res.status_code, 200)
+        edus = list(self.profile.educations.order_by('year_graduated'))
+        self.assertEqual(len(edus), 2)
+        self.assertEqual(edus[0].institution, 'Burgos Memorial School West')
+        self.assertEqual(edus[0].place, 'City Of Vigan (Capital), Ilocos Sur')
+        self.assertEqual(edus[1].institution, long_ched)
+        self.assertEqual(edus[1].place, 'Cotabato City')
+
 
 
 

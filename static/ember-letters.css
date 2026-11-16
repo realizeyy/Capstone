@@ -1,5 +1,89 @@
 /* Shared Ember Letters UI (Registrar & Clergy portals) */
 
+:root {
+  --ember-surface: #ffffff;
+  --ember-surface-subtle: #f8fafc;
+  --ember-surface-locked: #fafbfd;
+  --ember-surface-saved: #fbfefc;
+  --ember-surface-error: #fffafa;
+  --ember-surface-disabled: #f1f5f9;
+  --ember-surface-pill: #eef2f6;
+
+  --ember-ink: var(--text, #17212b);
+  --ember-ink-strong: #0f172a;
+  --ember-ink-body: #1e293b;
+  --ember-ink-secondary: #334155;
+  --ember-ink-muted: #475569;
+
+  --ember-border: var(--border, var(--line, #e1e7ee));
+  --ember-border-strong: #cbd5e1;
+  --ember-border-hover: #94a3b8;
+  --ember-border-row: #edf0f3;
+  --ember-border-active-card: #e2e8f0;
+
+  --ember-accent: var(--blue, #2f6fed);
+  --ember-navy: var(--navy, #17324d);
+
+  --ember-info-bg: #eff6ff;
+  --ember-info-fg: #1d4ed8;
+  --ember-info-border: #bfdbfe;
+
+  --ember-success-bg: #ecfdf5;
+  --ember-success-fg: #065f46;
+
+  --ember-danger-bg: #fef2f2;
+  --ember-danger-hover-bg: #fee2e2;
+  --ember-danger-fg: #991b1b;
+  --ember-danger-border: #fecaca;
+  --ember-danger-hover-border: #fca5a5;
+
+  --ember-space-1: 4px;
+  --ember-space-2: 8px;
+  --ember-space-3: 12px;
+  --ember-space-4: 16px;
+  --ember-pad-xs: 2px;
+  --ember-pad-sm: 6px;
+  --ember-pad-pill-y: 5px;
+  --ember-pad-pill-x: 11px;
+  --ember-pad-row-y: 12px;
+  --ember-pad-row-x: 14px;
+  --ember-pad-btn-y: 10px;
+  --ember-pad-btn-x: 15px;
+  --ember-pad-trigger-y: 7px;
+
+  --ember-radius-sm: 6px;
+  --ember-radius-md: 8px;
+  --ember-radius-lg: 10px;
+  --ember-radius-xl: 11px;
+  --ember-radius-card: 15px;
+  --ember-radius-pill: 20px;
+
+  --ember-text-xs: 12px;
+  --ember-text-sm: 14px;
+  --ember-text-md: 14.5px;
+  --ember-text-base: 15px;
+  --ember-text-icon: 16px;
+
+  --ember-focus-ring: 3px;
+  --ember-focus-shadow: rgba(47, 111, 237, 0.14);
+  --ember-popover-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+
+  --ember-control-h: 34px;
+  --ember-trigger-h: 38px;
+  --ember-pill-w: 40px;
+  --ember-pill-h: 32px;
+  --ember-spinner-sz: 13px;
+  --ember-spinner-border: 2px;
+  --ember-picker-w: 175px;
+  --ember-picker-max-w: 220px;
+  --ember-listbox-max-h: 230px;
+  --ember-q-left-basis: 260px;
+  --ember-filename-max-w: 300px;
+
+  --ember-duration-fast: 0.15s;
+  --ember-duration-spin: 0.7s;
+}
+
 .tab-content {
   display: none;
 }
@@ -8,39 +92,48 @@
   display: block;
 }
 
+.page-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ember-space-2);
+  min-width: 0;
+  max-width: 100%;
+}
+
 .page-tabs button {
-  border: 1px solid var(--border, var(--line, #e1e7ee));
-  background: #fff;
-  border-radius: 8px;
-  padding: 10px 15px;
+  border: 1px solid var(--ember-border);
+  background: var(--ember-surface);
+  border-radius: var(--ember-radius-md);
+  padding: var(--ember-pad-btn-y) var(--ember-pad-btn-x);
   cursor: pointer;
-  font-size: 13.5px;
+  font-size: var(--ember-text-base);
   font-weight: 700;
-  color: #334155;
+  color: var(--ember-ink-secondary);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--ember-pad-sm);
+  max-width: 100%;
 }
 
 .page-tabs button.active {
-  background: var(--blue, #2f6fed);
-  color: #fff;
-  border-color: var(--blue, #2f6fed);
+  background: var(--ember-accent);
+  color: var(--ember-surface);
+  border-color: var(--ember-accent);
 }
 
 .page-tabs button .badge {
-  margin-left: 4px;
+  margin-left: var(--ember-space-1);
 }
 
 .ember-summary-card {
-  border-left: 3px solid var(--blue, #2f6fed);
+  border: 1px solid var(--ember-border);
 }
 
 .ember-summary-card .row-actions {
   width: auto;
   flex-direction: row;
   margin-top: auto;
-  padding-top: 6px;
+  padding-top: var(--ember-pad-sm);
 }
 
 .ember-summary-card .row-actions .btn {
@@ -49,38 +142,41 @@
 
 .ember-header-bar {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 12px 15px;
-  background: #f8fafc;
-  border: 1px solid var(--border, var(--line, #e1e7ee));
-  border-radius: 10px;
-  margin-bottom: 16px;
+  gap: var(--ember-space-3);
+  padding: var(--ember-space-3) var(--ember-pad-btn-x);
+  background: var(--ember-surface-subtle);
+  border: 1px solid var(--ember-border);
+  border-radius: var(--ember-radius-lg);
+  margin-bottom: var(--ember-space-4);
 }
 
 .ember-progress-summary {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #17212b;
+  gap: var(--ember-space-2);
+  font-size: var(--ember-text-sm);
+  color: var(--ember-ink);
 }
 
 .ember-progress-summary i {
-  color: var(--blue, #2f6fed);
-  font-size: 16px;
+  color: var(--ember-accent);
+  font-size: var(--ember-text-icon);
 }
 
 .ember-header-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: var(--ember-space-3);
 }
 
 #emberAddYearBtn.hidden,
-#emberAddYearBtn:disabled {
+#emberAddYearBtn:disabled,
+#emberRemoveYearBtn[hidden],
+.ember-head-controls .btn[hidden] {
   display: none !important;
 }
 
@@ -91,88 +187,232 @@
 .ember-queue-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12.5px;
+  gap: var(--ember-pad-sm);
+  font-size: var(--ember-text-sm);
   font-weight: 700;
-  padding: 5px 10px;
-  border-radius: 20px;
-  background: #eaf1ff;
-  color: var(--blue, #2f6fed);
+  padding: var(--ember-pad-pill-y) var(--ember-pad-pill-x);
+  border-radius: var(--ember-radius-pill);
+  background: var(--ember-info-bg);
+  color: var(--ember-info-fg);
+  border: 1px solid var(--ember-info-border);
 }
 
-.ember-years-list {
-  display: flex;
+/* Inline single-year modal adjustments (allow listbox overflow cleanly) */
+#emberYearModal .inline-modal-card {
+  overflow: visible !important;
+}
+
+.ember-modal-head {
+  border-top-left-radius: var(--ember-radius-card);
+  border-top-right-radius: var(--ember-radius-card);
   flex-direction: column;
-  gap: 14px;
+  align-items: stretch;
+  gap: var(--ember-space-3);
 }
 
-.ember-year-block {
-  border: 1px solid var(--border, var(--line, #e1e7ee));
-  border-radius: 11px;
-  background: #fff;
-  overflow: hidden;
-  transition: opacity 0.15s ease, border-color 0.15s ease;
+.ember-modal-foot {
+  border-bottom-left-radius: var(--ember-radius-card);
+  border-bottom-right-radius: var(--ember-radius-card);
 }
 
-.ember-year-block.is-locked-block {
-  background: #fafbfd;
-  opacity: 0.72;
+.ember-head-summary {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
-.ember-year-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 12px 16px;
-  background: #fbfcfe;
-  border-bottom: 1px solid var(--border, var(--line, #e1e7ee));
-}
-
-.ember-year-head-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2, 8px);
-}
-
-.ember-year-title-group {
+.ember-head-title-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--ember-space-2);
   flex-wrap: wrap;
 }
 
-.ember-year-label {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--navy, #17324d);
+.ember-head-title-row h3 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--ember-space-2);
+  color: var(--ember-navy);
 }
 
-.ember-year-select {
-  width: auto;
-  min-width: 145px;
-  padding: 7px 11px;
-  font-size: 13px;
-  font-weight: 600;
-  border: 1px solid var(--border, var(--line, #e1e7ee));
-  border-radius: 7px;
-  background: #fff;
-  color: #17212b;
-}
-
-.ember-year-select:disabled {
-  background: #f1f5f9;
-  color: #475569;
-  cursor: not-allowed;
+.ember-head-title-row h3 i {
+  color: var(--ember-accent);
 }
 
 .ember-year-lock-hint {
-  font-size: 11px;
-  color: var(--muted, #718096);
+  margin: var(--ember-pad-sm) 0 0;
+  font-size: var(--ember-text-sm);
+  line-height: 1.4;
+  color: var(--ember-ink-muted);
+  display: flex;
+  align-items: center;
+  gap: var(--ember-pad-sm);
+}
+
+.ember-year-lock-hint[hidden] {
+  display: none !important;
+}
+
+.ember-head-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--ember-space-2);
+  flex-shrink: 0;
+}
+
+/* Custom Accessible Year Listbox (zero native <select>) */
+.ember-year-picker {
+  position: relative;
+  width: 100%;
+  max-width: var(--ember-picker-max-w);
+}
+
+.ember-year-trigger {
+  width: 100%;
+  min-height: var(--ember-trigger-h);
+  padding: var(--ember-pad-trigger-y) var(--ember-space-3);
+  border: 1px solid var(--ember-border-strong);
+  border-radius: var(--ember-radius-md);
+  background: var(--ember-surface);
+  color: var(--ember-ink-strong);
+  font-size: var(--ember-text-md);
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  justify-content: space-between;
+  gap: var(--ember-space-3);
+  cursor: pointer;
+  transition: border-color var(--ember-duration-fast) ease, box-shadow var(--ember-duration-fast) ease, background-color var(--ember-duration-fast) ease;
+}
+
+.ember-year-trigger:hover:not(:disabled) {
+  border-color: var(--ember-border-hover);
+  background: var(--ember-surface-subtle);
+}
+
+.ember-year-trigger:focus-visible {
+  outline: var(--ember-spinner-border) solid var(--ember-accent);
+  outline-offset: var(--ember-pad-xs);
+}
+
+.ember-year-trigger[aria-expanded="true"] {
+  border-color: var(--ember-accent);
+  box-shadow: 0 0 0 var(--ember-focus-ring) var(--ember-focus-shadow);
+}
+
+.ember-year-trigger:disabled {
+  background: var(--ember-surface-disabled);
+  color: var(--ember-ink-muted);
+  border-color: var(--ember-border-strong);
+  cursor: not-allowed;
+}
+
+.ember-year-trigger-text.is-placeholder {
+  color: var(--ember-ink-muted);
+  font-weight: 500;
+}
+
+.ember-year-trigger-chevron {
+  font-size: var(--ember-text-xs);
+  color: var(--ember-ink-muted);
+  transition: transform var(--ember-duration-fast) ease;
+  flex-shrink: 0;
+}
+
+.ember-year-trigger[aria-expanded="true"] .ember-year-trigger-chevron {
+  transform: rotate(180deg);
+}
+
+.ember-year-listbox {
+  position: absolute;
+  top: calc(100% + var(--ember-space-1));
+  left: 0;
+  right: 0;
+  z-index: 40;
+  margin: 0;
+  padding: var(--ember-space-1);
+  list-style: none;
+  background: var(--ember-surface);
+  border: 1px solid var(--ember-border-strong);
+  border-radius: var(--ember-radius-lg);
+  box-shadow: var(--ember-popover-shadow);
+  max-height: var(--ember-listbox-max-h);
+  overflow-y: auto;
+  outline: none;
+}
+
+.ember-year-listbox[hidden] {
+  display: none !important;
+}
+
+.ember-year-option {
+  padding: var(--ember-space-2) var(--ember-pad-pill-x);
+  border-radius: var(--ember-radius-md);
+  font-size: var(--ember-text-md);
+  font-weight: 600;
+  color: var(--ember-ink-body);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ember-year-option:hover,
+.ember-year-option.is-highlighted {
+  background: var(--ember-info-bg);
+  color: var(--ember-info-fg);
+}
+
+.ember-year-option.is-selected,
+.ember-year-option[aria-selected="true"] {
+  background: var(--ember-accent);
+  color: var(--ember-surface);
+}
+
+.ember-foot-pager {
+  display: flex;
+  gap: var(--ember-space-2);
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ember-foot-secondary {
+  display: flex;
+  gap: var(--ember-space-2);
+  align-items: center;
+}
+
+.doc-nav-pill.is-locked-pill {
+  color: var(--ember-ink-muted);
+}
+
+/* Single visible year card inside #emberYearBody */
+.ember-years-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ember-space-3);
+}
+
+.ember-years-list[hidden] {
+  display: none !important;
+}
+
+.ember-year-block {
+  border: 1px solid var(--ember-border);
+  border-radius: var(--ember-radius-xl);
+  background: var(--ember-surface);
+  overflow: hidden;
+  transition: opacity var(--ember-duration-fast) ease, border-color var(--ember-duration-fast) ease;
+}
+
+.ember-year-block.ember-year-block--active {
+  border-color: var(--ember-border-active-card);
+}
+
+.ember-year-block.is-locked-block {
+  background: var(--ember-surface-locked);
 }
 
 .ember-quarters {
@@ -180,14 +420,15 @@
   flex-direction: column;
 }
 
+/* Mobile-first quarter row layout (320px base) */
 .ember-quarter-row {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 11px 16px;
-  border-bottom: 1px solid #edf0f3;
+  gap: var(--ember-space-3);
+  padding: var(--ember-pad-row-y) var(--ember-pad-row-x);
+  border-bottom: 1px solid var(--ember-border-row);
 }
 
 .ember-quarter-row:last-child {
@@ -195,54 +436,56 @@
 }
 
 .ember-quarter-row.state-locked {
-  background: #fafbfd;
-  color: var(--muted, #718096);
+  background: var(--ember-surface-locked);
+  color: var(--ember-ink-muted);
 }
 
 .ember-quarter-row.state-saved {
-  background: #fbfefc;
+  background: var(--ember-surface-saved);
 }
 
 .ember-quarter-row.state-error {
-  background: #fffafa;
+  background: var(--ember-surface-error);
 }
 
 .ember-q-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--ember-space-3);
   min-width: 0;
-  flex: 1 1 260px;
+  width: 100%;
 }
 
 .ember-q-pill {
   flex: 0 0 auto;
-  width: 34px;
-  height: 28px;
-  border-radius: 6px;
-  background: #eef2f6;
-  color: var(--navy, #17324d);
-  font-size: 12px;
+  min-width: var(--ember-pill-w);
+  height: var(--ember-pill-h);
+  padding: 0 var(--ember-space-2);
+  border-radius: var(--ember-radius-sm);
+  background: var(--ember-surface-pill);
+  color: var(--ember-navy);
+  font-size: var(--ember-text-sm);
   font-weight: 800;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
 }
 
 .state-saved .ember-q-pill {
-  background: #e9f7ef;
-  color: var(--green, #239b62);
+  background: var(--ember-success-bg);
+  color: var(--ember-success-fg);
 }
 
 .state-uploading .ember-q-pill,
 .state-queued .ember-q-pill {
-  background: #eaf1ff;
-  color: var(--blue, #2f6fed);
+  background: var(--ember-info-bg);
+  color: var(--ember-info-fg);
 }
 
 .state-error .ember-q-pill {
-  background: #fff0ef;
-  color: var(--red, #c94b47);
+  background: var(--ember-danger-bg);
+  color: var(--ember-danger-fg);
 }
 
 .ember-q-info {
@@ -253,42 +496,70 @@
 .ember-q-status-line {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--ember-space-2);
   flex-wrap: wrap;
-  font-size: 14px;
+  font-size: var(--ember-text-sm);
 }
 
 .ember-q-filename {
   font-weight: 600;
-  color: #17212b;
+  color: var(--ember-ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 320px;
+  max-width: 100%;
 }
 
 .ember-q-meta {
-  font-size: 12.5px;
-  color: var(--muted, #718096);
-  margin-top: 2px;
+  font-size: var(--ember-text-sm);
+  line-height: 1.4;
+  color: var(--ember-ink-muted);
+  margin-top: var(--ember-space-1);
 }
 
 .ember-q-error {
-  font-size: 12.5px;
-  color: var(--red, #c94b47);
+  font-size: var(--ember-text-sm);
+  line-height: 1.4;
+  color: var(--ember-danger-fg);
   font-weight: 600;
 }
 
 .ember-q-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--ember-pad-sm);
   flex-wrap: wrap;
+  width: 100%;
+  justify-content: flex-start;
   flex-shrink: 0;
 }
 
 .ember-q-actions .btn {
   width: auto;
+  min-height: var(--ember-control-h);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ember-pad-pill-y);
+}
+
+.ember-q-actions .btn.danger,
+.ember-head-controls .btn.danger {
+  background: var(--ember-danger-bg);
+  color: var(--ember-danger-fg);
+  border: 1px solid var(--ember-danger-border);
+}
+
+.ember-q-actions .btn.danger:hover,
+.ember-head-controls .btn.danger:hover {
+  background: var(--ember-danger-hover-bg);
+  border-color: var(--ember-danger-hover-border);
+}
+
+.ember-q-actions .btn:focus-visible,
+.ember-head-controls .btn:focus-visible,
+.ember-header-actions .btn:focus-visible {
+  outline: var(--ember-spinner-border) solid var(--ember-accent);
+  outline-offset: var(--ember-pad-xs);
 }
 
 .ember-file-input {
@@ -296,13 +567,13 @@
 }
 
 .ember-spinner {
-  width: 13px;
-  height: 13px;
-  border: 2px solid #cbd5e1;
-  border-top-color: var(--blue, #2f6fed);
+  width: var(--ember-spinner-sz);
+  height: var(--ember-spinner-sz);
+  border: var(--ember-spinner-border) solid var(--ember-border-strong);
+  border-top-color: var(--ember-accent);
   border-radius: 50%;
   display: inline-block;
-  animation: ember-spin 0.7s linear infinite;
+  animation: ember-spin var(--ember-duration-spin) linear infinite;
 }
 
 @keyframes ember-spin {
@@ -311,20 +582,40 @@
   }
 }
 
-@media (max-width: 650px) {
-  .ember-quarter-row {
-    flex-direction: column;
+/* Wider viewports layered on with min-width */
+@media (min-width: 650px) {
+  .ember-header-bar {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .ember-modal-head {
+    flex-direction: row;
     align-items: flex-start;
+    justify-content: space-between;
   }
+
+  .ember-year-picker {
+    width: var(--ember-picker-w);
+  }
+
+  .ember-quarter-row {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--ember-pad-row-y) var(--ember-space-4);
+  }
+
   .ember-q-left {
-    flex: 1 1 auto;
-    width: 100%;
+    flex: 1 1 var(--ember-q-left-basis);
+    width: auto;
   }
+
   .ember-q-filename {
-    max-width: 200px;
+    max-width: var(--ember-filename-max-w);
   }
+
   .ember-q-actions {
-    width: 100%;
-    justify-content: flex-start;
+    width: auto;
+    justify-content: flex-end;
   }
 }

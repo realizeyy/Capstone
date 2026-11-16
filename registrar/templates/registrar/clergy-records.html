@@ -61,7 +61,7 @@
       </div>
       {% if showing_archived %}
         <div class="notice" id="noticeArchivedRecordsRegistrar">
-          <div class="notice-content">Archived records are retired clergy filed away. They are never deleted, keep their documents and portal account, still appear in reports, and can be restored at any time.</div>
+          <div class="notice-content">Archived retired clergy stay in reports, are never deleted, and can be restored anytime.</div>
           <button type="button" class="notice-dismiss" data-dismiss-notice="noticeArchivedRecordsRegistrar" aria-label="Dismiss notice" title="Dismiss">
             <i class="fa-solid fa-xmark"></i>
           </button>
@@ -246,7 +246,7 @@
             <label for="newContractEnd">Contract End</label><input id="newContractEnd" name="contract_end" type="date" value="{{ record_modal_draft.contract_end|default:'' }}">
           </div>
         </div>
-        <p class="muted form-note">A portal username and a random temporary password are made for this person automatically and opened as a printable slip.</p>
+        <p class="muted form-note">Creates a portal username and one-time temporary password on a printable slip.</p>
         <div class="modal-actions">
           <button type="button"
                   class="btn secondary"
@@ -270,10 +270,10 @@
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
-      <form method="post" id="linkAccountForm" class="slip-form" data-confirm="Create a portal account and generate login slips? A temporary password will be printed.">
+      <form method="post" id="linkAccountForm" class="slip-form" data-confirm="Create a portal account and open the printable password slip?">
         {% csrf_token %}
         <input type="hidden" name="format" value="html">
-        <p class="muted no-margin">The username is the record ID, and a random temporary password is generated. Both open as a printable slip (the password is shown only once).</p>
+        <p class="muted no-margin">Uses the record ID as username and opens a printable slip with a one-time temporary password.</p>
         <div class="modal-actions">
           <button type="button"
                   class="btn secondary"
@@ -297,11 +297,11 @@
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
-      <form method="post" id="resetAccountForm" class="slip-form" data-confirm="Reset this account after a lost phone? The old password stops working, all devices are signed out, and a new temporary password slip will open.">
+      <form method="post" id="resetAccountForm" class="slip-form" data-confirm="Reset this account? Signs out all devices, clears their phone, and prints a new password slip.">
         {% csrf_token %}
         <input type="hidden" name="kind" value="lost_phone">
         <input type="hidden" name="format" value="html">
-        <div class="alert">Only do this after confirming the owner's identity in person. Their number is forgotten, every device and open session is signed out, and a <b>new temporary password</b> is printed; the old password stops working. They then register a new number when they sign in.</div>
+        <div class="alert">Confirm identity in person first. Signs out all devices, clears their number, and prints a <b>new temporary password</b>. They register a phone at sign-in.</div>
         <div class="field">
           <label>Note (optional)</label><input name="note" maxlength="255" placeholder="e.g. phone lost, ID checked">
         </div>

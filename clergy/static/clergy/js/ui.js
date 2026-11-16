@@ -306,17 +306,18 @@ if(profilePicInput){
    display: inline-flex;
    align-items: center;
    gap: 4px;
-   font-size: 11px;
+   font-size: 14px;
    font-weight: 600;
    color: #15803d;
    background: #dcfce7;
-   padding: 2px 7px;
+   padding: 3px 9px;
    border-radius: 9999px;
   }
   .floating-save-bar {
    position: fixed;
    bottom: 20px;
    right: 24px;
+   max-width: calc(100vw - 32px);
    z-index: 90;
    background: #0f172a;
    color: #ffffff;
@@ -325,8 +326,9 @@ if(profilePicInput){
    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.35);
    display: flex;
    align-items: center;
+   flex-wrap: wrap;
    gap: 14px;
-   font-size: 13px;
+   font-size: 14px;
    transform: translateY(140%);
    opacity: 0;
    pointer-events: none;
@@ -352,7 +354,7 @@ if(profilePicInput){
   }
   .field-error-msg {
    display: block;
-   font-size: 0.75rem;
+   font-size: 0.875rem;
    color: var(--red, #d9534f);
    margin-top: 0.25rem;
    font-weight: 500;
@@ -387,7 +389,7 @@ if(profilePicInput){
     <div class="doc-preview-head">
      <div>
       <h3 id="docPreviewTitle"><i class="fa-solid fa-file-eye" style="color:#2f6fed;"></i> <span>Document Preview</span></h3>
-      <span class="muted" style="font-size:11px;">Review the attached document below, then confirm or return to your form.</span>
+      <span class="muted" style="font-size:14px;">Review the attached document below, then confirm or return to your form.</span>
      </div>
      <button type="button" class="close" id="docPreviewCloseTop" aria-label="Close preview">
       <i class="fa-solid fa-xmark"></i>
@@ -459,7 +461,7 @@ if(profilePicInput){
   const frame=document.getElementById('docPreviewFrame');
   if(frame)frame.src='about:blank';
   if(activePreviewTrigger){
-   const field=activePreviewTrigger.closest('.field, .edit-field, .doc-card, .doc-row, .doc-bar');
+   const field=activePreviewTrigger.closest('.field, .edit-field, .doc-card, .doc-row, .doc-bar, .ember-quarter-row');
    if(field){
     field.scrollIntoView({behavior:'smooth',block:'center'});
    }
@@ -506,19 +508,19 @@ if(profilePicInput){
  });
 
  document.addEventListener('click',function(e){
-  // 1. In-app document view links (including .doc-table-link, .att-btn.view, and direct /documents/.../view/ links)
-  const viewLink=e.target.closest('a.att-btn.view, a.doc-table-link, .doc-card .row-actions a[href*="/documents/"][href$="/view/"], a[href*="/documents/"][href$="/view/"]');
+  // 1. In-app document view links (including .doc-table-link, .att-btn.view, Ember Letters view links, and direct /view/ links)
+  const viewLink=e.target.closest('a.att-btn.view, a.doc-table-link, a.ember-view-link, .doc-card .row-actions a[href*="/documents/"][href$="/view/"], a[href*="/documents/"][href$="/view/"], a[href*="/ember-letters/"][href$="/view/"]');
   if(viewLink&&!e.metaKey&&!e.ctrlKey&&!e.shiftKey&&!e.altKey){
    const href=viewLink.getAttribute('href');
    if(href&&href!=='#'&&!href.startsWith('javascript:')){
     e.preventDefault();
     e.stopImmediatePropagation();
-    const cardOrBar=viewLink.closest('[data-doc-title], .doc-row, .doc-bar, .doc-card, .date-att-bar');
+    const cardOrBar=viewLink.closest('[data-doc-title], .doc-row, .doc-bar, .doc-card, .date-att-bar, .ember-quarter-row');
     const title=
      viewLink.dataset.docName||
      (cardOrBar&&cardOrBar.dataset.docTitle)||
      viewLink.querySelector('span')?.textContent||
-     (cardOrBar&&cardOrBar.querySelector('.doc-table-link span, .col-name span, .doc-card-head b')?.textContent)||
+     (cardOrBar&&cardOrBar.querySelector('.doc-table-link span, .col-name span, .doc-card-head b, .ember-q-filename')?.textContent)||
      'Document Preview';
     openDocPreview(href, title, viewLink);
     return;

@@ -168,7 +168,7 @@ button.is-busy::after, .btn.is-busy::after, [aria-busy="true"]::after {
 @keyframes sk-bar{0%{transform:translateX(-100%)}100%{transform:translateX(260%)}}
 
 /* Spinner + label at the top of the navigation skeleton */
-.sk-status{display:flex;align-items:center;gap:10px;margin:0 0 14px;color:#718096;font-size:13px;font-weight:600}
+.sk-status{display:flex;align-items:center;gap:10px;margin:0 0 14px;color:#718096;font-size:14px;font-weight:600}
 .sk-spinner{width:20px;height:20px;border:3px solid #dbe4ef;border-top-color:#2f6fed;border-radius:50%;animation:sk-spin .75s linear infinite;flex-shrink:0}
 
 /* Toast levels (success / error / working) */
@@ -404,7 +404,7 @@ body.modal-open {
   gap: 10px !important;
   padding: 12px 14px !important;
   border-radius: 10px !important;
-  font-size: 13px !important;
+  font-size: 14px !important;
   line-height: 1.45 !important;
   margin-bottom: 20px !important;
 }

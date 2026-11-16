@@ -5,13 +5,13 @@
 {% block content %}
   <section class="page active">
     {% if encryption_on %}
-      <div class="panel"><span class="muted"><i class="fa-solid fa-lock"></i> Stored documents and government ID numbers are encrypted, and so are these backups. Restoring one needs the same DATA_ENCRYPTION_KEY the site uses, so keep a copy of that key somewhere safe that is not this server.</span></div>
+      <div class="panel"><span class="muted"><i class="fa-solid fa-lock"></i> Documents, IDs, and backups are encrypted. Keep a copy of DATA_ENCRYPTION_KEY off this server to restore.</span></div>
     {% endif %}
     <div class="panel{% if encryption_on %} stacked{% endif %}">
       <div class="panel-head">
         <div>
           <h3><i class="fa-solid fa-database"></i> Database Backup</h3>
-          <span class="muted">A fresh dump of clergy records, profiles and accounts (always current, stays fast no matter how many records there are).</span>
+          <span class="muted">Live export of clergy records, profiles, and accounts.</span>
         </div>
       </div>
       <form method="post"
@@ -25,13 +25,13 @@
                required>
         <button class="btn" type="submit"><i class="fa-solid fa-download"></i> Download Database Backup</button>
       </form>
-      <p class="muted form-note">It holds every clergy member's personal details and ID numbers, so it asks for your password, and each download is recorded under Account Security.</p>
+      <p class="muted form-note">Includes personal IDs: password required, logged in Account Security.</p>
     </div>
     <div class="panel stacked">
       <div class="panel-head">
         <div>
           <h3><i class="fa-solid fa-box-archive"></i> Documents Archive</h3>
-          <span class="muted">Every uploaded clergy document in one .zip, made as it downloads. Nothing is kept on the server, so keep the file somewhere safe, such as an external drive or the diocese's Google Drive.</span>
+          <span class="muted">One .zip of all uploaded documents. Store it off-server (external drive or diocesan Google Drive).</span>
         </div>
       </div>
       <form method="post"
@@ -45,14 +45,14 @@
                required>
         <button class="btn" type="submit"><i class="fa-solid fa-file-zipper"></i> Download Documents Archive</button>
       </form>
-      <p class="muted form-note">It holds every clergy member's documents, so it asks for your password, and each download is recorded under Account Security. With many documents it can take a few minutes.</p>
+      <p class="muted form-note">Password required; logged in Account Security. Large archives may take a few minutes.</p>
     </div>
     {% if saved_archives %}
       <div class="panel stacked">
         <div class="panel-head">
           <div>
             <h3><i class="fa-solid fa-clock-rotate-left"></i> Archives Saved on the Server</h3>
-            <span class="muted">Made before the archive became a straight download. Each one is a full copy of every document as it was then, so download any you still need, then delete it to free the storage.</span>
+            <span class="muted">Legacy server copies. Download what you need, then delete to free space.</span>
           </div>
         </div>
         <table>

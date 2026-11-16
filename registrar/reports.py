@@ -1,8 +1,9 @@
 """Report data-building and PDF rendering for the registrar's Generate Report page.
 
-Every report is normalized into the same shape — a title plus a list of
-sections, each with its own columns/rows — so the HTML view and the PDF
-export can walk the same structure instead of having per-report templates.
+Every report is normalized into the same shape (a title plus a list of
+sections, each with its own columns/rows, plus summary KPIs) so the HTML
+preview and the PDF export walk the same structure instead of maintaining
+separate per-report templates.
 """
 
 from datetime import date
@@ -19,6 +20,15 @@ REPORT_TYPES = {
     'per_deanery': 'Per-Deanery Report',
     'ordination_documents': 'Ordination Documents Report (Registrar)',
 }
+
+REPORT_SUBTITLES = {
+    'clerical_directory': 'Comprehensive Diocesan Clergy Directory & Service Dossier',
+    'status_report': 'Ministry Status, Leave Tracking & Active Station Roster',
+    'per_deanery': 'Clergy Distribution Grouped by Ecclesiastical Deanery',
+    'ordination_documents': 'Canonical Ordination & Registry Document Filing Audit',
+}
+
+UNASSIGNED_DEANERY_LABEL = 'Unassigned / Not Matched to a Parish'
 
 
 def _assignment_to_deanery_map():
@@ -45,8 +55,15 @@ def _build_clerical_directory():
     entries = []
     columns = ['No.', 'Name', 'Deployment / Assignment', 'Date of Ordination', 'Status']
     rows = []
+    rank_counts = {'bishop': 0, 'priest': 0, 'deacon': 0}
+    active_count = 0
 
     for i, r in enumerate(records, start=1):
+        if r.rank in rank_counts:
+            rank_counts[r.rank] += 1
+        if r.status == 'Active':
+            active_count += 1
+
         profile = getattr(r, 'profile', None)
 
         # DOB: Date of birth + place
@@ -57,7 +74,7 @@ def _build_clerical_directory():
             dob_parts.append(profile.place_of_birth.strip())
         dob_display = ' — '.join(dob_parts) if dob_parts else '—'
 
-        # Grad: Grad-year graduated + place
+        # Grad: year graduated + place + degree
         grad_items = []
         if profile:
             edus = sorted(profile.educations.all(), key=lambda e: (e.year_graduated or 0, e.id or 0))
@@ -77,7 +94,7 @@ def _build_clerical_directory():
             grad_items.append(profile.education.strip())
         grad_display = '; '.join(grad_items) if grad_items else '—'
 
-        # OD: ordination to the diaconate : date and place
+        # OD: ordination to the diaconate (date and place)
         od_parts = []
         if r.diaconate_date:
             od_parts.append(r.diaconate_date.strftime('%b %d, %Y'))
@@ -85,7 +102,7 @@ def _build_clerical_directory():
             od_parts.append(r.diaconate_place.strip())
         od_display = ' — '.join(od_parts) if od_parts else '—'
 
-        # OP: ordination to the priesthood: date and place
+        # OP: ordination to the priesthood (date and place)
         op_parts = []
         if r.ordination_date:
             op_parts.append(r.ordination_date.strftime('%b %d, %Y'))
@@ -93,7 +110,7 @@ def _build_clerical_directory():
             op_parts.append(r.ordination_place.strip())
         op_display = ' — '.join(op_parts) if op_parts else '—'
 
-        # Dep: deployments; date and place of each deployment, latest to oldest
+        # Dep: deployments (date and place of each deployment, latest to oldest)
         deployments = []
         for dep in r.deployments.all():
             summary = dep.summary_display
@@ -102,7 +119,7 @@ def _build_clerical_directory():
         if not deployments and r.assignment:
             deployments.append(f"Current: {r.assignment}")
 
-        # S: Spouse, name and birth date
+        # S: Spouse name and birth date
         spouse_parts = []
         if profile and profile.spouse_name:
             spouse_parts.append(profile.spouse_name.strip())
@@ -114,7 +131,7 @@ def _build_clerical_directory():
                 spouse_parts.append(bdate_str)
         spouse_display = spouse_parts[0] if spouse_parts else '—'
 
-        # M: Place of marriage: date and place
+        # M: Date and place of marriage
         m_parts = []
         if profile and profile.marriage_date:
             m_parts.append(profile.marriage_date.strftime('%b %d, %Y'))
@@ -122,7 +139,7 @@ def _build_clerical_directory():
             m_parts.append(profile.marriage_place.strip())
         marriage_display = ' — '.join(m_parts) if m_parts else '—'
 
-        # C: Child/childrens: names ,and date of birth
+        # C: Children names and birth dates
         children_items = []
         if profile:
             kids = sorted(profile.children.all(), key=lambda c: (c.birth_date or date.min, c.id or 0))
@@ -135,11 +152,19 @@ def _build_clerical_directory():
             children_items.append(profile.children_names.strip())
         children_display = '; '.join(children_items) if children_items else '—'
 
+        has_family = (
+            spouse_display != '—'
+            or marriage_display != '—'
+            or children_display != '—'
+        )
+
         entries.append({
             'id': r.id,
             'name': r.name,
             'rank_display': r.get_rank_display(),
             'status': r.status,
+            'assignment': r.assignment or '',
+            'deanery': r.deanery.name if r.deanery else '',
             'dob': dob_display,
             'grad': grad_display,
             'od': od_display,
@@ -148,61 +173,184 @@ def _build_clerical_directory():
             'spouse': spouse_display,
             'marriage': marriage_display,
             'children': children_display,
+            'has_dob': bool(dob_parts),
+            'has_grad': bool(grad_items),
+            'has_od': bool(od_parts),
+            'has_op': bool(op_parts),
+            'has_spouse': bool(spouse_parts),
+            'has_marriage': bool(m_parts),
+            'has_children': bool(children_items),
+            'has_family': has_family,
         })
 
         name_cell = mark_safe(f'<b>{escape(r.name)}</b><span class="record-id">{escape(r.id)}</span>')
         rows.append([str(i), name_cell, r.assignment or '—', _fmt_date(r.ordination_date), r.status])
 
+    summary = [
+        {'label': 'Total Clergy', 'value': str(len(entries)), 'lead': True},
+        {'label': 'Bishops', 'value': str(rank_counts['bishop'])},
+        {'label': 'Priests', 'value': str(rank_counts['priest'])},
+        {'label': 'Deacons', 'value': str(rank_counts['deacon'])},
+        {'label': 'Active Ministry', 'value': str(active_count)},
+    ]
+
     return {
         'sections': [{'heading': None, 'columns': columns, 'rows': rows}],
         'entries': entries,
+        'summary': summary,
     }
 
 
 def _build_status_report():
-    records = ClergyRecord.objects.exclude(rank='postulancy').order_by('name')
+    records = list(ClergyRecord.objects.exclude(rank='postulancy').select_related('deanery').order_by('name'))
     columns = ['Name', 'Status', 'Leave Reason', 'Current Deployment']
     rows = []
+    rich_rows = []
+    counts = {'Active': 0, 'On Leave': 0, 'Missionary to Other Diocese': 0, 'Retired': 0}
+
     for r in records:
+        if r.status in counts:
+            counts[r.status] += 1
         reason = r.leave_reason if r.status == 'On Leave' else ''
         rows.append([r.name, r.status, reason or '—', r.assignment or '—'])
-    return [{'heading': None, 'columns': columns, 'rows': rows}]
+        rich_rows.append({
+            'id': r.id,
+            'name': r.name,
+            'rank': r.get_rank_display(),
+            'status': r.status,
+            'leave_reason': reason,
+            'assignment': r.assignment or '',
+            'deanery': r.deanery.name if r.deanery else '',
+        })
+
+    summary = [
+        {'label': 'Total Clergy', 'value': str(len(records)), 'lead': True},
+        {'label': 'Active', 'value': str(counts['Active'])},
+        {'label': 'On Leave', 'value': str(counts['On Leave'])},
+        {'label': 'Missionary', 'value': str(counts['Missionary to Other Diocese'])},
+        {'label': 'Retired', 'value': str(counts['Retired'])},
+    ]
+
+    return {
+        'sections': [{'heading': None, 'columns': columns, 'rows': rows, 'rich_rows': rich_rows}],
+        'summary': summary,
+    }
 
 
 def _build_per_deanery_report():
     mapping = _assignment_to_deanery_map()
-    records = ClergyRecord.objects.exclude(rank='postulancy').select_related('deanery').order_by('name')
+    records = list(ClergyRecord.objects.exclude(rank='postulancy').select_related('deanery').order_by('name'))
     groups = {}
+    unassigned_count = 0
     for r in records:
         deanery = (
             r.deanery.name if r.deanery
-            else mapping.get(r.assignment, 'Unassigned / Not Matched to a Parish')
+            else mapping.get(r.assignment, UNASSIGNED_DEANERY_LABEL)
         )
+        if deanery == UNASSIGNED_DEANERY_LABEL:
+            unassigned_count += 1
         groups.setdefault(deanery, []).append(r)
 
     columns = ['Name', 'Rank', 'Current Deployment', 'Status']
     sections = []
     for deanery in sorted(groups):
-        rows = [[r.name, r.get_rank_display(), r.assignment or '—', r.status] for r in groups[deanery]]
-        sections.append({'heading': deanery, 'columns': columns, 'rows': rows})
-    return sections
+        group_records = groups[deanery]
+        rows = [[r.name, r.get_rank_display(), r.assignment or '—', r.status] for r in group_records]
+        rich_rows = [
+            {
+                'id': r.id,
+                'name': r.name,
+                'rank': r.get_rank_display(),
+                'assignment': r.assignment or '',
+                'status': r.status,
+            }
+            for r in group_records
+        ]
+        sections.append({
+            'heading': deanery,
+            'count': len(rows),
+            'columns': columns,
+            'rows': rows,
+            'rich_rows': rich_rows,
+        })
+
+    assigned_deaneries = len([d for d in groups if d != UNASSIGNED_DEANERY_LABEL])
+    summary = [
+        {'label': 'Total Clergy', 'value': str(len(records)), 'lead': True},
+        {'label': 'Deaneries Represented', 'value': str(assigned_deaneries)},
+        {'label': 'Assigned Clergy', 'value': str(len(records) - unassigned_count)},
+        {'label': 'Unassigned', 'value': str(unassigned_count)},
+    ]
+
+    return {
+        'sections': sections,
+        'summary': summary,
+    }
 
 
 def _build_ordination_documents_report():
     required_types = list(DocumentType.objects.filter(is_required=True).exclude(required_from_rank='postulancy'))
-    records = ClergyRecord.objects.exclude(rank='postulancy').prefetch_related('documents__document_type').order_by('name')
+    records = list(
+        ClergyRecord.objects.exclude(rank='postulancy')
+        .prefetch_related('documents__document_type')
+        .order_by('name')
+    )
     columns = ['Name', 'Rank', 'Current Deployment', 'Status', 'Documents Submitted', 'Documents Missing']
     rows = []
+    rich_rows = []
+
+    complete_count = 0
+    partial_count = 0
+    zero_count = 0
+    total_submitted_all = 0
+    total_required_all = 0
+
     for r in records:
         checklist = r.document_checklist(required_types=required_types)
         checklist = [c for c in checklist if getattr(c.get('document_type'), 'required_from_rank', '') != 'postulancy']
         missing = [c['document_type'].name for c in checklist if c['status'] in ('Missing', 'Expired')]
-        submitted_count = len(checklist) - len(missing)
+        total_items = len(checklist)
+        submitted_count = total_items - len(missing)
+        pct = round((submitted_count / total_items) * 100) if total_items else 100
+
+        total_submitted_all += submitted_count
+        total_required_all += total_items
+        if total_items == 0 or submitted_count == total_items:
+            complete_count += 1
+        elif submitted_count == 0:
+            zero_count += 1
+        else:
+            partial_count += 1
+
         rows.append([
             r.name, r.get_rank_display(), r.assignment or '—', r.status,
-            f"{submitted_count}/{len(checklist)}", ', '.join(missing) or '—',
+            f"{submitted_count}/{total_items}", ', '.join(missing) or '—',
         ])
-    return [{'heading': None, 'columns': columns, 'rows': rows}]
+        rich_rows.append({
+            'id': r.id,
+            'name': r.name,
+            'rank': r.get_rank_display(),
+            'assignment': r.assignment or '',
+            'status': r.status,
+            'submitted': submitted_count,
+            'total': total_items,
+            'percent': pct,
+            'missing_items': missing,
+        })
+
+    overall_pct = round((total_submitted_all / total_required_all) * 100) if total_required_all else 0
+    summary = [
+        {'label': 'Clergy Evaluated', 'value': str(len(records)), 'lead': True},
+        {'label': 'Complete (100%)', 'value': str(complete_count)},
+        {'label': 'Partial Filings', 'value': str(partial_count)},
+        {'label': 'No Filings (0%)', 'value': str(zero_count)},
+        {'label': 'Overall Compliance', 'value': f"{overall_pct}%"},
+    ]
+
+    return {
+        'sections': [{'heading': None, 'columns': columns, 'rows': rows, 'rich_rows': rich_rows}],
+        'summary': summary,
+    }
 
 
 _BUILDERS = {
@@ -220,16 +368,20 @@ def build_report(report_type, generated_by=None):
     if isinstance(result, dict):
         sections = result.get('sections', [])
         entries = result.get('entries', [])
+        summary = result.get('summary', [])
     else:
         sections = result
         entries = []
+        summary = []
     return {
         'type': report_type,
         'title': REPORT_TYPES[report_type],
+        'subtitle': REPORT_SUBTITLES.get(report_type, ''),
         'generated_at': timezone.now(),
         'generated_by': (generated_by.get_full_name() or generated_by.username) if generated_by else 'Registrar',
         'sections': sections,
         'entries': entries,
+        'summary': summary,
     }
 
 
@@ -237,11 +389,8 @@ def render_pdf(report):
     """Renders the same registrar/report_pdf.html template used for the
     on-screen preview (see views.preview_generated_report) into a real PDF,
     so the letterhead design is written once in ordinary HTML/CSS instead of
-    being built twice — once by hand in a template, once again in a PDF
-    library's own drawing API. WeasyPrint needs the GTK/Pango native
-    libraries installed on the machine running this (see its install docs);
-    that's a one-time environment setup step, not something pip alone
-    provides on Windows."""
+    being built twice (once in a template, once in a PDF drawing API).
+    WeasyPrint needs the GTK/Pango native libraries installed on the host."""
     from django.template.loader import render_to_string
 
     from ednp.pdf import html_to_pdf

@@ -4,7 +4,7 @@
 {% block page_name_heading %}My Requirements &amp; Attachments{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'ember-letters.css' %}?v=8">
+<link rel="stylesheet" href="{% static 'ember-letters.css' %}?v=11">
 <style>
 .hub-hidden-sections {
   display: none !important;
@@ -62,7 +62,7 @@ body.modal-open {
     <div id="tabChecklist" class="tab-content">
       <div class="doc-info-strip">
         <i class="fa-solid fa-circle-info"></i>
-        <span>Documents attached to your clergy record. Maximum 5 MB for PDF files, 10 MB for images (auto-compressed).</span>
+        <span>Documents attached to your clergy record. Max 5 MB PDF, 10 MB image (auto-compressed).</span>
       </div>
 
       <!-- Sticky Quick Navigation Bar for Documents -->
@@ -140,8 +140,8 @@ body.modal-open {
                   <i class="fa-solid fa-folder-open" style="color:var(--blue);"></i>
                   <span>Stage Requirements</span>
                 </h3>
-                <span class="badge blue" id="stageDocumentsStepBadge" style="font-size:13px;padding:3px 8px;">Stage 1</span>
-                <span class="badge pending-b" id="stageDocumentsProgressBadge" style="font-size:13px;padding:3px 8px;">0 uploaded</span>
+                <span class="badge blue" id="stageDocumentsStepBadge" style="font-size:14px;padding:3px 9px;">Stage 1</span>
+                <span class="badge pending-b" id="stageDocumentsProgressBadge" style="font-size:14px;padding:3px 9px;">0 uploaded</span>
               </div>
               <p class="muted" id="stageDocumentsModalDesc" style="margin:4px 0 0;font-size:14px;">Requirements and attachments for this formation stage</p>
             </div>
@@ -222,7 +222,7 @@ body.modal-open {
                         <span class="doc-table-name">{{ item.document_type.name }}</span>
                       {% endif %}
                       {% if item.document_type.uploaded_by == 'registrar' %}
-                        <span class="badge retired-b" style="font-size:12.5px; padding:1px 6px; margin-left:6px;" title="Registrar filing (view-only)">Diocesan</span>
+                        <span class="badge retired-b" style="font-size:14px; padding:2px 8px; margin-left:6px;" title="Registrar filing (view-only)">Diocesan</span>
                       {% endif %}
                     </td>
                     <td class="col-date">
@@ -273,11 +273,11 @@ body.modal-open {
                         {% endif %}
                       {% else %}
                         {% if not item.document_type.is_noted_only and item.document_type.uploaded_by == 'clergy' %}
-                          <button type="button" class="btn small" style="padding: 3px 10px; font-size: 13px; height: 28px;" data-open-upload="{{ item.document_type.id }}" data-doc-title="{{ item.document_type.name }}" data-is-replace="0">
+                          <button type="button" class="btn small" style="padding: 5px 12px; min-height: 32px;" data-open-upload="{{ item.document_type.id }}" data-doc-title="{{ item.document_type.name }}" data-is-replace="0">
                             <i class="fa-solid fa-cloud-arrow-up"></i> Upload
                           </button>
                         {% else %}
-                          <span class="text-muted" style="font-size: 13px;">View only</span>
+                          <span class="text-muted" style="font-size: 14px;">View only</span>
                         {% endif %}
                       {% endif %}
                     </td>
@@ -360,7 +360,7 @@ body.modal-open {
                           <i class="fa-solid fa-rotate"></i>
                         </button>
                       {% else %}
-                        <button type="button" class="btn small" style="padding: 3px 10px; font-size: 13px; height: 28px;" data-open-upload="{{ item.document_type.id }}" data-doc-title="{{ item.document_type.name }}" data-is-replace="0">
+                        <button type="button" class="btn small" style="padding: 5px 12px; min-height: 32px;" data-open-upload="{{ item.document_type.id }}" data-doc-title="{{ item.document_type.name }}" data-is-replace="0">
                           <i class="fa-solid fa-cloud-arrow-up"></i> Upload
                         </button>
                       {% endif %}
@@ -425,7 +425,7 @@ body.modal-open {
                     </span>
                   </td>
                   <td class="col-actions">
-                    <button type="button" class="btn small" style="padding: 3px 10px; font-size: 13px; height: 28px;" data-open-tab="ember">
+                    <button type="button" class="btn small" style="padding: 5px 12px; min-height: 32px;" data-open-tab="ember">
                       <i class="fa-solid fa-folder-open"></i> Open Tab
                     </button>
                   </td>
@@ -445,7 +445,7 @@ body.modal-open {
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'ember-letters.js' %}?v=9"></script>
+<script src="{% static 'ember-letters.js' %}?v=11"></script>
 <script>
 (function() {
   const container = document.getElementById('tabChecklist') || document.getElementById('tabDocuments');
@@ -832,20 +832,9 @@ body.modal-open {
       }
     });
 
-    // Also filter Ember Letters tab container when query is entered
-    const emberContainer = document.getElementById('emberYearsContainer');
-    if (emberContainer) {
-      const emberCards = emberContainer.querySelectorAll('.ember-year-card, .ember-quarter-item, tr');
-      if (emberCards.length > 0) {
-        emberCards.forEach(function(el) {
-          if (!query) {
-            el.style.display = '';
-          } else {
-            const match = el.textContent.toLowerCase().includes(query);
-            el.style.display = match ? '' : 'none';
-          }
-        });
-      }
+    // Sync Ember Letters workspace search when shared page search input changes
+    if (typeof window.ednpEmberSearch === 'function') {
+      window.ednpEmberSearch(searchQuery, { autoJump: options.autoJump !== false });
     }
 
     if (query.length > 0) {
@@ -944,6 +933,9 @@ body.modal-open {
     const stepperCtrl = document.getElementById('stageStepperControl');
     if (stepperCtrl) {
       stepperCtrl.style.display = isChecklistActive ? '' : 'none';
+    }
+    if (!isChecklistActive && typeof window.ednpRefreshEmberNav === 'function') {
+      setTimeout(window.ednpRefreshEmberNav, 30);
     }
   }
 
@@ -1185,7 +1177,7 @@ body.modal-open {
         <div class="edit-field full">
           <label>File (PDF, PNG, JPG) <span class="req-mark">*</span></label>
           <input type="file" name="file" required accept=".pdf,.jpg,.jpeg,.png">
-          <small class="muted" style="font-size:13px;margin-top:4px;display:block;">Maximum 5 MB for PDF, 10 MB for images.</small>
+          <small class="muted" style="font-size:14px;margin-top:4px;display:block;">Maximum 5 MB for PDF, 10 MB for images.</small>
         </div>
         <div class="edit-field full">
           <label>Notes (optional)</label>

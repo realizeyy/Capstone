@@ -9,116 +9,148 @@
     {% if report.type == 'clerical_directory' %}
     <style>
       @page {
-        size: letter portrait;
-        margin: 10mm 12mm 12mm 12mm;
+        size: A4 portrait;
+        margin: 16mm 12mm 15mm 12mm;
+        @top-left {
+          content: "EPISCOPAL DIOCESE OF NORTHERN PHILIPPINES \2022  CLERICAL DIRECTORY";
+          font-size: 7.5pt;
+          font-weight: 700;
+          letter-spacing: 0.04em;
+          font-family: var(--font-family-sans);
+          color: #64748b; /* ds-allow-hardcode */
+          border-bottom: 0.75pt solid #cbd5e1; /* ds-allow-hardcode */
+          padding-bottom: 3pt;
+          margin-bottom: 4pt;
+        }
+        @top-center {
+          content: "";
+          border-bottom: 0.75pt solid #cbd5e1; /* ds-allow-hardcode */
+          padding-bottom: 3pt;
+          margin-bottom: 4pt;
+        }
+        @top-right {
+          content: "DIR-REG \2022  OFFICIAL REGISTRY";
+          font-size: 7.5pt;
+          font-weight: 600;
+          letter-spacing: 0.04em;
+          font-family: var(--font-family-sans);
+          color: #64748b; /* ds-allow-hardcode */
+          border-bottom: 0.75pt solid #cbd5e1; /* ds-allow-hardcode */
+          padding-bottom: 3pt;
+          margin-bottom: 4pt;
+        }
         @bottom-left {
           content: "Episcopal Diocese of Northern Philippines (EDNP) \2022  Clerical Directory";
-          font-size: 9.5pt;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-          color: #64748b;
+          font-size: 8pt;
+          font-family: var(--font-family-sans);
+          color: #64748b; /* ds-allow-hardcode */
         }
         @bottom-right {
           content: "Page " counter(page) " of " counter(pages);
-          font-size: 9.5pt;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-          color: #64748b;
-          font-weight: bold;
+          font-size: 8pt;
+          font-family: var(--font-family-sans);
+          color: #334155; /* ds-allow-hardcode */
+          font-weight: 700;
         }
+      }
+      @page :first {
+        margin-top: 10mm;
+        @top-left { content: none; border-bottom: none; }
+        @top-center { content: none; border-bottom: none; }
+        @top-right { content: none; border-bottom: none; }
       }
     </style>
     {% else %}
     <style>
       @page {
-        size: letter landscape;
-        margin: 10mm 12mm 12mm 12mm;
+        size: A4 landscape;
+        margin: 16mm 12mm 15mm 12mm;
+        @top-left {
+          content: "EPISCOPAL DIOCESE OF NORTHERN PHILIPPINES \2022  {{ report.title|upper }}";
+          font-size: 7.5pt;
+          font-weight: 700;
+          letter-spacing: 0.04em;
+          font-family: var(--font-family-sans);
+          color: #64748b; /* ds-allow-hardcode */
+          border-bottom: 0.75pt solid #cbd5e1; /* ds-allow-hardcode */
+          padding-bottom: 3pt;
+          margin-bottom: 4pt;
+        }
+        @top-center {
+          content: "";
+          border-bottom: 0.75pt solid #cbd5e1; /* ds-allow-hardcode */
+          padding-bottom: 3pt;
+          margin-bottom: 4pt;
+        }
+        @top-right {
+          content: "OFFICIAL DIOCESAN EXTRACT";
+          font-size: 7.5pt;
+          font-weight: 600;
+          letter-spacing: 0.04em;
+          font-family: var(--font-family-sans);
+          color: #64748b; /* ds-allow-hardcode */
+          border-bottom: 0.75pt solid #cbd5e1; /* ds-allow-hardcode */
+          padding-bottom: 3pt;
+          margin-bottom: 4pt;
+        }
         @bottom-left {
           content: "Episcopal Diocese of Northern Philippines (EDNP) \2022  Official Reports Registry";
-          font-size: 9.5pt;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-          color: #64748b;
+          font-size: 8pt;
+          font-family: var(--font-family-sans);
+          color: #64748b; /* ds-allow-hardcode */
         }
         @bottom-right {
           content: "Page " counter(page) " of " counter(pages);
-          font-size: 9.5pt;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-          color: #64748b;
-          font-weight: bold;
+          font-size: 8pt;
+          font-family: var(--font-family-sans);
+          color: #334155; /* ds-allow-hardcode */
+          font-weight: 700;
         }
+      }
+      @page :first {
+        margin-top: 10mm;
+        @top-left { content: none; border-bottom: none; }
+        @top-center { content: none; border-bottom: none; }
+        @top-right { content: none; border-bottom: none; }
       }
     </style>
     {% endif %}
-    <style>
-      /* Critical Inline Protection against stale browser cache */
-      .church-seal {
-        width: 48px !important;
-        height: 72px !important;
-        max-width: 48px !important;
-        max-height: 72px !important;
-        object-fit: contain !important;
-        display: block !important;
-      }
-      body {
-        background-color: #525659 !important;
-      }
-      .word-canvas {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 24px;
-        width: 100%;
-      }
-      .paper-sheet {
-        background-color: #ffffff;
-        padding: 11mm 14mm;
-        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.15);
-        border-radius: 2px;
-        box-sizing: border-box;
-        position: relative;
-        max-width: 100%;
-      }
-      .paper-sheet.paper-portrait {
-        width: 210mm;
-        min-height: 297mm;
-      }
-      .paper-sheet.paper-landscape {
-        width: 297mm;
-        min-height: 210mm;
-      }
-      @media print {
-        body { background-color: #ffffff !important; }
-        .word-canvas { display: block !important; }
-        .paper-sheet {
-          width: 100% !important;
-          min-height: 0 !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          box-shadow: none !important;
-          border-radius: 0 !important;
-        }
-      }
-    </style>
   </head>
   <body>
-    <!-- Screen-Only Actions Toolbar -->
-    <div class="toolbar" role="toolbar" aria-label="Report controls">
-      <a class="download-btn" href="{% url 'registrar:generate_report' %}" data-back-page data-back-url="{% url 'registrar:generate_report' %}">&larr; Back to Reports</a>
-      <button type="button" class="print-btn" data-print-page>Print</button>
-      {% if download_url %}
-      <a class="download-btn" href="{{ download_url }}">Download Saved PDF</a>
-      {% endif %}
-    </div>
+    <!-- Screen-Only Docked Actions Toolbar -->
+    <header class="toolbar" role="toolbar" aria-label="Report controls">
+      <div class="toolbar-brand">
+        <span class="toolbar-title">{{ report.title }}</span>
+        <span class="toolbar-meta">Generated by {{ report.generated_by }} &bull; {{ report.generated_at|date:"M d, Y g:i A" }}</span>
+      </div>
+      <div class="toolbar-buttons">
+        <a class="download-btn" href="{% url 'registrar:generate_report' %}" data-back-page data-back-url="{% url 'registrar:generate_report' %}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          Back to Reports
+        </a>
+        {% if download_url %}
+        <a class="download-btn" href="{{ download_url }}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Download Saved PDF
+        </a>
+        {% endif %}
+        <button type="button" class="print-btn" data-print-page>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          Print
+        </button>
+      </div>
+    </header>
 
-    <!-- Word Processor Canvas Layout -->
-    <div class="word-canvas">
+    <main class="word-canvas">
       <article class="paper-sheet {% if report.type == 'clerical_directory' %}paper-portrait{% else %}paper-landscape{% endif %}">
         <div class="doc-watermark" aria-hidden="true">OFFICIAL COPY</div>
 
         <div class="sheet-content">
-          <!-- 1. Diocesan Letterhead & Official Header -->
+          <!-- Diocesan Letterhead & Official Header -->
           <header class="doc-header">
             <div class="letterhead-top">
               <div class="seal-col">
-                <img src="{% static 'ednp_logo.png' %}" alt="EDNP Seal" class="church-seal" width="48" height="72" style="width: 48px !important; height: 72px !important; max-width: 48px !important; max-height: 72px !important; object-fit: contain; display: block;">
+                <img src="{% static 'ednp_logo.png' %}" alt="EDNP Seal" class="church-seal" width="48" height="72">
               </div>
               <div class="masthead-col">
                 <div class="church-name">The Episcopal Church in the Philippines</div>
@@ -128,7 +160,7 @@
               </div>
               <div class="doc-stamp-col">
                 <div class="record-id-box">
-                  <span class="id-label">Report Type</span>
+                  <span class="id-label">Report Code</span>
                   <span class="id-value">
                     {% if report.type == 'clerical_directory' %}DIR-REG
                     {% elif report.type == 'status_report' %}STS-REG
@@ -146,6 +178,7 @@
             <div class="document-title-bar">
               <div class="title-wrap">
                 <h2 class="doc-main-title">{{ report.title }}</h2>
+                {% if report.subtitle %}<div class="doc-subtitle">{{ report.subtitle }}</div>{% endif %}
                 <div class="certify">I HEREBY CERTIFY that the following is the official clergy record generated from the Episcopal Diocese of Northern Philippines Clergy Records System as of <b>{{ report.generated_at|date:"F d, Y" }}</b>.</div>
               </div>
               <div class="doc-meta-pills">
@@ -155,6 +188,18 @@
             </div>
           </header>
 
+          <!-- Executive Summary KPI Strip -->
+          {% if report.summary %}
+          <section class="kpi-strip" aria-label="Report summary">
+            {% for card in report.summary %}
+            <div class="kpi-card{% if card.lead %} is-lead{% endif %}">
+              <span class="kpi-value">{{ card.value }}</span>
+              <span class="kpi-label">{{ card.label }}</span>
+            </div>
+            {% endfor %}
+          </section>
+          {% endif %}
+
           <!-- Report Body -->
           {% if report.type == 'clerical_directory' %}
             <div class="directory-list">
@@ -163,28 +208,43 @@
                   <thead>
                     <tr>
                       <th colspan="2" class="directory-entry-header">
-                        <span class="clergy-name"><b>{{ entry.name }}</b></span>
-                        <span class="clergy-rank">({{ entry.rank_display }})</span>
-                        <span class="entry-record-id">[{{ entry.id }}]</span>
+                        <div class="directory-header-bar">
+                          <div class="directory-header-identity">
+                            <span class="clergy-name"><b>{{ entry.name }}</b></span>
+                            <span class="clergy-rank">{{ entry.rank_display }}</span>
+                            {% if entry.status == 'Active' %}
+                              <span class="badge badge-active">Active</span>
+                            {% elif entry.status == 'On Leave' %}
+                              <span class="badge badge-warning">On Leave</span>
+                            {% elif entry.status == 'Missionary to Other Diocese' %}
+                              <span class="badge badge-info">Missionary</span>
+                            {% elif entry.status == 'Retired' %}
+                              <span class="badge badge-neutral">Retired</span>
+                            {% else %}
+                              <span class="badge badge-neutral">{{ entry.status }}</span>
+                            {% endif %}
+                          </div>
+                          <span class="entry-record-id">[{{ entry.id }}]</span>
+                        </div>
                       </th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
                       <td class="dir-label"><b>Date &amp; Place of Birth</b></td>
-                      <td class="dir-val">{{ entry.dob }}</td>
+                      <td class="dir-val">{% if entry.has_dob %}{{ entry.dob }}{% else %}<span class="cell-muted">Not recorded</span>{% endif %}</td>
                     </tr>
                     <tr>
                       <td class="dir-label"><b>Education</b></td>
-                      <td class="dir-val">{{ entry.grad }}</td>
+                      <td class="dir-val">{% if entry.has_grad %}{{ entry.grad }}{% else %}<span class="cell-muted">Not recorded</span>{% endif %}</td>
                     </tr>
                     <tr>
                       <td class="dir-label"><b>Ordination to the Diaconate</b></td>
-                      <td class="dir-val">{{ entry.od }}</td>
+                      <td class="dir-val">{% if entry.has_od %}{{ entry.od }}{% else %}<span class="cell-muted">Not recorded</span>{% endif %}</td>
                     </tr>
                     <tr>
                       <td class="dir-label"><b>Ordination to the Priesthood</b></td>
-                      <td class="dir-val">{{ entry.op }}</td>
+                      <td class="dir-val">{% if entry.has_op %}{{ entry.op }}{% else %}<span class="cell-muted">Not recorded</span>{% endif %}</td>
                     </tr>
                     <tr>
                       <td class="dir-label"><b>Deployments</b></td>
@@ -192,104 +252,275 @@
                         {% for dep in entry.deployments %}
                           <div class="dep-item">{{ dep }}</div>
                         {% empty %}
-                          <div>-</div>
+                          <span class="cell-muted">No recorded deployments</span>
                         {% endfor %}
                       </td>
                     </tr>
+                    {% if entry.has_family %}
                     <tr>
                       <td class="dir-label"><b>Spouse</b></td>
-                      <td class="dir-val">{{ entry.spouse }}</td>
+                      <td class="dir-val">{% if entry.has_spouse %}{{ entry.spouse }}{% else %}<span class="cell-muted">Not recorded</span>{% endif %}</td>
                     </tr>
                     <tr>
                       <td class="dir-label"><b>Date &amp; Place of Marriage</b></td>
-                      <td class="dir-val">{{ entry.marriage }}</td>
+                      <td class="dir-val">{% if entry.has_marriage %}{{ entry.marriage }}{% else %}<span class="cell-muted">Not recorded</span>{% endif %}</td>
                     </tr>
                     <tr>
                       <td class="dir-label"><b>Children</b></td>
-                      <td class="dir-val">{{ entry.children }}</td>
+                      <td class="dir-val">{% if entry.has_children %}{{ entry.children }}{% else %}<span class="cell-muted">None recorded</span>{% endif %}</td>
                     </tr>
+                    {% else %}
+                    <tr>
+                      <td class="dir-label"><b>Family Status</b></td>
+                      <td class="dir-val"><span class="cell-muted">No spouse or dependent records registered</span></td>
+                    </tr>
+                    {% endif %}
                   </tbody>
                 </table>
               {% empty %}
                 <div class="empty-row">No records found.</div>
               {% endfor %}
             </div>
-          {% else %}
+
+          {% elif report.type == 'ordination_documents' %}
             {% for section in report.sections %}
-              {% if section.heading %}<div class="section-heading">{{ section.heading }}</div>{% endif %}
-              <table class="report-table">
-                <thead><tr>{% for col in section.columns %}<th>{{ col }}</th>{% endfor %}</tr></thead>
-                <tbody>
-                  {% for row in section.rows %}
+              <div class="table-scroll">
+                <table class="report-table">
+                  <thead>
                     <tr>
-                      {% for cell in row %}
+                      <th>Clergy Name</th>
+                      <th>Rank</th>
+                      <th>Current Deployment</th>
+                      <th class="col-status">Status</th>
+                      <th class="col-progress">Filing Progress</th>
+                      <th>Missing Requirements</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in section.rich_rows %}
+                      <tr>
                         <td>
-                          {% if cell == 'Active' %}
+                          <b>{{ item.name }}</b>
+                          <span class="cell-sub-id">{{ item.id }}</span>
+                        </td>
+                        <td>{{ item.rank }}</td>
+                        <td>{% if item.assignment %}{{ item.assignment }}{% else %}<span class="cell-muted">Unassigned</span>{% endif %}</td>
+                        <td>
+                          {% if item.status == 'Active' %}
                             <span class="badge badge-active">Active</span>
-                          {% elif cell == 'On Leave' %}
+                          {% elif item.status == 'On Leave' %}
                             <span class="badge badge-warning">On Leave</span>
-                          {% elif cell == 'Retired' %}
+                          {% elif item.status == 'Missionary to Other Diocese' %}
+                            <span class="badge badge-info">Missionary</span>
+                          {% elif item.status == 'Retired' %}
                             <span class="badge badge-neutral">Retired</span>
-                          {% elif cell == 'Deceased' %}
-                            <span class="badge badge-neutral">Deceased</span>
                           {% else %}
-                            {{ cell }}
+                            <span class="badge badge-neutral">{{ item.status }}</span>
                           {% endif %}
                         </td>
-                      {% endfor %}
-                    </tr>
-                  {% empty %}
+                        <td>
+                          <div class="doc-progress-cell">
+                            <div class="doc-progress-text">
+                              <span>{{ item.submitted }}/{{ item.total }}</span>
+                              <span class="doc-progress-pct">{{ item.percent }}%</span>
+                            </div>
+                            <div class="doc-progress-track">
+                              <div class="doc-progress-fill{% if item.percent == 0 %} is-zero{% elif item.percent < 100 %} is-partial{% endif %}" style="width: {{ item.percent }}%;"></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          {% if item.missing_items %}
+                            <div class="missing-tags">
+                              {% for doc_name in item.missing_items %}
+                                <span class="missing-tag">{{ doc_name }}</span>
+                              {% endfor %}
+                            </div>
+                          {% else %}
+                            <span class="badge badge-submitted">All Required Filed</span>
+                          {% endif %}
+                        </td>
+                      </tr>
+                    {% empty %}
+                      <tr>
+                        <td class="empty-row" colspan="6">No records found.</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% endfor %}
+
+          {% elif report.type == 'status_report' %}
+            {% for section in report.sections %}
+              <div class="table-scroll">
+                <table class="report-table">
+                  <thead>
                     <tr>
-                      <td class="empty-row" colspan="{{ section.columns|length }}">No records found.</td>
+                      <th>Clergy Name</th>
+                      <th>Rank</th>
+                      <th class="col-status">Status</th>
+                      <th>Leave Reason</th>
+                      <th>Current Deployment</th>
                     </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {% for item in section.rich_rows %}
+                      <tr>
+                        <td>
+                          <b>{{ item.name }}</b>
+                          <span class="cell-sub-id">{{ item.id }}</span>
+                        </td>
+                        <td>{{ item.rank }}</td>
+                        <td>
+                          {% if item.status == 'Active' %}
+                            <span class="badge badge-active">Active</span>
+                          {% elif item.status == 'On Leave' %}
+                            <span class="badge badge-warning">On Leave</span>
+                          {% elif item.status == 'Missionary to Other Diocese' %}
+                            <span class="badge badge-info">Missionary</span>
+                          {% elif item.status == 'Retired' %}
+                            <span class="badge badge-neutral">Retired</span>
+                          {% else %}
+                            <span class="badge badge-neutral">{{ item.status }}</span>
+                          {% endif %}
+                        </td>
+                        <td>{% if item.leave_reason %}{{ item.leave_reason }}{% else %}<span class="cell-muted">Not applicable</span>{% endif %}</td>
+                        <td>{% if item.assignment %}{{ item.assignment }}{% else %}<span class="cell-muted">Unassigned</span>{% endif %}</td>
+                      </tr>
+                    {% empty %}
+                      <tr>
+                        <td class="empty-row" colspan="5">No records found.</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% endfor %}
+
+          {% else %}
+            {% for section in report.sections %}
+              {% if section.heading %}
+                <div class="section-heading-row">
+                  <div class="section-heading">{{ section.heading }}</div>
+                  {% if section.count %}<span class="section-count-pill">{{ section.count }} Clergy</span>{% endif %}
+                </div>
+              {% endif %}
+              <div class="table-scroll">
+                <table class="report-table">
+                  <thead>
+                    <tr>{% for col in section.columns %}<th>{{ col }}</th>{% endfor %}</tr>
+                  </thead>
+                  <tbody>
+                    {% if section.rich_rows %}
+                      {% for item in section.rich_rows %}
+                        <tr>
+                          <td>
+                            <b>{{ item.name }}</b>
+                            <span class="cell-sub-id">{{ item.id }}</span>
+                          </td>
+                          <td>{{ item.rank }}</td>
+                          <td>{% if item.assignment %}{{ item.assignment }}{% else %}<span class="cell-muted">Unassigned</span>{% endif %}</td>
+                          <td class="col-status">
+                            {% if item.status == 'Active' %}
+                              <span class="badge badge-active">Active</span>
+                            {% elif item.status == 'On Leave' %}
+                              <span class="badge badge-warning">On Leave</span>
+                            {% elif item.status == 'Missionary to Other Diocese' %}
+                              <span class="badge badge-info">Missionary</span>
+                            {% elif item.status == 'Retired' %}
+                              <span class="badge badge-neutral">Retired</span>
+                            {% else %}
+                              <span class="badge badge-neutral">{{ item.status }}</span>
+                            {% endif %}
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    {% else %}
+                      {% for row in section.rows %}
+                        <tr>
+                          {% for cell in row %}
+                            <td>
+                              {% if cell == 'Active' %}
+                                <span class="badge badge-active">Active</span>
+                              {% elif cell == 'On Leave' %}
+                                <span class="badge badge-warning">On Leave</span>
+                              {% elif cell == 'Missionary to Other Diocese' %}
+                                <span class="badge badge-info">Missionary</span>
+                              {% elif cell == 'Retired' %}
+                                <span class="badge badge-neutral">Retired</span>
+                              {% else %}
+                                {{ cell }}
+                              {% endif %}
+                            </td>
+                          {% endfor %}
+                        </tr>
+                      {% empty %}
+                        <tr>
+                          <td class="empty-row" colspan="{{ section.columns|length }}">No records found.</td>
+                        </tr>
+                      {% endfor %}
+                    {% endif %}
+                  </tbody>
+                </table>
+              </div>
             {% endfor %}
           {% endif %}
 
-          <!-- Certification & Official Stamp Sign-Off Block -->
-          <section class="certification-section">
-            <div class="sign-grid">
-              <div class="sign-block">
-                <div class="sign-heading">Prepared / Generated by:</div>
-                <p class="sign-text">Certified extract generated under canonical record-keeping authority for administrative and diocesan registry use.</p>
-                <div class="sign-space"></div>
-                <div class="sign-line"></div>
-                <div class="sign-name"><b>{{ report.generated_by|upper }}</b></div>
-                <div class="sign-caption">Episcopal Diocese of Northern Philippines</div>
-              </div>
-
-              <div class="sign-block registrar-block">
-                <div class="sign-heading">Diocesan Registry Certification</div>
-                <p class="sign-text">Official document extract certified on file with the Episcopal Diocese of Northern Philippines.</p>
-                <div class="stamp-box">
-                  <div class="stamp-inner-circle">
-                    <span class="stamp-text-org">EDNP REGISTRAR</span>
-                    <span class="stamp-text-loc">OFFICIAL SEAL</span>
+          <!-- Closing Block: Certification, Official Seal & Running Notice -->
+          <div class="closing-block">
+            <section class="certification-section">
+              <div class="sign-grid">
+                <div class="sign-block">
+                  <div>
+                    <div class="sign-heading">Prepared / Generated by:</div>
+                    <p class="sign-text">Certified extract generated under canonical record-keeping authority for administrative and diocesan registry use.</p>
+                  </div>
+                  <div>
+                    <div class="sign-space"></div>
+                    <div class="sign-line"></div>
+                    <div class="sign-name"><b>{{ report.generated_by|upper }}</b></div>
+                    <div class="sign-caption">Episcopal Diocese of Northern Philippines</div>
                   </div>
                 </div>
-                <div class="sign-line"></div>
-                <div class="sign-name">Office of the Diocesan Registrar</div>
-                <div class="sign-caption">Diocesan Center &bull; Bontoc, Mountain Province</div>
-              </div>
-            </div>
-          </section>
-        </div>
 
-        <!-- Official Running Footer -->
-        <footer class="doc-footer">
-          <div class="footer-notice">
-            <b>Notice:</b> This document is an official registry record generated from the Episcopal Diocese of Northern Philippines Clergy Records System. For verification or inquiries, please contact the Diocesan Registrar.
+                <div class="sign-block registrar-block">
+                  <div>
+                    <div class="sign-heading">Diocesan Registry Certification</div>
+                    <p class="sign-text">Official document extract certified on file with the Episcopal Diocese of Northern Philippines.</p>
+                  </div>
+                  <div>
+                    <div class="stamp-box">
+                      <div class="stamp-inner-circle">
+                        <div class="stamp-ring">
+                          <span class="stamp-text-org">EDNP</span>
+                          <span class="stamp-text-org">REGISTRAR</span>
+                          <span class="stamp-text-loc">OFFICIAL SEAL</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="sign-line"></div>
+                    <div class="sign-name">Office of the Diocesan Registrar</div>
+                    <div class="sign-caption">Diocesan Center &bull; Bontoc, Mountain Province</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <footer class="doc-footer">
+              <div class="footer-notice">
+                <b>Notice:</b> This document is an official registry record generated from the Episcopal Diocese of Northern Philippines Clergy Records System. For verification or inquiries, please contact the Diocesan Registrar.
+              </div>
+              <div class="footer-meta">
+                <span>Official Clergy Records Registry &bull; EDNP Clergy Records System</span>
+                <span>Generated on {{ report.generated_at|date:"F d, Y" }} at {{ report.generated_at|date:"g:i A" }}</span>
+                <span>Official Document</span>
+              </div>
+            </footer>
           </div>
-          <div class="footer-meta">
-            <span>Official Clergy Records Registry &bull; EDNP Clergy Records System</span>
-            <span>Generated on {{ report.generated_at|date:"F d, Y" }} at {{ report.generated_at|date:"g:i A" }}</span>
-            <span>Official Document</span>
-          </div>
-        </footer>
+        </div>
       </article>
-    </div>
+    </main>
 
     <script src="{% static 'print-page.js' %}"></script>
   </body>

@@ -4,7 +4,7 @@
 {% block page_name %}{{ record.name }}{% endblock %}
 {% block page_name_heading %}{{ record.name }}{% endblock %}
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'ember-letters.css' %}?v=8">
+  <link rel="stylesheet" href="{% static 'ember-letters.css' %}?v=11">
   <style>
   .date-att-bar {
     display: flex;
@@ -43,7 +43,6 @@
     align-items: center;
     gap: 6px;
     flex-shrink: 0;
-    margin-left: 8px;
   }
   .date-att-bar .att-btn {
     display: inline-flex;
@@ -194,7 +193,7 @@
       </div>
       {% if record.is_archived %}
         <div class="notice" id="noticeArchivedRecordDetail">
-          <div class="notice-content">Archived on {{ record.archived_at|date:"M d, Y" }}{% if record.archived_by %} by {{ record.archived_by.first_name|default:record.archived_by.username }}{% endif %}. Archived records are never deleted: this one keeps its documents and portal account and still appears in reports. Its status stays Retired until you restore it.</div>
+          <div class="notice-content">Archived {{ record.archived_at|date:"M d, Y" }}{% if record.archived_by %} by {{ record.archived_by.first_name|default:record.archived_by.username }}{% endif %}. Files and account remain intact; status stays Retired until restored.</div>
           <button type="button" class="notice-dismiss" data-dismiss-notice="noticeArchivedRecordDetail" aria-label="Dismiss notice" title="Dismiss">
             <i class="fa-solid fa-xmark"></i>
           </button>
@@ -258,8 +257,8 @@
               <div>
                 <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
                   <h3 id="sectionQuickEditTitle" style="margin:0;"><i class="fa-solid fa-pen-to-square" style="color:#2f6fed;"></i> <span>Identity &amp; Basic Details</span></h3>
-                  <span class="badge blue" id="sectionQuickEditStepBadge" style="font-size:13px;padding:3px 8px;">Step 1 of 7</span>
-                  <span class="badge pending-b" id="sectionDraftRestoredBadge" style="display:none;font-size:12.5px;padding:3px 8px;" title="Unsaved edits from this session were kept across reload"><i class="fa-solid fa-clock-rotate-left"></i> Draft kept</span>
+                  <span class="badge blue" id="sectionQuickEditStepBadge" style="font-size:14px;padding:3px 9px;">Step 1 of 7</span>
+                  <span class="badge pending-b" id="sectionDraftRestoredBadge" style="display:none;font-size:14px;padding:3px 9px;" title="Unsaved edits from this session were kept across reload"><i class="fa-solid fa-clock-rotate-left"></i> Draft kept</span>
                 </div>
                 <span class="muted" style="margin-top:3px;display:block;">Navigate groups with the quick edit bar above or the left and right edge arrows.</span>
               </div>
@@ -321,6 +320,13 @@
                 </div>
                 {% endwith %}
               </div>
+              <div class="edit-field">
+                <label>Place of Birth</label>
+                <div class="input-with-action">
+                  <input name="place_of_birth" id="placeOfBirthInputRegistrar" maxlength="150" value="{{ clergy_profile.place_of_birth|default:'' }}" placeholder="e.g. Bontoc, Mountain Province">
+                  <button type="button" class="ph-picker-btn" data-ph-picker-target="placeOfBirthInputRegistrar" aria-label="Choose place of birth from province, city, or barangay list" title="Choose from province / city / barangay list"><i class="fa-solid fa-location-dot"></i></button>
+                </div>
+              </div>
               <!-- ds-allow-native-select: personal info gender dropdown -->
               <div class="edit-field"><label>Gender</label><select name="gender"><option value="">Select</option><option {% if record.gender == 'Male' %}selected{% endif %}>Male</option><option {% if record.gender == 'Female' %}selected{% endif %}>Female</option></select></div>
             </div>
@@ -332,14 +338,8 @@
               <div class="edit-field full">
                 <label>Residential Address</label>
                 <div class="input-with-action">
-                  <input name="address"
-                         id="addressInput"
-                         value="{{ record.address|default:'' }}"><button type="button"
-        class="ph-picker-btn"
-        data-ph-picker-target="addressInput"
-        title="Choose from province / city / barangay list">
-                    <i class="fa-solid fa-location-dot"></i>
-                  </button>
+                  <textarea name="address" id="addressInput" rows="2">{{ record.address|default:'' }}</textarea>
+                  <button type="button" class="ph-picker-btn" data-ph-picker-target="addressInput" aria-label="Choose residential address from province, city, or barangay list" title="Choose from province / city / barangay list"><i class="fa-solid fa-location-dot"></i></button>
                 </div>
               </div>
               <div class="edit-field">
@@ -350,7 +350,7 @@
               </div>
               <div class="edit-field">
                 <label>Email Address</label><input name="email" type="email" value="{{ record.email|default:'' }}" pattern="[a-zA-Z0-9._%+-]+@[gG][mM][aA][iI][lL]\.[cC][oO][mM]" placeholder="example@gmail.com" title="Please enter a valid Gmail address (@gmail.com)">
-                <span class="muted" style="font-size: 13px; color: #64748b; display: block; margin-top: 4px;">Only Gmail accounts (@gmail.com) are accepted at this time.</span>
+                <span class="muted" style="font-size: 14px; color: #64748b; display: block; margin-top: 4px;">Only Gmail accounts (@gmail.com) are accepted at this time.</span>
               </div>
             </div>
 
@@ -429,7 +429,7 @@
               <!-- Postulancy Notice (Shown when rank == postulancy) -->
               <div id="stage-postulancy" class="edit-field full" style="{% if record.rank != 'postulancy' %}display:none;{% endif %} background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px 14px; color: #475569; font-size: 14px;">
                 <i class="fa-solid fa-seedling" style="color: #0284c7;"></i>
-                <strong>Postulancy (Lay Candidate):</strong> This record is registered in Postulancy. Ordination stages (Diaconate, Priesthood, Episcopate) are unlocked sequentially as the candidate receives Holy Orders.
+                <strong>Postulancy (Lay Candidate):</strong> Ordination stages unlock as the candidate receives Holy Orders.
               </div>
 
               <!-- Stage 1: The Diaconate (Deacon, Priest, Bishop) -->
@@ -671,14 +671,14 @@
             <button type="button" class="btn small" onclick="openModal('addDeploymentModal')"><i class="fa-solid fa-plus"></i> Add Deployment</button>
           </div>
           <div class="notice" id="noticeRecordDetailDeployments">
-            <div class="notice-content">Track parish assignments, mission stations, and appointments. Can be updated by both the Registrar and the clergy member.</div>
+            <div class="notice-content">Parish assignments and mission deployments. Both Registrar and clergy can edit.</div>
             <button type="button" class="notice-dismiss" data-dismiss-notice="noticeRecordDetailDeployments" aria-label="Dismiss notice" title="Dismiss">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
           <table style="width:100%;border-collapse:collapse;margin-top:12px;">
             <thead>
-              <tr style="border-bottom:2px solid #e3e8ef;text-align:left;font-size:13px;color:#64748b;">
+              <tr style="border-bottom:2px solid #e3e8ef;text-align:left;font-size:14px;color:#64748b;">
                 <th style="padding:8px;">Parish / Station / Mission</th>
                 <th style="padding:8px;">Place / Location</th>
                 <th style="padding:8px;">Role</th>
@@ -690,11 +690,11 @@
             <tbody>
               {% for dep in record.deployments.all %}
               <tr style="border-bottom:1px solid #edf0f3;">
-                <td style="padding:8px;"><b>{{ dep.station_name }}</b>{% if dep.notes %}<br><span class="muted" style="font-size:13px;">{{ dep.notes }}</span>{% endif %}</td>
+                <td style="padding:8px;"><b>{{ dep.station_name }}</b>{% if dep.notes %}<br><span class="muted" style="font-size:14px;">{{ dep.notes }}</span>{% endif %}</td>
                 <td style="padding:8px;">{{ dep.place_name|default:"Not set" }}</td>
                 <td style="padding:8px;">{{ dep.role }}</td>
-                <td style="padding:8px;">{% if dep.start_date %}{{ dep.start_date|date:"M Y" }} to {% endif %}{% if dep.is_current %}<span class="badge active-b" style="background:#e9f7ef;color:#166534;padding:2px 6px;border-radius:4px;font-size:12.5px;font-weight:700;">Present</span>{% elif dep.end_date %}{% if not dep.start_date %}Ended {% endif %}{{ dep.end_date|date:"M Y" }}{% else %}Not specified{% endif %}</td>
-                <td style="padding:8px;">{% if dep.is_current %}<span class="badge active-b" style="background:#e9f7ef;color:#166534;padding:2px 6px;border-radius:4px;font-size:12.5px;font-weight:700;">Current</span>{% else %}Past{% endif %}</td>
+                <td style="padding:8px;">{% if dep.start_date %}{{ dep.start_date|date:"M Y" }} to {% endif %}{% if dep.is_current %}<span class="badge active-b" style="background:#e9f7ef;color:#166534;padding:3px 8px;border-radius:4px;font-size:14px;font-weight:700;">Present</span>{% elif dep.end_date %}{% if not dep.start_date %}Ended {% endif %}{{ dep.end_date|date:"M Y" }}{% else %}Not specified{% endif %}</td>
+                <td style="padding:8px;">{% if dep.is_current %}<span class="badge active-b" style="background:#e9f7ef;color:#166534;padding:3px 8px;border-radius:4px;font-size:14px;font-weight:700;">Current</span>{% else %}Past{% endif %}</td>
                 <td style="padding:8px;text-align:center;">
                   <form method="post" class="inline-form" data-confirm="Remove this deployment entry?">
                     {% csrf_token %}
@@ -714,10 +714,10 @@
         <!-- Family & Educational Background (Filed by Clergy) -->
         <div class="section-card" id="sec-reg-family" style="margin-top:24px; scroll-margin-top: 70px;">
           <div class="section-head" style="margin-bottom:8px;">
-            <h4 style="margin:0;"><i class="fa-solid fa-people-roof"></i> Family &amp; Education <span class="badge blue" style="font-size:12.5px;font-weight:600;margin-left:8px;">Filed by Clergy</span></h4>
+            <h4 style="margin:0;"><i class="fa-solid fa-people-roof"></i> Family &amp; Education <span class="badge blue" style="font-size:14px;font-weight:600;margin-left:8px;">Filed by Clergy</span></h4>
           </div>
           <div class="notice" id="noticeRecordDetailSelfService">
-            <div class="notice-content">These details are entered and maintained directly by the clergy member through their self-service portal (Read-only for Registrar).</div>
+            <div class="notice-content">Managed by the clergy member in their portal (read-only here).</div>
             <button type="button" class="notice-dismiss" data-dismiss-notice="noticeRecordDetailSelfService" aria-label="Dismiss notice" title="Dismiss">
               <i class="fa-solid fa-xmark"></i>
             </button>
@@ -725,7 +725,6 @@
 
           <h5 style="margin:16px 0 8px;font-size:15px;color:#1e293b;border-bottom:1px solid #e2e8f0;padding-bottom:4px;"><i class="fa-solid fa-ring"></i> Marriage &amp; Spouse</h5>
           <div class="edit-grid" style="margin-bottom:16px;">
-            <div class="edit-field"><label>Place of Birth</label><input value="{{ clergy_profile.place_of_birth|default:'Not set' }}" readonly></div>
             <div class="edit-field"><label>Civil Status</label><input value="{{ clergy_profile.civil_status|default:'Not set' }}" readonly></div>
             <div class="edit-field"><label>Date Married</label><input value="{{ clergy_profile.marriage_date|date:'M d, Y'|default:'Not set' }}" readonly></div>
             <div class="edit-field"><label>Place of Marriage</label><input value="{{ clergy_profile.marriage_place|default:'Not set' }}" readonly></div>
@@ -736,7 +735,7 @@
           <h5 style="margin:16px 0 8px;font-size:15px;color:#1e293b;border-bottom:1px solid #e2e8f0;padding-bottom:4px;"><i class="fa-solid fa-children"></i> Children (Organized List)</h5>
           <table style="width:100%;border-collapse:collapse;margin-bottom:16px;">
             <thead>
-              <tr style="border-bottom:2px solid #e3e8ef;text-align:left;font-size:13px;color:#64748b;">
+              <tr style="border-bottom:2px solid #e3e8ef;text-align:left;font-size:14px;color:#64748b;">
                 <th style="padding:6px;">Child Name</th>
                 <th style="padding:6px;width:160px;">Date of Birth</th>
                 <th style="padding:6px;width:120px;">Gender</th>
@@ -766,11 +765,11 @@
           <h5 style="margin:16px 0 8px;font-size:15px;color:#1e293b;border-bottom:1px solid #e2e8f0;padding-bottom:4px;"><i class="fa-solid fa-graduation-cap"></i> Educational Background (Degrees &amp; Graduations)</h5>
           <table style="width:100%;border-collapse:collapse;margin-bottom:12px;">
             <thead>
-              <tr style="border-bottom:2px solid #e3e8ef;text-align:left;font-size:13px;color:#64748b;">
+              <tr style="border-bottom:2px solid #e3e8ef;text-align:left;font-size:14px;color:#64748b;">
                 <th style="padding:6px;">Degree / Program</th>
                 <th style="padding:6px;">Institution / Seminary / School</th>
                 <th style="padding:6px;">Place / Location</th>
-                <th style="padding:6px;width:120px;">Year Graduated</th>
+                <th style="padding:6px;width:135px;">Year Graduated</th>
               </tr>
             </thead>
             <tbody>
@@ -798,7 +797,7 @@
       <div id="tabDocuments" class="tab-content">
         <div class="doc-info-strip">
           <i class="fa-solid fa-circle-info"></i>
-          <span>Uploading a document replaces any existing file and updates its submission date. Maximum 5 MB for PDF files, 10 MB for images (auto-compressed).</span>
+          <span>Re-uploading replaces the file and updates its date. Max 5 MB PDF, 10 MB image (auto-compressed).</span>
         </div>
 
         <!-- Sticky Quick Navigation Bar for Documents -->
@@ -883,8 +882,8 @@
                     <i class="fa-solid fa-folder-open" style="color:var(--blue);"></i>
                     <span>Stage Requirements</span>
                   </h3>
-                  <span class="badge blue" id="stageDocumentsStepBadge" style="font-size:13px;padding:3px 8px;">Stage 1 of 1</span>
-                  <span class="badge pending-b" id="stageDocumentsProgressBadge" style="font-size:13px;padding:3px 8px;">0 uploaded</span>
+                  <span class="badge blue" id="stageDocumentsStepBadge" style="font-size:14px;padding:3px 9px;">Stage 1 of 1</span>
+                  <span class="badge pending-b" id="stageDocumentsProgressBadge" style="font-size:14px;padding:3px 9px;">0 uploaded</span>
                 </div>
                 <p class="muted" id="stageDocumentsModalDesc" style="margin:4px 0 0;font-size:14px;">Navigate stages with the tabs above or the left and right edge arrows.</p>
               </div>
@@ -963,7 +962,7 @@
                           <span class="doc-table-name">{{ item.document_type.name }}</span>
                         {% endif %}
                         {% if item.document_type.uploaded_by == 'registrar' %}
-                          <span class="badge retired-b" style="font-size:12.5px; padding:1px 6px; margin-left:6px;" title="Registrar filing">Diocesan</span>
+                          <span class="badge retired-b" style="font-size:14px; padding:2px 8px; margin-left:6px;" title="Registrar filing">Diocesan</span>
                         {% endif %}
                       </td>
                       <td class="col-date">
@@ -1012,7 +1011,7 @@
                               </button>
                             </form>
                           {% else %}
-                            <button type="button" class="btn small" style="padding: 3px 10px; font-size: 13px; height: 28px;" data-open-noted-modal="{{ item.document_type.id }}" data-doc-title="{{ item.document_type.name }}">
+                            <button type="button" class="btn small" style="padding: 5px 12px; min-height: 32px;" data-open-noted-modal="{{ item.document_type.id }}" data-doc-title="{{ item.document_type.name }}">
                               <i class="fa-solid fa-check"></i> Mark Noted
                             </button>
                           {% endif %}
@@ -1028,7 +1027,7 @@
                               <i class="fa-solid fa-rotate"></i>
                             </button>
                           {% else %}
-                            <button type="button" class="btn small" style="padding: 3px 10px; font-size: 13px; height: 28px;" data-quick-upload="{{ item.document_type.id }}" data-doc-name="{{ item.document_type.name }}">
+                            <button type="button" class="btn small" style="padding: 5px 12px; min-height: 32px;" data-quick-upload="{{ item.document_type.id }}" data-doc-name="{{ item.document_type.name }}">
                               <i class="fa-solid fa-cloud-arrow-up"></i> Upload
                             </button>
                           {% endif %}
@@ -1114,7 +1113,7 @@
                             <i class="fa-solid fa-rotate"></i>
                           </button>
                         {% else %}
-                          <button type="button" class="btn small" style="padding: 3px 10px; font-size: 13px; height: 28px;" data-quick-upload="{{ item.document_type.id }}" data-doc-name="{{ item.document_type.name }}">
+                          <button type="button" class="btn small" style="padding: 5px 12px; min-height: 32px;" data-quick-upload="{{ item.document_type.id }}" data-doc-name="{{ item.document_type.name }}">
                             <i class="fa-solid fa-cloud-arrow-up"></i> Upload
                           </button>
                         {% endif %}
@@ -1179,7 +1178,7 @@
                     </span>
                   </td>
                   <td class="col-actions">
-                    <button type="button" class="btn small" style="padding: 3px 10px; font-size: 13px; height: 28px;" data-open-tab="ember">
+                    <button type="button" class="btn small" style="padding: 5px 12px; min-height: 32px;" data-open-tab="ember">
                       <i class="fa-solid fa-folder-open"></i> Open
                     </button>
                   </td>
@@ -1216,13 +1215,16 @@
       <div class="edit-grid">
         <div class="edit-field full">
           <label>Parish / Mission / Station <span class="req-mark">*</span></label>
-          <input name="station_name" required placeholder="e.g. St. Barnabas Parish">
+          <div class="input-with-action">
+            <input name="station_name" id="depStationInputRegistrar" required placeholder="e.g. St. Barnabas Parish">
+            <button type="button" class="ph-picker-btn" data-ph-picker-target="depStationInputRegistrar" data-picker-mode="parish" aria-label="Select diocesan parish or mission station" title="Select diocesan parish or mission station"><i class="fa-solid fa-church"></i></button>
+          </div>
         </div>
         <div class="edit-field">
           <label>Place / Location</label>
           <div class="input-with-action">
             <input name="place_name" id="depPlaceInputRegistrar" placeholder="e.g. Alab, Bontoc">
-            <button type="button" class="ph-picker-btn" data-ph-picker-target="depPlaceInputRegistrar" title="Choose from province / city / barangay list"><i class="fa-solid fa-location-dot"></i></button>
+            <button type="button" class="ph-picker-btn" data-ph-picker-target="depPlaceInputRegistrar" aria-label="Choose place from province, city, or barangay list" title="Choose from province / city / barangay list"><i class="fa-solid fa-location-dot"></i></button>
           </div>
         </div>
         <div class="edit-field">
@@ -1328,9 +1330,9 @@
 
 {% block extra_js %}
   <script src="{% static 'registrar/js/clergy-records.js' %}?v=6"></script>
-  <script src="{% static 'registrar/js/record-detail.js' %}?v=7"></script>
-  <script src="{% static 'ember-letters.js' %}?v=9"></script>
-  <script src="{% static 'clergy/js/address-picker.js' %}?v=10"></script>
+  <script src="{% static 'registrar/js/record-detail.js' %}?v=8"></script>
+  <script src="{% static 'ember-letters.js' %}?v=11"></script>
+  <script src="{% static 'clergy/js/address-picker.js' %}?v=11"></script>
   <script>
   (function() {
     const DRAFT_KEY = 'ednp_form_draft_' + window.location.pathname;

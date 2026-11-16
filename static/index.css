@@ -189,7 +189,7 @@ body{
   color:#e4ecf4;
   padding:1px 6px;
   border-radius:4px;
-  font-size:13px;
+  font-size:14px;
 }
 
 /* =========================================
@@ -292,7 +292,7 @@ body{
 /* Small grey help text: under the code field, under the buttons, and at the foot of the panel */
 .code-hint,
 .form-hint,
-.form-foot{font-size:13px;color:#7d92a6}
+.form-foot{font-size:14px;color:#7d92a6}
 .code-hint{display:block;margin-top:6px}
 .form-hint{margin-top:10px}
 .form-foot{margin-top:14px}
@@ -425,7 +425,7 @@ body{
 }
 .terms-head-sub {
   display: block;
-  font-size: 13px;
+  font-size: 14px;
   color: #7fa8ff;
   margin-top: 1px;
   text-transform: uppercase;
@@ -533,7 +533,7 @@ body{
   justify-content: space-between;
 }
 .terms-card-content h4 .terms-num {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   color: #64748b;
   background: rgba(255, 255, 255, 0.06);

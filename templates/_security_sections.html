@@ -64,10 +64,10 @@
 <div class="{{ card_class }} stacked">
   <h3><i class="fa-solid fa-mobile-screen"></i> Mobile number</h3>
   <p class="muted card-intro">Used to confirm new devices and to reset your password. This is the only place it can be changed.</p>
-  <p class="current-number">Current number: <b>{{ masked_phone|default:"—" }}</b></p>
+  <p class="current-number">Current number: <b>{{ masked_phone|default:"-" }}</b></p>
 
   {% if sent and test_mode %}
-  <div class="alert"><i class="fa-solid fa-flask"></i> Test mode — no text message was sent.{% if test_code %} Your code is: <b class="test-code">{{ test_code }}</b>{% endif %}</div>
+  <div class="alert"><i class="fa-solid fa-flask"></i> Test mode: no text message was sent.{% if test_code %} Your code is: <b class="test-code">{{ test_code }}</b>{% endif %}</div>
   {% endif %}
   <form method="post" action="{% url 'my_security' %}" autocomplete="off">{% csrf_token %}
     <button type="submit" class="default-submit" name="action" value="{% if sent %}verify_change_code{% else %}send_change_code{% endif %}" tabindex="-1" aria-hidden="true"></button>
@@ -85,7 +85,7 @@
       <div class="field">
         <label for="code">Verification code</label>
         {% include '_code_field.html' with send_value='send_change_code' resend_value='resend_change' %}
-        <p class="muted code-help">{% if sent %}Code sent to <b>{{ pending_masked }}</b>. It expires in 5 minutes.{% else %}We'll text a code to the new number. If you no longer have your current phone, visit the registrar in person instead.{% endif %}</p>
+        <p class="muted code-help">{% if sent %}Code sent to <b>{{ pending_masked }}</b>. Expires in 5 minutes.{% else %}We'll text a code to the new number. Lost your old phone? Visit the registrar in person.{% endif %}</p>
       </div>
     </div>
     <div class="modal-actions align-start">
@@ -99,7 +99,7 @@
   <div class="security-head">
     <div>
       <h3><i class="fa-solid fa-laptop"></i> Trusted devices</h3>
-      <p class="muted card-intro">Browsers that won't ask for a code when you sign in. Remove any you don't recognise or no longer use.</p>
+      <p class="muted card-intro">Browsers that skip sign-in codes. Remove any you don't recognise.</p>
     </div>
     {% if other_devices %}
     <form method="post" action="{% url 'my_security' %}" data-confirm="Remove every trusted device except this one?">{% csrf_token %}<input type="hidden" name="action" value="revoke_others"><button class="btn small danger" type="submit">Remove all others</button></form>

@@ -49,6 +49,9 @@ function selectTab(tab, historyMode) {
   }
 
   updateTabUrl(validTab, 'personal', historyMode || 'push');
+  if (validTab === 'ember' && typeof window.ednpRefreshEmberNav === 'function') {
+    setTimeout(window.ednpRefreshEmberNav, 30);
+  }
 }
 
 window.selectTab = selectTab;

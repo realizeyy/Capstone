@@ -34,7 +34,7 @@
               <span class="muted">Untick anyone you don't want created. Nothing has been saved yet.</span>
             </div>
           </div>
-          <div class="alert">Each person gets a username (their record ID) and a random temporary password. The passwords appear <b>only once</b>, on the printable slips that open next: they cannot be shown again. Unactivated accounts stop working after {{ setup_window_days }} days.</div>
+          <div class="alert">Usernames are record IDs; passwords show <b>only once</b> on the slips and expire after {{ setup_window_days }} days if unused.</div>
           <form method="post" id="bulkConfirmForm" class="slip-form">
             {% csrf_token %}
             <input type="hidden" name="format" value="html">
@@ -71,7 +71,7 @@
                 {% endfor %}
               </tbody>
             </table>
-            <p class="muted form-note">Names with a yellow note start unticked: tick them only if it really is a different person.</p>
+            <p class="muted form-note">Yellow-flagged names start unticked; tick only if this is a different person.</p>
             <div class="modal-actions">
               <a class="btn secondary"
                  href="{% url 'registrar:bulk_accounts' %}"><i class="fa-solid fa-rotate-left"></i> Start over</a>
@@ -98,7 +98,7 @@
           </div>
           <div class="bulk-result-note">
             <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
-            <span>Temporary passwords appear only on the generated login slips and cannot be retrieved again after leaving this page. Print all slips before leaving.</span>
+            <span>Passwords show only on these slips; print them before leaving.</span>
           </div>
           <div class="bulk-result-actions">
             <button type="button" class="btn" id="bulkReopenSlipsBtn"><i class="fa-solid fa-print"></i> Open Printable Login Slips</button>
@@ -129,7 +129,7 @@
             <div class="field">
               <label for="names_file">…or upload a spreadsheet (.xlsx or .csv)</label>
               <input type="file" id="names_file" name="names_file" accept=".xlsx,.csv">
-              <span class="muted">Names in the first column; a "Full name" header row is fine. If you choose a file, it is used instead of the text above.</span>
+              <span class="muted">Put names in column 1 (header optional). A file overrides the text above.</span>
             </div>
           </div>
           <div class="modal-actions">
