@@ -1329,7 +1329,7 @@
 {% endblock %}
 
 {% block extra_js %}
-  <script src="{% static 'registrar/js/clergy-records.js' %}?v=6"></script>
+  <script src="{% static 'registrar/js/clergy-records.js' %}?v=18"></script>
   <script src="{% static 'registrar/js/record-detail.js' %}?v=8"></script>
   <script src="{% static 'ember-letters.js' %}?v=11"></script>
   <script src="{% static 'clergy/js/address-picker.js' %}?v=11"></script>
@@ -1785,6 +1785,9 @@
             showToast('Network error while uploading. Please try again.', 'error');
           }
         } finally {
+          if (typeof window.ednpClearSkeleton === 'function') {
+            window.ednpClearSkeleton();
+          }
           if (btn) {
             btn.disabled = false;
             btn.innerHTML = origHtml;

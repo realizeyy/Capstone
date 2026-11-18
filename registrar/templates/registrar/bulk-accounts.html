@@ -30,59 +30,70 @@
         <div id="bulkReviewSection">
           <div class="panel-head">
             <div>
-              <h3><i class="fa-solid fa-list-check"></i> Review before creating</h3>
+              <h3><i class="fa-solid fa-list-check" aria-hidden="true"></i> Review before creating</h3>
               <span class="muted">Untick anyone you don't want created. Nothing has been saved yet.</span>
+            </div>
+            <div class="panel-head-actions">
+              <a class="btn secondary" href="{% url 'registrar:clergy_records' %}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to Clergy Records</a>
             </div>
           </div>
           <div class="alert">Usernames are record IDs; passwords show <b>only once</b> on the slips and expire after {{ setup_window_days }} days if unused.</div>
+          <p class="muted bulk-review-note">Yellow-flagged names start unticked; tick only if this is a different person.</p>
           <form method="post" id="bulkConfirmForm" class="slip-form">
             {% csrf_token %}
             <input type="hidden" name="format" value="html">
             <input type="hidden" name="step" value="confirm">
             <input type="hidden" name="token" value="{{ token }}">
-            <table>
-              <thead>
-                <tr>
-                  <th class="col-narrow"></th>
-                  <th class="col-narrow">#</th>
-                  <th>Full name</th>
-                  <th>Check</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for row in preview_rows %}
+            <div id="bulkReviewSentinel" aria-hidden="true"></div>
+            <div class="bulk-review-bar" id="bulkReviewBar">
+              <div class="bulk-review-summary">
+                <span class="bulk-review-count" id="bulkSelectedSummary" aria-live="polite">{{ preview_rows|length }} in list</span>
+              </div>
+              <div class="bulk-review-actions">
+                <a class="btn secondary"
+                   href="{% url 'registrar:bulk_accounts' %}"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Start over</a>
+                <button class="btn secondary"
+                        type="submit"
+                        form="bulkEditInputForm"
+                        formnovalidate><i class="fa-solid fa-pen" aria-hidden="true"></i> Edit names</button>
+                <button class="btn"
+                        type="submit"
+                        id="bulkConfirmBtn"
+                        data-confirm="Create portal accounts and generate printable login slips for the selected clergy members? Temporary passwords will be generated."><i class="fa-solid fa-print" aria-hidden="true"></i> Create accounts &amp; open slips</button>
+              </div>
+            </div>
+            <div class="table-wrap bulk-review-table-wrap">
+              <table>
+                <thead>
                   <tr>
-                    <td>
-                      <input type="checkbox"
-                             class="pick"
-                             name="names"
-                             value="{{ row.name }}"
-                             {% if row.errors %}disabled{% elif not row.warnings %}checked{% endif %}
-                             aria-label="Create account for {{ row.name }}">
-                    </td>
-                    <td>{{ forloop.counter }}</td>
-                    <td><b>{{ row.name }}</b></td>
-                    <td>
-                      {% for e in row.errors %}<span class="badge inactive-b">{{ e }}</span>{% endfor %}
-                      {% for w in row.warnings %}<span class="badge pending-b">{{ w }}</span>{% endfor %}
-                      {% if not row.errors and not row.warnings %}<span class="badge active-b">OK</span>{% endif %}
-                    </td>
+                    <th class="col-narrow"></th>
+                    <th class="col-narrow">#</th>
+                    <th>Full name</th>
+                    <th>Check</th>
                   </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-            <p class="muted form-note">Yellow-flagged names start unticked; tick only if this is a different person.</p>
-            <div class="modal-actions">
-              <a class="btn secondary"
-                 href="{% url 'registrar:bulk_accounts' %}"><i class="fa-solid fa-rotate-left"></i> Start over</a>
-              <button class="btn secondary"
-                      type="submit"
-                      form="bulkEditInputForm"
-                      formnovalidate><i class="fa-solid fa-pen"></i> Edit names</button>
-              <button class="btn"
-                      type="submit"
-                      id="bulkConfirmBtn"
-                      data-confirm="Create portal accounts and generate printable login slips for the selected clergy members? Temporary passwords will be generated."><i class="fa-solid fa-print"></i> Create accounts &amp; open slips</button>
+                </thead>
+                <tbody>
+                  {% for row in preview_rows %}
+                    <tr>
+                      <td>
+                        <input type="checkbox"
+                               class="pick"
+                               name="names"
+                               value="{{ row.name }}"
+                               {% if row.errors %}disabled{% elif not row.warnings %}checked{% endif %}
+                               aria-label="Create account for {{ row.name }}">
+                      </td>
+                      <td>{{ forloop.counter }}</td>
+                      <td><b>{{ row.name }}</b></td>
+                      <td>
+                        {% for e in row.errors %}<span class="badge inactive-b">{{ e }}</span>{% endfor %}
+                        {% for w in row.warnings %}<span class="badge pending-b">{{ w }}</span>{% endfor %}
+                        {% if not row.errors and not row.warnings %}<span class="badge active-b">OK</span>{% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
             </div>
           </form>
         </div>
@@ -112,7 +123,15 @@
           <textarea name="names_text">{{ raw_names_text|default:"" }}</textarea>
         </form>
       {% else %}
-        <div class="panel-head"><div><h3><i class="fa-solid fa-users-gear"></i> Bulk Create Accounts</h3><span class="muted">Add several clergy at once. Everything except the name is filled in later.</span></div><a class="btn secondary" href="{% url 'registrar:clergy_records' %}"><i class="fa-solid fa-arrow-left"></i> Clergy Records</a></div>
+        <div class="panel-head">
+          <div>
+            <h3><i class="fa-solid fa-users-gear" aria-hidden="true"></i> Bulk Create Accounts</h3>
+            <span class="muted">Add several clergy at once. Everything except the name is filled in later.</span>
+          </div>
+          <div class="panel-head-actions">
+            <a class="btn secondary" href="{% url 'registrar:clergy_records' %}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to Clergy Records</a>
+          </div>
+        </div>
         <form method="post" enctype="multipart/form-data" autocomplete="off" id="bulkPreviewForm">
           {% csrf_token %}
           <input type="hidden" name="step" value="preview">
@@ -141,5 +160,5 @@
   </section>
 {% endblock %}
 {% block extra_js %}
-  <script src="{% static 'registrar/js/bulk-accounts.js' %}?v=2"></script>
+  <script src="{% static 'registrar/js/bulk-accounts.js' %}?v=3"></script>
 {% endblock %}

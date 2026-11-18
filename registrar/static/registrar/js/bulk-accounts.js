@@ -5,6 +5,10 @@
   var form = document.getElementById('bulkConfirmForm');
   if (!form) return;
   var btn = document.getElementById('bulkConfirmBtn');
+  var selectedSummary = document.getElementById('bulkSelectedSummary');
+  var reviewBar = document.getElementById('bulkReviewBar');
+  var reviewSentinel = document.getElementById('bulkReviewSentinel');
+  var sidebarEl = document.querySelector('.sidebar');
   var reviewSection = document.getElementById('bulkReviewSection');
   var statusBanner = document.getElementById('bulkStatusBanner');
   var statusTitle = document.getElementById('bulkStatusTitle');
@@ -21,11 +25,40 @@
   var tokenInvalidated = false;
   var lastBulkSlips = null;
   var lastSuccessToastText = '';
+  var totalRows = form.querySelectorAll('.pick').length;
 
   function refresh() {
     var n = form.querySelectorAll('.pick:checked').length;
     btn.disabled = tokenInvalidated || n === 0;
     btn.lastChild.textContent = ' Create ' + n + ' account' + (n === 1 ? '' : 's') + ' & open slips';
+    if (selectedSummary) {
+      selectedSummary.textContent = n + ' of ' + totalRows + ' selected';
+    }
+  }
+
+  function updateStickyMetrics() {
+    if (!reviewBar) return;
+    var stickyTop = 0;
+    if (sidebarEl) {
+      var cs = window.getComputedStyle(sidebarEl);
+      if (cs.position === 'sticky') {
+        stickyTop = Math.max(0, Math.round(sidebarEl.getBoundingClientRect().height));
+      }
+    }
+    reviewBar.style.setProperty('--bulk-sticky-top', stickyTop + 'px');
+    if (reviewSentinel) {
+      var rect = reviewSentinel.getBoundingClientRect();
+      reviewBar.classList.toggle('is-stuck', rect.top < stickyTop);
+    }
+  }
+
+  if (reviewBar) {
+    window.addEventListener('scroll', updateStickyMetrics, { passive: true });
+    window.addEventListener('resize', updateStickyMetrics, { passive: true });
+    if (sidebarEl && 'ResizeObserver' in window) {
+      new ResizeObserver(updateStickyMetrics).observe(sidebarEl);
+    }
+    updateStickyMetrics();
   }
 
   form.addEventListener('change', refresh);

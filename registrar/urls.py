@@ -25,6 +25,7 @@ urlpatterns = [
     path('ember-letters/<int:ember_id>/download/', views.download_ember_letter, name='download_ember_letter'),
     path('ember-letters/<int:ember_id>/delete/', views.delete_ember_letter, name='delete_ember_letter'),
     path('contract-review/', views.contract_review, name='contract_review'),
+    path('contract-review/<str:record_id>/update/', views.update_contract_status, name='update_contract_status'),
     path('generate-report/', views.generate_report, name='generate_report'),
     path('generate-report/archive-selected/', views.archive_selected_reports, name='archive_selected_reports'),
     path('generate-report/archived/delete/', views.delete_archived_reports, name='delete_archived_reports'),

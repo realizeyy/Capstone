@@ -151,6 +151,27 @@ class BulkViewTests(TestCase):
         self.assertFalse(ClergyRecord.objects.exists())
         self.assertFalse(User.objects.filter(username__startswith='CLG').exists())
 
+    def test_step_one_and_review_include_back_to_clergy_records_and_top_action_bar(self):
+        records_url = reverse('registrar:clergy_records')
+        step1 = self.client.get(self.url)
+        self.assertEqual(step1.status_code, 200)
+        self.assertContains(step1, records_url)
+        self.assertContains(step1, 'Back to Clergy Records')
+
+        names = '\n'.join(f'Rev. Preview {i}' for i in range(1, 51))
+        review = self._preview(names)
+        self.assertEqual(review.status_code, 200)
+        html = review.content.decode('utf-8')
+        self.assertIn(f'href="{records_url}"', html)
+        self.assertIn('Back to Clergy Records', html)
+        bar_idx = html.index('id="bulkReviewBar"')
+        confirm_idx = html.index('id="bulkConfirmBtn"')
+        edit_idx = html.index('form="bulkEditInputForm"')
+        table_idx = html.index('<table>')
+        self.assertLess(bar_idx, table_idx)
+        self.assertLess(edit_idx, table_idx)
+        self.assertLess(confirm_idx, table_idx)
+
     def test_confirm_creates_selected_people_and_returns_pdf(self):
         token = self._preview('Juan Cruz\nMaria Santos').context['token']
         r = self.client.post(self.url, {'step': 'confirm', 'token': token, 'names': ['Juan Cruz', 'Maria Santos']})

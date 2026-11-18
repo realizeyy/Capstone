@@ -53,11 +53,15 @@
   }
 
   var skeletonTimer = null;
+  var busyTimers = [];
 
   function clearSkeleton() {
     if (skeletonTimer) {
       clearTimeout(skeletonTimer);
       skeletonTimer = null;
+    }
+    while (busyTimers.length) {
+      clearTimeout(busyTimers.pop());
     }
     progress(false);
     document.querySelectorAll('.is-pending').forEach(function (n) { n.classList.remove('is-pending'); });
@@ -66,6 +70,14 @@
       b.classList.remove('is-busy');
       b.removeAttribute('aria-busy');
     });
+    var workingToast = document.querySelector('#toast.toast-working.show');
+    if (workingToast) {
+      if (typeof window.hideToast === 'function') {
+        window.hideToast();
+      } else {
+        workingToast.classList.remove('show', 'toast-working');
+      }
+    }
     var main = document.querySelector('main');
     if (!main) return;
     main.classList.remove('is-loading');
@@ -333,34 +345,49 @@
     showSkeleton(a);
   }, true);
 
+  // Capture phase: block duplicate in-flight submits and intercept data-confirm prompts
+  // before target-phase form validators or submit handlers execute.
   document.addEventListener('submit', function (e) {
     if (e.defaultPrevented) return;
     var form = e.target;
+    if (!form || form.tagName !== 'FORM') return;
+
+    if (form.classList.contains('is-submitting')) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      return;
+    }
 
     if (form._isConfirmed) {
       delete form._isConfirmed;
-    } else {
-      var submitter = e.submitter;
-      var confirmMsg = (submitter && (submitter.getAttribute('data-confirm') || (submitter.dataset && submitter.dataset.confirm))) ||
-                       (form.dataset && form.dataset.confirm) ||
-                       (form.getAttribute && form.getAttribute('data-confirm'));
-
-      if (confirmMsg) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        window.appConfirm(confirmMsg).then(function (ok) {
-          if (!ok) return;
-          form._isConfirmed = true;
-          if (typeof form.requestSubmit === 'function') {
-            form.requestSubmit(submitter || undefined);
-          } else {
-            form.submit();
-          }
-        });
-        return;
-      }
+      return;
     }
 
+    var submitter = e.submitter;
+    var confirmMsg = (submitter && (submitter.getAttribute('data-confirm') || (submitter.dataset && submitter.dataset.confirm))) ||
+                     (form.dataset && form.dataset.confirm) ||
+                     (form.getAttribute && form.getAttribute('data-confirm'));
+
+    if (confirmMsg) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      window.appConfirm(confirmMsg).then(function (ok) {
+        if (!ok) return;
+        form._isConfirmed = true;
+        if (typeof form.requestSubmit === 'function') {
+          form.requestSubmit(submitter || undefined);
+        } else {
+          form.submit();
+        }
+      });
+    }
+  }, true);
+
+  // Bubble phase: apply busy/spinner state only after target-phase validators allow submission.
+  document.addEventListener('submit', function (e) {
+    if (e.defaultPrevented) return;
+    var form = e.target;
+    if (!form || form.tagName !== 'FORM') return;
     if (form.target && form.target !== '_self') return;
     if (form.classList.contains('is-submitting')) {
       e.preventDefault();
@@ -375,19 +402,25 @@
       skeletonTimer = null;
     }
     // Async fetch forms clear skeleton explicitly when their request finishes;
-    // standard POSTs (which may return a file download without navigating) keep a 60s safety fallback.
+    // standard POSTs (which may return a file download without navigating) keep a safety fallback.
     if (!asyncManaged) {
-      skeletonTimer = setTimeout(clearSkeleton, 60000);
+      skeletonTimer = setTimeout(clearSkeleton, 15000);
       if (typeof showToast === 'function') {
         showToast(form.querySelector('input[type=file]') ? 'Uploading...' : 'Working on it...', 'working');
       }
     }
     if (btn) {
       btn.setAttribute('aria-busy', 'true');
-      // Defer so the button's own value is still submitted
-      setTimeout(function () { btn.classList.add('is-busy'); }, 0);
+      // Defer so the button's own value is still submitted, and abort if cleared synchronously.
+      var tid = setTimeout(function () {
+        busyTimers = busyTimers.filter(function (id) { return id !== tid; });
+        if (btn.getAttribute('aria-busy') === 'true') {
+          btn.classList.add('is-busy');
+        }
+      }, 0);
+      busyTimers.push(tid);
     }
-  }, true);
+  }, false);
 
   // Icon-only nav on phones: keep every link labelled for hover/screen readers
   document.querySelectorAll('.sidebar .nav a').forEach(function (a) {

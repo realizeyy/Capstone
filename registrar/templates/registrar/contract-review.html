@@ -75,9 +75,23 @@
                 <td><b>{{ row.days_left }}</b></td>
                 <td><span class="badge {{ row.record.status|status_badge_class }}">{{ row.record.status }}</span></td>
                 <td>
-                  <a class="btn small secondary" href="{% url 'registrar:record_detail' row.record.id %}?edit=contract#sec-reg-status">
-                    <i class="fa-solid fa-pen-to-square"></i> Update Contract
-                  </a>
+                  <button type="button"
+                          class="btn small secondary"
+                          data-contract-edit
+                          data-update-url="{% url 'registrar:update_contract_status' row.record.id %}"
+                          data-record-url="{% url 'registrar:record_detail' row.record.id %}?edit=contract#sec-reg-status"
+                          data-record-id="{{ row.record.id }}"
+                          data-record-name="{{ row.record.name }}"
+                          data-rank="{{ row.record.rank|default:'deacon' }}"
+                          data-years-service="{{ row.record.years_of_service_display }}"
+                          data-status="{{ row.record.status|default:'Active' }}"
+                          data-leave-reason="{{ row.record.leave_reason|default:'' }}"
+                          data-deanery-id="{{ row.record.deanery_id|default:'' }}"
+                          data-assignment="{{ row.record.assignment|default:'' }}"
+                          data-contract-end="{{ row.record.contract_end|date:'Y-m-d'|default:'' }}"
+                          data-retirement-date="{{ row.record.retirement_date|date:'Y-m-d'|default:'' }}">
+                    <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Update Contract
+                  </button>
                 </td>
               </tr>
             {% empty %}
@@ -100,4 +114,202 @@
       {% endif %}
     </div>
   </section>
+{% endblock %}
+{% block modals %}
+  <div class="modal-bg"
+       id="contractStatusModal"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="contractModalTitle"
+       aria-describedby="contractModalClergySubtitle">
+    <div class="modal contract-status-modal">
+      <div class="modal-head">
+        <div>
+          <h3 id="contractModalTitle">
+            <i class="fa-solid fa-briefcase" aria-hidden="true"></i> Deployment &amp; Official Status
+          </h3>
+          <p class="muted contract-modal-subject" id="contractModalClergySubtitle">
+            <strong id="contractModalClergyName"></strong>
+            <span class="contract-modal-id" id="contractModalClergyId"></span>
+            <a class="contract-modal-profile-link"
+               id="contractModalFullRecordLink"
+               href="#">Open full record</a>
+          </p>
+        </div>
+        <button class="close contract-modal-close"
+                type="button"
+                id="contractModalCloseBtn"
+                aria-label="Close"
+                data-close-modal="contractStatusModal">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
+      <form method="post" id="contractStatusForm" data-async-submit="true" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="next" id="contractModalNext" value="{{ request.get_full_path }}">
+        <div class="alert alert-error contract-modal-alert"
+             id="contractModalErrorAlert"
+             role="alert"
+             hidden></div>
+        <div class="edit-grid contract-edit-grid">
+          <div class="edit-field full contract-section-heading">
+            <i class="fa-solid fa-id-badge" aria-hidden="true"></i>
+            <span>Ecclesiastical Rank &amp; Status</span>
+          </div>
+          <div class="edit-field">
+            <label id="contractRankLabel" for="contractRankTrigger">Rank</label>
+            <div class="edit-select" data-edit-select="rank">
+              <input type="hidden" name="rank" id="contractRankValue" value="deacon">
+              <button type="button"
+                      class="edit-select-trigger"
+                      id="contractRankTrigger"
+                      aria-haspopup="listbox"
+                      aria-expanded="false"
+                      aria-controls="contractRankListbox"
+                      aria-labelledby="contractRankLabel contractRankText">
+                <span class="edit-select-text" id="contractRankText">Deacon</span>
+                <i class="fa-solid fa-chevron-down edit-select-chevron" aria-hidden="true"></i>
+              </button>
+              <ul class="edit-select-listbox"
+                  id="contractRankListbox"
+                  role="listbox"
+                  tabindex="-1"
+                  aria-labelledby="contractRankLabel"
+                  hidden>
+                {% for value, label in rank_choices %}
+                  <li role="option"
+                      id="contractRankOpt_{{ forloop.counter0 }}"
+                      class="edit-select-option"
+                      data-value="{{ value }}"
+                      aria-selected="false">{{ label }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+          <div class="edit-field">
+            <label for="contractYearsService">Years of Service</label>
+            <input id="contractYearsService"
+                   type="text"
+                   readonly
+                   value="0 years"
+                   title="Calculated automatically from deployment history">
+          </div>
+          <div class="edit-field">
+            <label id="contractStatusLabel" for="contractStatusTrigger">Current Status</label>
+            <div class="edit-select" data-edit-select="status">
+              <input type="hidden" name="status" id="contractStatusValue" value="Active">
+              <button type="button"
+                      class="edit-select-trigger"
+                      id="contractStatusTrigger"
+                      aria-haspopup="listbox"
+                      aria-expanded="false"
+                      aria-controls="contractStatusListbox"
+                      aria-labelledby="contractStatusLabel contractStatusText">
+                <span class="edit-select-text" id="contractStatusText">Active</span>
+                <i class="fa-solid fa-chevron-down edit-select-chevron" aria-hidden="true"></i>
+              </button>
+              <ul class="edit-select-listbox"
+                  id="contractStatusListbox"
+                  role="listbox"
+                  tabindex="-1"
+                  aria-labelledby="contractStatusLabel"
+                  hidden>
+                {% for value, label in status_choices %}
+                  <li role="option"
+                      id="contractStatusOpt_{{ forloop.counter0 }}"
+                      class="edit-select-option"
+                      data-value="{{ value }}"
+                      aria-selected="false">{{ label }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+          <div class="edit-field hidden" id="contractLeaveReasonField">
+            <label for="contractLeaveReason">Leave Reason</label>
+            <input id="contractLeaveReason"
+                   name="leave_reason"
+                   type="text"
+                   maxlength="255"
+                   placeholder="e.g. medical leave, sabbatical">
+          </div>
+
+          <div class="edit-field full contract-section-heading">
+            <i class="fa-solid fa-church" aria-hidden="true"></i>
+            <span>Assignment &amp; Jurisdiction</span>
+          </div>
+          <div class="edit-field">
+            <label id="contractDeaneryLabel" for="contractDeaneryTrigger">Deanery</label>
+            <div class="edit-select" data-edit-select="deanery">
+              <input type="hidden" name="deanery" id="contractDeaneryValue" value="">
+              <button type="button"
+                      class="edit-select-trigger"
+                      id="contractDeaneryTrigger"
+                      aria-haspopup="listbox"
+                      aria-expanded="false"
+                      aria-controls="contractDeaneryListbox"
+                      aria-labelledby="contractDeaneryLabel contractDeaneryText">
+                <span class="edit-select-text" id="contractDeaneryText">Select Deanery</span>
+                <i class="fa-solid fa-chevron-down edit-select-chevron" aria-hidden="true"></i>
+              </button>
+              <ul class="edit-select-listbox"
+                  id="contractDeaneryListbox"
+                  role="listbox"
+                  tabindex="-1"
+                  aria-labelledby="contractDeaneryLabel"
+                  hidden></ul>
+            </div>
+          </div>
+          <div class="edit-field">
+            <label id="contractAssignmentLabel" for="contractAssignmentTrigger">Current Assignment</label>
+            <div class="edit-select" data-edit-select="assignment">
+              <input type="hidden" name="assignment" id="contractAssignmentValue" value="">
+              <button type="button"
+                      class="edit-select-trigger"
+                      id="contractAssignmentTrigger"
+                      aria-haspopup="listbox"
+                      aria-expanded="false"
+                      aria-controls="contractAssignmentListbox"
+                      aria-labelledby="contractAssignmentLabel contractAssignmentText">
+                <span class="edit-select-text" id="contractAssignmentText">Select Deanery first</span>
+                <i class="fa-solid fa-chevron-down edit-select-chevron" aria-hidden="true"></i>
+              </button>
+              <ul class="edit-select-listbox"
+                  id="contractAssignmentListbox"
+                  role="listbox"
+                  tabindex="-1"
+                  aria-labelledby="contractAssignmentLabel"
+                  hidden></ul>
+            </div>
+          </div>
+
+          <div class="edit-field full contract-section-heading">
+            <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
+            <span>Contract &amp; Tenure Dates</span>
+          </div>
+          <div class="edit-field">
+            <label for="contractEndDate">Contract End Date</label>
+            <input id="contractEndDate" name="contract_end" type="date">
+          </div>
+          <div class="edit-field">
+            <label for="contractRetirementDate">Date of Retirement</label>
+            <input id="contractRetirementDate" name="retirement_date" type="date">
+          </div>
+        </div>
+        <div class="modal-actions contract-modal-actions">
+          <button type="button"
+                  class="btn secondary"
+                  data-close-modal="contractStatusModal">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i> Cancel
+          </button>
+          <button type="submit" class="btn" id="contractModalSaveBtn">
+            <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {{ deaneries_map|json_script:"deaneries-data" }}
+{% endblock %}
+{% block extra_js %}
+  <script src="{% static 'registrar/js/contract-review.js' %}?v=2"></script>
 {% endblock %}

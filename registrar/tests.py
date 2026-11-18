@@ -10,15 +10,15 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError
 from django.db import close_old_connections, transaction
-from django.test import TestCase, TransactionTestCase, override_settings, skipUnlessDBFeature
+from django.test import Client, TestCase, TransactionTestCase, override_settings, skipUnlessDBFeature
 from django.urls import reverse
 from django.utils import dateformat, timezone
 
 from accounts.testing import activate
-from clergy.models import ClergyChild, ClergyEducation, ClergyProfile
+from clergy.models import ClergyChild, ClergyEducation, ClergyProfile, Notification
 
+from . import archive, reports
 from .forms import DocumentUploadForm
-from . import reports
 from .models import ClergyDeployment, ClergyRecord, Deanery, Document, DocumentType, GeneratedReport, IdCounter, Parish, save_document
 
 User = get_user_model()
@@ -1289,6 +1289,210 @@ class ContractReviewSearchAndPaginationTests(TestCase):
         self.assertIn(dateformat.format(self.soon_date, 'N j, Y').lower(), clergy_item['keywords'])
         action_titles = [item['title'] for item in catalog if item['category'] == 'Administrative Actions']
         self.assertIn('Contract Review', action_titles)
+
+
+class ContractReviewModalUpdateTests(TestCase):
+    def setUp(self):
+        self.registrar = activate(User.objects.create_user('reg_modal', password='pw12345!x', is_staff=True))
+        self.registrar.first_name = 'Maria Santos'
+        self.registrar.save()
+        self.client.force_login(self.registrar)
+
+        self.deanery_baguio = Deanery.objects.create(name='Baguio')
+        self.deanery_central = Deanery.objects.create(name='Central')
+        Parish.objects.create(deanery=self.deanery_baguio, parish_name='St. Luke Parish', place_name='Baguio')
+        Parish.objects.create(deanery=self.deanery_central, parish_name='All Saints Cathedral', place_name='Bontoc')
+
+        self.record = ClergyRecord.objects.create(
+            id='CLG-601',
+            name='Fr. Juan Santos',
+            date_of_birth=date(1980, 5, 10),
+            email='juan@gmail.com',
+            rank='priest',
+            status='Active',
+            deanery=self.deanery_baguio,
+            assignment='St. Luke Parish - Baguio',
+            contract_end=date.today() + timedelta(days=20),
+        )
+        self.clergy_user = activate(User.objects.create_user('CLG-601', password='pw12345!x'))
+        ClergyProfile.objects.create(user=self.clergy_user, record=self.record)
+        self.update_url = reverse('registrar:update_contract_status', args=[self.record.id])
+
+    def test_contract_review_renders_modal_and_row_attributes(self):
+        res = self.client.get(reverse('registrar:contract_review'))
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, 'id="contractStatusModal"')
+        self.assertContains(res, 'id="contractStatusForm" data-async-submit="true"')
+        self.assertContains(res, 'Deployment &amp; Official Status')
+        self.assertContains(res, 'id="contractModalClergyName"')
+        self.assertContains(res, 'id="contractModalClergyId"')
+        self.assertContains(res, 'id="contractModalFullRecordLink"')
+        self.assertContains(res, 'aria-haspopup="listbox"')
+        self.assertContains(res, 'id="deaneries-data"')
+        self.assertContains(res, 'contract-review.js')
+        self.assertContains(res, f'data-update-url="{self.update_url}"')
+        self.assertContains(res, 'data-record-name="Fr. Juan Santos"')
+        self.assertContains(res, 'data-record-id="CLG-601"')
+
+        html = res.content.decode('utf-8')
+        modal_html = html.split('id="contractStatusModal"', 1)[1]
+        self.assertNotIn('<select', modal_html)
+
+    def test_update_contract_status_requires_registrar_and_post(self):
+        get_res = self.client.get(self.update_url)
+        self.assertRedirects(get_res, reverse('registrar:contract_review'), fetch_redirect_response=False)
+
+        ajax_get = self.client.get(self.update_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(ajax_get.status_code, 405)
+
+        clergy_client = Client()
+        clergy_client.force_login(self.clergy_user)
+        clergy_res = clergy_client.post(self.update_url, {
+            'rank': 'bishop',
+            'status': 'Retired',
+            'contract_end': '2030-01-01',
+        })
+        self.assertEqual(clergy_res.status_code, 302)
+        self.record.refresh_from_db()
+        self.assertEqual(self.record.rank, 'priest')
+        self.assertEqual(self.record.status, 'Active')
+
+    def test_ajax_update_saves_deployment_and_official_status_and_notifies_clergy(self):
+        new_end = date(2028, 6, 30)
+        new_retire = date(2045, 5, 10)
+        res = self.client.post(
+            self.update_url,
+            {
+                'rank': 'bishop',
+                'status': 'On Leave',
+                'leave_reason': 'Sabbatical study',
+                'deanery': str(self.deanery_central.id),
+                'assignment': 'All Saints Cathedral - Bontoc',
+                'contract_end': new_end.isoformat(),
+                'retirement_date': new_retire.isoformat(),
+            },
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+        self.assertEqual(res.status_code, 200)
+        payload = res.json()
+        self.assertTrue(payload['ok'])
+        self.assertIn('Fr. Juan Santos', payload['message'])
+
+        self.record.refresh_from_db()
+        self.assertEqual(self.record.name, 'Fr. Juan Santos')
+        self.assertEqual(self.record.email, 'juan@gmail.com')
+        self.assertEqual(self.record.rank, 'bishop')
+        self.assertEqual(self.record.status, 'On Leave')
+        self.assertEqual(self.record.leave_reason, 'Sabbatical study')
+        self.assertEqual(self.record.deanery, self.deanery_central)
+        self.assertEqual(self.record.assignment, 'All Saints Cathedral - Bontoc')
+        self.assertEqual(self.record.contract_end, new_end)
+        self.assertEqual(self.record.retirement_date, new_retire)
+
+        note = Notification.objects.get(user=self.clergy_user, kind='record_updated')
+        self.assertIn('Maria Santos (Registrar) changed:', note.message)
+        self.assertIn('Status (now On Leave)', note.message)
+        self.assertIn('Rank (now Bishop)', note.message)
+        self.assertIn('Deanery (now Central)', note.message)
+        self.assertIn('Contract end (now Jun 30, 2028)', note.message)
+        self.assertNotIn('Sabbatical', note.message)
+
+    def test_non_ajax_redirect_preserves_safe_filters_and_rejects_external_next(self):
+        safe_next = reverse('registrar:contract_review') + '?q=Juan&status=Active'
+        res_safe = self.client.post(self.update_url, {
+            'rank': 'priest',
+            'status': 'Active',
+            'deanery': str(self.deanery_baguio.id),
+            'assignment': 'St. Luke Parish - Baguio',
+            'contract_end': '2029-12-31',
+            'next': safe_next,
+        })
+        self.assertRedirects(res_safe, safe_next, fetch_redirect_response=False)
+
+        res_evil = self.client.post(self.update_url, {
+            'rank': 'priest',
+            'status': 'Active',
+            'deanery': str(self.deanery_baguio.id),
+            'assignment': 'St. Luke Parish - Baguio',
+            'contract_end': '2030-01-15',
+            'next': 'https://evil.example/registrar/contract-review/?q=hack',
+        })
+        self.assertRedirects(res_evil, reverse('registrar:contract_review'), fetch_redirect_response=False)
+
+    def test_validation_errors_return_400_without_saving(self):
+        orig_end = self.record.contract_end
+
+        res_leave = self.client.post(
+            self.update_url,
+            {
+                'rank': 'priest',
+                'status': 'On Leave',
+                'leave_reason': '   ',
+                'contract_end': orig_end.isoformat(),
+            },
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+        self.assertEqual(res_leave.status_code, 400)
+        self.assertIn('leave_reason', res_leave.json()['errors'])
+
+        res_dob = self.client.post(
+            self.update_url,
+            {
+                'rank': 'priest',
+                'status': 'Active',
+                'contract_end': '1975-01-01',
+                'retirement_date': '1970-01-01',
+            },
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+        self.assertEqual(res_dob.status_code, 400)
+        errors = res_dob.json()['errors']
+        self.assertIn('contract_end', errors)
+        self.assertIn('retirement_date', errors)
+
+        self.record.refresh_from_db()
+        self.assertEqual(self.record.status, 'Active')
+        self.assertEqual(self.record.contract_end, orig_end)
+
+    def test_archived_record_cannot_leave_retired_status(self):
+        self.record.status = 'Retired'
+        self.record.archived_at = timezone.now()
+        self.record.archived_by = self.registrar
+        self.record.save()
+
+        res = self.client.post(
+            self.update_url,
+            {
+                'rank': 'priest',
+                'status': 'Active',
+                'contract_end': (date.today() + timedelta(days=30)).isoformat(),
+            },
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+        self.assertEqual(res.status_code, 400)
+        self.assertIn('status', res.json()['errors'])
+        self.record.refresh_from_db()
+        self.assertEqual(self.record.status, 'Retired')
+
+    def test_moving_contract_end_to_past_records_expired_deployment(self):
+        past_end = date.today() - timedelta(days=5)
+        res = self.client.post(
+            self.update_url,
+            {
+                'rank': 'priest',
+                'status': 'Active',
+                'deanery': str(self.deanery_baguio.id),
+                'assignment': 'St. Luke Parish - Baguio',
+                'contract_end': past_end.isoformat(),
+            },
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+        self.assertEqual(res.status_code, 200)
+        dep = self.record.deployments.filter(end_date=past_end).first()
+        self.assertIsNotNone(dep)
+        self.assertEqual(dep.station_name, 'St. Luke Parish')
+        self.assertFalse(dep.is_current)
+
 
 
 

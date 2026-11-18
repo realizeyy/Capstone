@@ -234,7 +234,7 @@
   {{ deaneries_map|json_script:"deaneries-data" }}
 {% endblock %}
 {% block extra_js %}
-  <script src="{% static 'registrar/js/clergy-records.js' %}"></script>
+  <script src="{% static 'registrar/js/clergy-records.js' %}?v=18"></script>
   <script>
   document.addEventListener('DOMContentLoaded', function() {
     // 1. Welcome banner dismiss logic with localStorage persistence

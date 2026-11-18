@@ -640,6 +640,8 @@ if(profilePicInput){
   const fileInput=form.querySelector('input[type="file"]')||(form.id?document.querySelector('input[type="file"][form="'+form.id+'"]'):null);
   const file=fileInput&&fileInput.files&&fileInput.files[0];
   if(file&&file.size>10*1024*1024){
+   e.preventDefault();
+   e.stopImmediatePropagation();
    showToast('File is too large: maximum allowed is 10 MB for a photo or scan, and 5 MB for a PDF.','error');
    return;
   }
@@ -708,6 +710,7 @@ if(profilePicInput){
   }catch(_err){
    showToast('Network error while uploading. Please try again.','error');
   }finally{
+   if(typeof window.ednpClearSkeleton==='function')window.ednpClearSkeleton();
    if(btn){
     btn.disabled=false;
     btn.innerHTML=origHtml;

@@ -17,6 +17,7 @@ from django.http import FileResponse, Http404, HttpResponse, JsonResponse, Strea
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import dateformat, timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from accounts import audit
 from accounts.models import AccountAuditLog
@@ -28,7 +29,8 @@ from ednp.pdf import PdfGenerationError
 
 from . import archive, backups, bulk, reports, slips
 from .decorators import registrar_required
-from .forms import ClergyDeploymentForm, ClergyRecordForm, DocumentUploadForm, EmberLetterUploadForm, PersonalInfoForm, first_error
+from .forms import (ClergyDeploymentForm, ClergyRecordForm, ContractStatusUpdateForm, DocumentUploadForm,
+                    EmberLetterUploadForm, PersonalInfoForm, first_error)
 from .models import (RANK_CHOICES, REPORT_ARCHIVE_DAYS, BackupArchive, ClergyRecord, ClergyDeployment, Deanery, Document, DocumentType,
                      EmberLetter, GeneratedReport, delete_ember_letter as remove_ember_letter,
                      note_document_submission, save_document, save_ember_letter, sync_expired_contracts)
@@ -1246,6 +1248,7 @@ def contract_review(request):
     records = (
         ClergyRecord.objects.current()
         .select_related('deanery')
+        .prefetch_related('deployments')
         .filter(contract_end__isnull=False)
         .order_by('contract_end')
     )
@@ -1275,7 +1278,76 @@ def contract_review(request):
         'expiry_choices': CONTRACT_EXPIRY_CHOICES,
         'status_filter': status_filter,
         'status_choices': ClergyRecord.STATUS_CHOICES,
+        'rank_choices': RANK_CHOICES,
+        'deaneries_map': _build_deaneries_map(),
     })
+
+
+def _contract_review_redirect(request):
+    """Redirect back to Contract Review while safely preserving any active query filters."""
+    next_url = (request.POST.get('next') or '').strip()
+    base_path = reverse('registrar:contract_review')
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        parsed = urllib.parse.urlsplit(next_url)
+        if parsed.path == base_path:
+            return redirect(f'{base_path}?{parsed.query}' if parsed.query else base_path)
+    return redirect(base_path)
+
+
+@registrar_required
+def update_contract_status(request, record_id):
+    """Update a clergy member's Deployment & Official Status fields directly from Contract Review."""
+    record = get_object_or_404(ClergyRecord, id=record_id)
+    is_ajax = _is_ajax_request(request)
+
+    if request.method != 'POST':
+        if is_ajax:
+            return JsonResponse({'ok': False, 'error': 'POST required.'}, status=405)
+        return redirect('registrar:contract_review')
+
+    form = ContractStatusUpdateForm(request.POST, instance=record)
+    if not form.is_valid():
+        err = first_error(form) or 'Please check the form and try again.'
+        if is_ajax:
+            return JsonResponse({'ok': False, 'error': err, 'errors': form.errors}, status=400)
+        messages.error(request, err)
+        return _contract_review_redirect(request)
+
+    if record.is_archived and form.cleaned_data['status'] != archive.ARCHIVABLE_STATUS:
+        err = 'This record is archived. Restore it before changing its status.'
+        if is_ajax:
+            return JsonResponse({'ok': False, 'error': err, 'errors': {'status': [err]}}, status=400)
+        messages.error(request, err)
+        return _contract_review_redirect(request)
+
+    with transaction.atomic():
+        form.save()
+        record.record_expired_contract()
+        notifications.record_updated(record, request.user, form)
+
+    msg = f'Deployment and official status updated for {record.name}.'
+    if is_ajax:
+        return JsonResponse({
+            'ok': True,
+            'message': msg,
+            'record': {
+                'id': record.id,
+                'name': record.name,
+                'rank': record.rank,
+                'status': record.status,
+                'leave_reason': record.leave_reason or '',
+                'deanery_id': record.deanery_id,
+                'assignment': record.assignment or '',
+                'contract_end': record.contract_end.isoformat() if record.contract_end else '',
+                'retirement_date': record.retirement_date.isoformat() if record.retirement_date else '',
+            },
+        })
+    messages.success(request, msg)
+    return _contract_review_redirect(request)
 
 
 @registrar_required

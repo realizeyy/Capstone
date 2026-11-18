@@ -74,14 +74,20 @@ function applyFormErrors(formEl, errors){
   if(input){
    input.setAttribute('aria-invalid', 'true');
    const container = input.closest('.field, .edit-field') || input.parentElement;
+   let focusEl = input;
    if(container){
     container.classList.add('has-error');
+    const customTrigger = input.type === 'hidden' ? container.querySelector('.edit-select-trigger') : null;
+    if(customTrigger){
+     customTrigger.setAttribute('aria-invalid', 'true');
+     focusEl = customTrigger;
+    }
     const errSpan = document.createElement('span');
     errSpan.className = 'field-error-msg';
     errSpan.textContent = msg;
     container.appendChild(errSpan);
    }
-   if(!firstInvalidEl) firstInvalidEl = input;
+   if(!firstInvalidEl) firstInvalidEl = focusEl;
   }
  }
 
@@ -658,6 +664,8 @@ try{
   const fileInput=form.querySelector('input[type="file"]');
   const file=fileInput&&fileInput.files&&fileInput.files[0];
   if(file&&file.size>10*1024*1024){
+   e.preventDefault();
+   e.stopImmediatePropagation();
    showToast('File is too large: maximum allowed is 10 MB for a photo or scan, and 5 MB for a PDF.','error');
    return;
   }
@@ -700,6 +708,7 @@ try{
   }catch(_err){
    showToast('Network error while uploading. Please try again.','error');
   }finally{
+   if(typeof window.ednpClearSkeleton==='function')window.ednpClearSkeleton();
    if(btn){
     btn.disabled=false;
     btn.innerHTML=origHtml;
@@ -1563,7 +1572,7 @@ try{
  };
 
  function clearSlipFormInlineError(form) {
-  form.querySelectorAll('.slip-form-inline-error').forEach(function (el) {
+  form.querySelectorAll('.slip-form-inline-error, .record-modal-client-error').forEach(function (el) {
    el.remove();
   });
  }
@@ -1612,7 +1621,7 @@ try{
   e.preventDefault();
   e.stopImmediatePropagation();
 
-  const submitBtn = e.submitter || form.querySelector('button[type="submit"], input[type="submit"]');
+  const submitBtn = e.submitter || form.querySelector('button[type="submit"], button:not([type]), input[type="submit"]');
   if (submitBtn) {
    submitBtn.disabled = true;
    submitBtn.setAttribute('aria-busy', 'true');
@@ -1637,33 +1646,44 @@ try{
    }
   }
 
-  openSlipProgressModal({
-   isBulk: isBulk,
-   count: batchCount,
-   title: isBulk ? undefined : 'Creating account & login slip'
-  });
+  let fetchPromise;
+  try {
+   openSlipProgressModal({
+    isBulk: isBulk,
+    count: batchCount,
+    title: isBulk ? undefined : 'Creating account & login slip'
+   });
 
-  showToast(
-   isBulk
-    ? ('Creating ' + (batchCount ? batchCount + ' ' : '') + 'clergy accounts & generating login slips...')
-    : 'Generating login slip for printing...',
-   'working'
-  );
+   showToast(
+    isBulk
+     ? ('Creating ' + (batchCount ? batchCount + ' ' : '') + 'clergy accounts & generating login slips...')
+     : 'Generating login slip for printing...',
+    'working'
+   );
 
-  const formData = new FormData(form);
-  if (e.submitter && e.submitter.name) {
-   formData.append(e.submitter.name, e.submitter.value);
-  }
-  formData.append('format', 'html');
-
-  fetch(form.action || window.location.href, {
-   method: 'POST',
-   body: formData,
-   headers: {
-    'X-Requested-With': 'XMLHttpRequest',
-    'X-Slip-Format': 'html'
+   const formData = new FormData(form);
+   if (e.submitter && e.submitter.name) {
+    formData.append(e.submitter.name, e.submitter.value);
    }
-  }).then(async function (res) {
+   formData.append('format', 'html');
+
+   fetchPromise = fetch(form.action || window.location.href, {
+    method: 'POST',
+    body: formData,
+    headers: {
+     'X-Requested-With': 'XMLHttpRequest',
+     'X-Slip-Format': 'html'
+    }
+   });
+  } catch (syncErr) {
+   finishProgressUi();
+   const syncMsg = 'Could not submit request: ' + ((syncErr && syncErr.message) || 'Unexpected error');
+   showSlipFormInlineError(form, syncMsg);
+   showToast(syncMsg, 'error');
+   return;
+  }
+
+  fetchPromise.then(async function (res) {
    const contentType = res.headers.get('content-type') || '';
 
    if (res.redirected) {

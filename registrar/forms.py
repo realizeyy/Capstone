@@ -7,6 +7,23 @@ from . import images
 from .models import ClergyRecord, ClergyDeployment, DocumentType
 
 
+def _validate_leave_reason(form, cleaned_data):
+    """Require a leave reason whenever status is On Leave."""
+    status = cleaned_data.get('status')
+    leave_reason = (cleaned_data.get('leave_reason') or '').strip()
+    if status == 'On Leave' and not leave_reason:
+        form.add_error('leave_reason', 'Leave reason is required when status is On Leave.')
+
+
+def _validate_dates_not_before_dob(form, dob, checks):
+    """Reject milestone dates that precede a known date of birth."""
+    if not dob:
+        return
+    for field_name, value, message in checks:
+        if value and value < dob:
+            form.add_error(field_name, message)
+
+
 class ClergyRecordForm(forms.ModelForm):
     class Meta:
         model = ClergyRecord
@@ -34,10 +51,7 @@ class ClergyRecordForm(forms.ModelForm):
         if rank == 'postulancy':
             cleaned_data['holy_orders_date'] = None
 
-        status = cleaned_data.get('status')
-        leave_reason = (cleaned_data.get('leave_reason') or '').strip()
-        if status == 'On Leave' and not leave_reason:
-            self.add_error('leave_reason', 'Leave reason is required when status is On Leave.')
+        _validate_leave_reason(self, cleaned_data)
 
         baptism_date = cleaned_data.get('baptism_date')
         confirmation_date = cleaned_data.get('confirmation_date')
@@ -112,10 +126,7 @@ class PersonalInfoForm(forms.ModelForm):
         elif rank == 'priest':
             cleaned_data['consecration_date'] = None
 
-        status = cleaned_data.get('status')
-        leave_reason = (cleaned_data.get('leave_reason') or '').strip()
-        if status == 'On Leave' and not leave_reason:
-            self.add_error('leave_reason', 'Leave reason is required when status is On Leave.')
+        _validate_leave_reason(self, cleaned_data)
 
         dob = cleaned_data.get('date_of_birth')
         baptism = cleaned_data.get('baptism_date')
@@ -127,23 +138,16 @@ class PersonalInfoForm(forms.ModelForm):
         contract_end = cleaned_data.get('contract_end')
         retirement = cleaned_data.get('retirement_date')
 
-        if dob:
-            if baptism and baptism < dob:
-                self.add_error('baptism_date', 'Baptism date cannot be earlier than date of birth.')
-            if confirmation and confirmation < dob:
-                self.add_error('confirmation_date', 'Confirmation date cannot be earlier than date of birth.')
-            if diaconate and diaconate < dob:
-                self.add_error('diaconate_date', 'Diaconate ordination date cannot be earlier than date of birth.')
-            if ordination and ordination < dob:
-                self.add_error('ordination_date', 'Priesthood ordination date cannot be earlier than date of birth.')
-            if holy_orders and holy_orders < dob:
-                self.add_error('holy_orders_date', 'Holy Orders admission date cannot be earlier than date of birth.')
-            if consecration and consecration < dob:
-                self.add_error('consecration_date', 'Bishop consecration date cannot be earlier than date of birth.')
-            if retirement and retirement < dob:
-                self.add_error('retirement_date', 'Retirement date cannot be earlier than date of birth.')
-            if contract_end and contract_end < dob:
-                self.add_error('contract_end', 'Contract end cannot be earlier than date of birth.')
+        _validate_dates_not_before_dob(self, dob, [
+            ('baptism_date', baptism, 'Baptism date cannot be earlier than date of birth.'),
+            ('confirmation_date', confirmation, 'Confirmation date cannot be earlier than date of birth.'),
+            ('diaconate_date', diaconate, 'Diaconate ordination date cannot be earlier than date of birth.'),
+            ('ordination_date', ordination, 'Priesthood ordination date cannot be earlier than date of birth.'),
+            ('holy_orders_date', holy_orders, 'Holy Orders admission date cannot be earlier than date of birth.'),
+            ('consecration_date', consecration, 'Bishop consecration date cannot be earlier than date of birth.'),
+            ('retirement_date', retirement, 'Retirement date cannot be earlier than date of birth.'),
+            ('contract_end', contract_end, 'Contract end cannot be earlier than date of birth.'),
+        ])
 
         if baptism and confirmation and baptism > confirmation:
             self.add_error('confirmation_date', 'Confirmation date cannot be earlier than baptism date.')
@@ -154,6 +158,32 @@ class PersonalInfoForm(forms.ModelForm):
             self.add_error('consecration_date', 'Bishop consecration date cannot be earlier than Priesthood ordination date.')
         if diaconate and consecration and diaconate > consecration:
             self.add_error('consecration_date', 'Bishop consecration date cannot be earlier than Diaconate ordination date.')
+        return cleaned_data
+
+
+class ContractStatusUpdateForm(forms.ModelForm):
+    """Subset of ClergyRecord fields edited in the Contract Review modal."""
+
+    class Meta:
+        model = ClergyRecord
+        fields = ['rank', 'status', 'leave_reason', 'deanery', 'assignment', 'contract_end', 'retirement_date']
+        widgets = {
+            'contract_end': forms.DateInput(attrs={'type': 'date'}),
+            'retirement_date': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+    def clean_assignment(self):
+        assignment = self.cleaned_data.get('assignment')
+        return assignment.strip() if assignment else ''
+
+    def clean(self):
+        cleaned_data = super().clean()
+        _validate_leave_reason(self, cleaned_data)
+        dob = getattr(self.instance, 'date_of_birth', None)
+        _validate_dates_not_before_dob(self, dob, [
+            ('retirement_date', cleaned_data.get('retirement_date'), 'Retirement date cannot be earlier than date of birth.'),
+            ('contract_end', cleaned_data.get('contract_end'), 'Contract end cannot be earlier than date of birth.'),
+        ])
         return cleaned_data
 
 
