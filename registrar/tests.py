@@ -295,7 +295,7 @@ class PaginationAndQueryCountTests(TestCase):
         self.client.force_login(self.registrar)
         self.doc_type, _ = DocumentType.objects.get_or_create(name='Baptismal Certificate', defaults={'is_required': True})
 
-    def test_clergy_records_and_documents_overview_do_not_run_n_plus_one_queries(self):
+    def test_clergy_records_and_document_checklist_do_not_run_n_plus_one_queries(self):
         for i in range(1, 15):
             r = ClergyRecord.objects.create(id=f'CLG-{i:03d}', name=f'Fr. {i}')
             Document.objects.create(record=r, document_type=self.doc_type, file='a.pdf', submitted_date=date.today())
@@ -306,17 +306,17 @@ class PaginationAndQueryCountTests(TestCase):
         self.assertEqual(res.context['records'][0].doc_summary['submitted'], 1)
 
         with self.assertNumQueries(11):
-            res2 = self.client.get(reverse('registrar:documents_overview'))
+            res2 = self.client.get(reverse('registrar:clergy_document_checklist'))
         self.assertEqual(len(res2.context['rows']), 14)
 
-    def test_documents_overview_paginates_and_preserves_filters(self):
+    def test_clergy_document_checklist_paginates_and_preserves_filters(self):
         for i in range(1, 32):
             ClergyRecord.objects.create(
                 id=f'DOC-{i:03d}',
                 name=f'Fr. Doc {i:03d}',
                 rank='priest' if i <= 28 else 'deacon',
             )
-        page1 = self.client.get(reverse('registrar:documents_overview'), {'q': 'Doc', 'rank': 'priest'})
+        page1 = self.client.get(reverse('registrar:clergy_document_checklist'), {'q': 'Doc', 'rank': 'priest'})
         self.assertEqual(len(page1.context['rows']), 25)
         self.assertTrue(page1.context['page'].has_next())
         self.assertContains(page1, 'q=Doc&amp;rank=priest&amp;page=2')
@@ -324,17 +324,26 @@ class PaginationAndQueryCountTests(TestCase):
         self.assertContains(page1, 'id="clergyPagerSentinel"')
 
         page1_10 = self.client.get(
-            reverse('registrar:documents_overview'),
+            reverse('registrar:clergy_document_checklist'),
             {'q': 'Doc', 'rank': 'priest', 'per_page': 10},
         )
         self.assertEqual(len(page1_10.context['rows']), 10)
         self.assertContains(page1_10, 'per_page=10&amp;page=2')
 
         page2_10 = self.client.get(
-            reverse('registrar:documents_overview'),
+            reverse('registrar:clergy_document_checklist'),
             {'q': 'Doc', 'rank': 'priest', 'per_page': 10, 'page': 3},
         )
         self.assertEqual(len(page2_10.context['rows']), 8)
+
+    def test_clergy_document_checklist_page_title_and_old_url_redirect(self):
+        url = reverse('registrar:clergy_document_checklist')
+        res = self.client.get(url)
+        self.assertTemplateUsed(res, 'registrar/clergy-document-checklist.html')
+        self.assertContains(res, '<title>EDNP - Clergy Document Checklist</title>', html=False)
+        self.assertEqual(res.context['active_page'], 'clergy_document_checklist')
+        old = self.client.get('/registrar/documents/?q=Doc')
+        self.assertRedirects(old, url + '?q=Doc', status_code=301)
 
     def test_centered_pager_structure_shared_across_registrar_tables(self):
         future = date.today() + timedelta(days=90)
@@ -344,7 +353,7 @@ class PaginationAndQueryCountTests(TestCase):
                 name=f'Fr. Pager {i:03d}',
                 contract_end=future + timedelta(days=i),
             )
-        for url_name in ('registrar:clergy_records', 'registrar:documents_overview', 'registrar:contract_review'):
+        for url_name in ('registrar:clergy_records', 'registrar:clergy_document_checklist', 'registrar:contract_review'):
             res = self.client.get(reverse(url_name), {'per_page': 10})
             html = res.content.decode('utf-8')
             self.assertRegex(
@@ -870,6 +879,7 @@ class RegistrarDashboardSearchTests(TestCase):
         self.assertIn('The Rev. Fr. John Doe', titles)
         self.assertIn('Create New Clergy Account', titles)
         self.assertIn('Clergy Records Directory', titles)
+        self.assertIn('Clergy Document Checklist', titles)
 
 
 class RegistrarRecordDetailModernizationTests(TestCase):

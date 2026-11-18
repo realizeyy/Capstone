@@ -96,7 +96,6 @@ class Command(BaseCommand):
                 'status': 'Active',
                 'diocese': 'Episcopal Diocese of Northern Philippines',
                 'contract_end': '2027-03-31',
-                'verification': 'Verified',
             },
         )
         self.stdout.write(self.style.SUCCESS("Clergy demo login ready: clergy / password (linked to CLG-001)"))

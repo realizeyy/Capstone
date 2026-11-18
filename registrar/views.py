@@ -443,12 +443,12 @@ def _build_registrar_search_catalog(user=None):
     catalog.append({
         'category': 'Administrative Actions',
         'icon': 'fa-solid fa-folder-open',
-        'title': 'Documents Overview',
+        'title': 'Clergy Document Checklist',
         'subtitle': 'Rank-based document checklist status across every stored clergy record',
-        'badge': 'Overview',
+        'badge': 'Checklist',
         'badge_class': 'slate',
-        'keywords': 'documents overview summary status rank checklist tracking'.lower(),
-        'url': reverse('registrar:documents_overview'),
+        'keywords': 'clergy document checklist documents overview summary status rank tracking'.lower(),
+        'url': reverse('registrar:clergy_document_checklist'),
     })
     catalog.append({
         'category': 'Administrative Actions',
@@ -1177,7 +1177,7 @@ def record_detail(request, record_id):
 
 
 @registrar_required
-def documents_overview(request):
+def clergy_document_checklist(request):
     query = request.GET.get('q', '').strip()
     rank_filter = request.GET.get('rank', '').strip()
 
@@ -1197,8 +1197,8 @@ def documents_overview(request):
         {'record': r, 'summary': r.document_summary(required_types=required_types)}
         for r in pagination['page'].object_list
     ]
-    return render(request, 'registrar/documents.html', {
-        'active_page': 'documents',
+    return render(request, 'registrar/clergy-document-checklist.html', {
+        'active_page': 'clergy_document_checklist',
         'rows': rows,
         **pagination,
         'search_query': query,

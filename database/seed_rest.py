@@ -205,7 +205,6 @@ with transaction.atomic():
         profile.education = f"{deg}, {inst} ({diac_year - 1})"
         profile.other_information = COMMITTEE_ROLES[i % len(COMMITTEE_ROLES)]
         profile.diocese = 'Episcopal Diocese of Northern Philippines'
-        profile.verification = 'Verified'
         profile.save()
 
         # Build SQL line for export
@@ -243,8 +242,7 @@ WHERE id = '{r.id}';""")
   place_of_birth = '{esc_town}', civil_status = '{profile.civil_status}',
   baptism_place = '{esc_bap_pl}', confirmation_place = '{esc_conf_pl}',
   education = '{esc_edu}', other_information = '{esc_other}',
-  spouse_name = '{esc_spouse}', marriage_date = {m_date_sql}, marriage_place = {m_pl_sql},
-  verification = 'Verified'
+  spouse_name = '{esc_spouse}', marriage_date = {m_date_sql}, marriage_place = {m_pl_sql}
 WHERE record_id = '{r.id}';\n""")
 
 sql_lines.append("COMMIT;\n")

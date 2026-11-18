@@ -12,8 +12,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Bontoc, Mountain Province', civil_status = 'Married',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master of Divinity, St. Andrew''s Theological Seminary (1998)', other_information = 'Diocesan Youth Ministry Coordinator',
-  spouse_name = 'Lorna Garcia', marriage_date = '1997-04-23', marriage_place = 'Bontoc, Mountain Province',
-  verification = 'Verified'
+  spouse_name = 'Lorna Garcia', marriage_date = '1997-04-23', marriage_place = 'Bontoc, Mountain Province'
 WHERE record_id = 'CLG-007';
 
 UPDATE clergy_records SET
@@ -28,8 +27,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Sagada, Mountain Province', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Bachelor of Theology, St. Andrew''s Theological Seminary (2022)', other_information = 'Episcopal Church Women Spiritual Adviser',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-009';
 
 UPDATE clergy_records SET
@@ -44,8 +42,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Besao, Mountain Province', civil_status = 'Married',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master of Arts in Theological Studies, St. Andrew''s Theological Seminary (2012)', other_information = 'Commission on Liturgy and Music Member',
-  spouse_name = 'Robert Santos', marriage_date = '2012-04-25', marriage_place = 'Besao, Mountain Province',
-  verification = 'Verified'
+  spouse_name = 'Robert Santos', marriage_date = '2012-04-25', marriage_place = 'Besao, Mountain Province'
 WHERE record_id = 'CLG-030';
 
 UPDATE clergy_records SET
@@ -60,8 +57,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Bauko, Mountain Province', civil_status = 'Married',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master in Ministry, Trinity Theological College (2007)', other_information = 'Stewardship and Finance Committee Member',
-  spouse_name = 'Corazon Santiago', marriage_date = '2005-08-13', marriage_place = 'Bauko, Mountain Province',
-  verification = 'Verified'
+  spouse_name = 'Corazon Santiago', marriage_date = '2005-08-13', marriage_place = 'Bauko, Mountain Province'
 WHERE record_id = 'CLG-031';
 
 UPDATE clergy_records SET
@@ -76,8 +72,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tadian, Mountain Province', civil_status = 'Married',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Diploma in Episcopal Studies, St. Andrew''s Theological Seminary (2006)', other_information = 'Indigenous Peoples Ministry Liaison',
-  spouse_name = 'Manuel Baluyan', marriage_date = '2008-08-05', marriage_place = 'Tadian, Mountain Province',
-  verification = 'Verified'
+  spouse_name = 'Manuel Baluyan', marriage_date = '2008-08-05', marriage_place = 'Tadian, Mountain Province'
 WHERE record_id = 'CLG-032';
 
 UPDATE clergy_records SET
@@ -92,8 +87,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tinglayan, Kalinga', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master of Divinity, St. Andrew''s Theological Seminary (2005)', other_information = 'Diocesan Christian Education Coordinator',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-033';
 
 UPDATE clergy_records SET
@@ -108,8 +102,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tabuk City, Kalinga', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Bachelor of Theology, St. Andrew''s Theological Seminary (2000)', other_information = 'Ecumenical and Inter-Faith Relations Officer',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-034';
 
 UPDATE clergy_records SET
@@ -124,8 +117,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Baguio City', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master of Arts in Theological Studies, St. Andrew''s Theological Seminary (2023)', other_information = 'Disaster Preparedness and Response Coordinator',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-035';
 
 UPDATE clergy_records SET
@@ -140,8 +132,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'La Trinidad, Benguet', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master in Ministry, Trinity Theological College (2023)', other_information = 'Deanery Secretary',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-036';
 
 UPDATE clergy_records SET
@@ -156,8 +147,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Cervantes, Ilocos Sur', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Diploma in Episcopal Studies, St. Andrew''s Theological Seminary (2003)', other_information = 'Deanery Representative to Diocesan Council',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-037';
 
 UPDATE clergy_records SET
@@ -172,8 +162,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Bontoc, Mountain Province', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master of Divinity, St. Andrew''s Theological Seminary (2017)', other_information = 'Assistant Dean of Deanery',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-038';
 
 UPDATE clergy_records SET
@@ -188,8 +177,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Sagada, Mountain Province', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Bachelor of Theology, St. Andrew''s Theological Seminary (2023)', other_information = 'Curate / Assistant Priest',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-039';
 
 UPDATE clergy_records SET
@@ -204,8 +192,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Besao, Mountain Province', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master of Arts in Theological Studies, St. Andrew''s Theological Seminary (1998)', other_information = 'Diocesan Youth Ministry Coordinator',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-040';
 
 UPDATE clergy_records SET
@@ -220,8 +207,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Bauko, Mountain Province', civil_status = 'Married',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master in Ministry, Trinity Theological College (1994)', other_information = 'Episcopal Church Women Spiritual Adviser',
-  spouse_name = 'Grace Manalo', marriage_date = '1992-01-21', marriage_place = 'Bauko, Mountain Province',
-  verification = 'Verified'
+  spouse_name = 'Grace Manalo', marriage_date = '1992-01-21', marriage_place = 'Bauko, Mountain Province'
 WHERE record_id = 'CLG-041';
 
 UPDATE clergy_records SET
@@ -236,8 +222,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tadian, Mountain Province', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Diploma in Episcopal Studies, St. Andrew''s Theological Seminary (2022)', other_information = 'Commission on Liturgy and Music Member',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-042';
 
 UPDATE clergy_records SET
@@ -252,8 +237,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tinglayan, Kalinga', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master of Divinity, St. Andrew''s Theological Seminary (2023)', other_information = 'Stewardship and Finance Committee Member',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-043';
 
 UPDATE clergy_records SET
@@ -268,8 +252,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tabuk City, Kalinga', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Bachelor of Theology, St. Andrew''s Theological Seminary (2023)', other_information = 'Indigenous Peoples Ministry Liaison',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-044';
 
 UPDATE clergy_records SET
@@ -284,8 +267,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Baguio City', civil_status = 'Married',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master of Arts in Theological Studies, St. Andrew''s Theological Seminary (2005)', other_information = 'Diocesan Christian Education Coordinator',
-  spouse_name = 'Corazon Dizon', marriage_date = '2006-05-05', marriage_place = 'Baguio City',
-  verification = 'Verified'
+  spouse_name = 'Corazon Dizon', marriage_date = '2006-05-05', marriage_place = 'Baguio City'
 WHERE record_id = 'CLG-045';
 
 UPDATE clergy_records SET
@@ -300,8 +282,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'La Trinidad, Benguet', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master in Ministry, Trinity Theological College (2013)', other_information = 'Ecumenical and Inter-Faith Relations Officer',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-046';
 
 UPDATE clergy_records SET
@@ -316,8 +297,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Cervantes, Ilocos Sur', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Diploma in Episcopal Studies, St. Andrew''s Theological Seminary (2023)', other_information = 'Disaster Preparedness and Response Coordinator',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-047';
 
 UPDATE clergy_records SET
@@ -332,8 +312,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Bontoc, Mountain Province', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master of Divinity, St. Andrew''s Theological Seminary (1993)', other_information = 'Deanery Secretary',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-048';
 
 UPDATE clergy_records SET
@@ -348,8 +327,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Sagada, Mountain Province', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Bachelor of Theology, St. Andrew''s Theological Seminary (2023)', other_information = 'Deanery Representative to Diocesan Council',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-049';
 
 UPDATE clergy_records SET
@@ -364,8 +342,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Besao, Mountain Province', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master of Arts in Theological Studies, St. Andrew''s Theological Seminary (1997)', other_information = 'Assistant Dean of Deanery',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-050';
 
 UPDATE clergy_records SET
@@ -380,8 +357,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Bauko, Mountain Province', civil_status = 'Married',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master in Ministry, Trinity Theological College (2002)', other_information = 'Curate / Assistant Priest',
-  spouse_name = 'Grace Walker', marriage_date = '2003-11-27', marriage_place = 'Bauko, Mountain Province',
-  verification = 'Verified'
+  spouse_name = 'Grace Walker', marriage_date = '2003-11-27', marriage_place = 'Bauko, Mountain Province'
 WHERE record_id = 'CLG-051';
 
 UPDATE clergy_records SET
@@ -396,8 +372,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tadian, Mountain Province', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Diploma in Episcopal Studies, St. Andrew''s Theological Seminary (2023)', other_information = 'Diocesan Youth Ministry Coordinator',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-052';
 
 UPDATE clergy_records SET
@@ -412,8 +387,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tinglayan, Kalinga', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master of Divinity, St. Andrew''s Theological Seminary (2001)', other_information = 'Episcopal Church Women Spiritual Adviser',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-053';
 
 UPDATE clergy_records SET
@@ -428,8 +402,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tabuk City, Kalinga', civil_status = 'Married',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Bachelor of Theology, St. Andrew''s Theological Seminary (1995)', other_information = 'Commission on Liturgy and Music Member',
-  spouse_name = 'Eduardo Bawas', marriage_date = '1995-04-14', marriage_place = 'Tabuk City, Kalinga',
-  verification = 'Verified'
+  spouse_name = 'Eduardo Bawas', marriage_date = '1995-04-14', marriage_place = 'Tabuk City, Kalinga'
 WHERE record_id = 'CLG-054';
 
 UPDATE clergy_records SET
@@ -444,8 +417,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Baguio City', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master of Arts in Theological Studies, St. Andrew''s Theological Seminary (2007)', other_information = 'Stewardship and Finance Committee Member',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-055';
 
 UPDATE clergy_records SET
@@ -460,8 +432,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'La Trinidad, Benguet', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master in Ministry, Trinity Theological College (2003)', other_information = 'Indigenous Peoples Ministry Liaison',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-056';
 
 UPDATE clergy_records SET
@@ -476,8 +447,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Cervantes, Ilocos Sur', civil_status = 'Married',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Diploma in Episcopal Studies, St. Andrew''s Theological Seminary (2002)', other_information = 'Diocesan Christian Education Coordinator',
-  spouse_name = 'Marilou Wilson', marriage_date = '2001-03-26', marriage_place = 'Cervantes, Ilocos Sur',
-  verification = 'Verified'
+  spouse_name = 'Marilou Wilson', marriage_date = '2001-03-26', marriage_place = 'Cervantes, Ilocos Sur'
 WHERE record_id = 'CLG-057';
 
 UPDATE clergy_records SET
@@ -492,8 +462,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Bontoc, Mountain Province', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master of Divinity, St. Andrew''s Theological Seminary (2020)', other_information = 'Ecumenical and Inter-Faith Relations Officer',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-058';
 
 UPDATE clergy_records SET
@@ -508,8 +477,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Sagada, Mountain Province', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Bachelor of Theology, St. Andrew''s Theological Seminary (2006)', other_information = 'Disaster Preparedness and Response Coordinator',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-059';
 
 UPDATE clergy_records SET
@@ -524,8 +492,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Besao, Mountain Province', civil_status = 'Married',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master of Arts in Theological Studies, St. Andrew''s Theological Seminary (2004)', other_information = 'Deanery Secretary',
-  spouse_name = 'Lito Bawas', marriage_date = '2005-07-28', marriage_place = 'Besao, Mountain Province',
-  verification = 'Verified'
+  spouse_name = 'Lito Bawas', marriage_date = '2005-07-28', marriage_place = 'Besao, Mountain Province'
 WHERE record_id = 'CLG-060';
 
 UPDATE clergy_records SET
@@ -540,8 +507,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Bauko, Mountain Province', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master in Ministry, Trinity Theological College (2016)', other_information = 'Deanery Representative to Diocesan Council',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-061';
 
 UPDATE clergy_records SET
@@ -556,8 +522,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tadian, Mountain Province', civil_status = 'Married',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Diploma in Episcopal Studies, St. Andrew''s Theological Seminary (1998)', other_information = 'Assistant Dean of Deanery',
-  spouse_name = 'Danilo Ngilangil', marriage_date = '1996-06-25', marriage_place = 'Tadian, Mountain Province',
-  verification = 'Verified'
+  spouse_name = 'Danilo Ngilangil', marriage_date = '1996-06-25', marriage_place = 'Tadian, Mountain Province'
 WHERE record_id = 'CLG-062';
 
 UPDATE clergy_records SET
@@ -572,8 +537,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tinglayan, Kalinga', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master of Divinity, St. Andrew''s Theological Seminary (2013)', other_information = 'Curate / Assistant Priest',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-063';
 
 UPDATE clergy_records SET
@@ -588,8 +552,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tabuk City, Kalinga', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Bachelor of Theology, St. Andrew''s Theological Seminary (2001)', other_information = 'Diocesan Youth Ministry Coordinator',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-064';
 
 UPDATE clergy_records SET
@@ -604,8 +567,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Baguio City', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master of Arts in Theological Studies, St. Andrew''s Theological Seminary (1998)', other_information = 'Episcopal Church Women Spiritual Adviser',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-065';
 
 UPDATE clergy_records SET
@@ -620,8 +582,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'La Trinidad, Benguet', civil_status = 'Married',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master in Ministry, Trinity Theological College (1994)', other_information = 'Commission on Liturgy and Music Member',
-  spouse_name = 'Manuel Caligtan', marriage_date = '1994-07-06', marriage_place = 'La Trinidad, Benguet',
-  verification = 'Verified'
+  spouse_name = 'Manuel Caligtan', marriage_date = '1994-07-06', marriage_place = 'La Trinidad, Benguet'
 WHERE record_id = 'CLG-066';
 
 UPDATE clergy_records SET
@@ -636,8 +597,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Cervantes, Ilocos Sur', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Diploma in Episcopal Studies, St. Andrew''s Theological Seminary (2022)', other_information = 'Stewardship and Finance Committee Member',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-067';
 
 UPDATE clergy_records SET
@@ -652,8 +612,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Bontoc, Mountain Province', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master of Divinity, St. Andrew''s Theological Seminary (2015)', other_information = 'Indigenous Peoples Ministry Liaison',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-068';
 
 UPDATE clergy_records SET
@@ -668,8 +627,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Sagada, Mountain Province', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Bachelor of Theology, St. Andrew''s Theological Seminary (2013)', other_information = 'Diocesan Christian Education Coordinator',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-069';
 
 UPDATE clergy_records SET
@@ -684,8 +642,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Besao, Mountain Province', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master of Arts in Theological Studies, St. Andrew''s Theological Seminary (2020)', other_information = 'Ecumenical and Inter-Faith Relations Officer',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-070';
 
 UPDATE clergy_records SET
@@ -700,8 +657,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Bauko, Mountain Province', civil_status = 'Married',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master in Ministry, Trinity Theological College (1998)', other_information = 'Disaster Preparedness and Response Coordinator',
-  spouse_name = 'Grace Hall', marriage_date = '1998-05-02', marriage_place = 'Bauko, Mountain Province',
-  verification = 'Verified'
+  spouse_name = 'Grace Hall', marriage_date = '1998-05-02', marriage_place = 'Bauko, Mountain Province'
 WHERE record_id = 'CLG-071';
 
 UPDATE clergy_records SET
@@ -716,8 +672,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tadian, Mountain Province', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Diploma in Episcopal Studies, St. Andrew''s Theological Seminary (1993)', other_information = 'Deanery Secretary',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-072';
 
 UPDATE clergy_records SET
@@ -732,8 +687,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tinglayan, Kalinga', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master of Divinity, St. Andrew''s Theological Seminary (2021)', other_information = 'Deanery Representative to Diocesan Council',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-073';
 
 UPDATE clergy_records SET
@@ -748,8 +702,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tabuk City, Kalinga', civil_status = 'Married',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Bachelor of Theology, St. Andrew''s Theological Seminary (2005)', other_information = 'Assistant Dean of Deanery',
-  spouse_name = 'Robert Reyes', marriage_date = '2001-03-18', marriage_place = 'Tabuk City, Kalinga',
-  verification = 'Verified'
+  spouse_name = 'Robert Reyes', marriage_date = '2001-03-18', marriage_place = 'Tabuk City, Kalinga'
 WHERE record_id = 'CLG-074';
 
 UPDATE clergy_records SET
@@ -764,8 +717,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Baguio City', civil_status = 'Married',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master of Arts in Theological Studies, St. Andrew''s Theological Seminary (1994)', other_information = 'Curate / Assistant Priest',
-  spouse_name = 'Grace Scott', marriage_date = '1991-11-05', marriage_place = 'Baguio City',
-  verification = 'Verified'
+  spouse_name = 'Grace Scott', marriage_date = '1991-11-05', marriage_place = 'Baguio City'
 WHERE record_id = 'CLG-075';
 
 UPDATE clergy_records SET
@@ -780,8 +732,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'La Trinidad, Benguet', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master in Ministry, Trinity Theological College (2007)', other_information = 'Diocesan Youth Ministry Coordinator',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-076';
 
 UPDATE clergy_records SET
@@ -796,8 +747,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Cervantes, Ilocos Sur', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Diploma in Episcopal Studies, St. Andrew''s Theological Seminary (2022)', other_information = 'Episcopal Church Women Spiritual Adviser',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-077';
 
 UPDATE clergy_records SET
@@ -812,8 +762,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Bontoc, Mountain Province', civil_status = 'Married',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master of Divinity, St. Andrew''s Theological Seminary (1990)', other_information = 'Commission on Liturgy and Music Member',
-  spouse_name = 'Lito Codiamat', marriage_date = '1992-02-28', marriage_place = 'Bontoc, Mountain Province',
-  verification = 'Verified'
+  spouse_name = 'Lito Codiamat', marriage_date = '1992-02-28', marriage_place = 'Bontoc, Mountain Province'
 WHERE record_id = 'CLG-078';
 
 UPDATE clergy_records SET
@@ -828,8 +777,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Sagada, Mountain Province', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Bachelor of Theology, St. Andrew''s Theological Seminary (2000)', other_information = 'Stewardship and Finance Committee Member',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-079';
 
 UPDATE clergy_records SET
@@ -844,8 +792,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Besao, Mountain Province', civil_status = 'Married',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master of Arts in Theological Studies, St. Andrew''s Theological Seminary (1990)', other_information = 'Indigenous Peoples Ministry Liaison',
-  spouse_name = 'Manuel Dela Cruz', marriage_date = '1986-11-20', marriage_place = 'Besao, Mountain Province',
-  verification = 'Verified'
+  spouse_name = 'Manuel Dela Cruz', marriage_date = '1986-11-20', marriage_place = 'Besao, Mountain Province'
 WHERE record_id = 'CLG-080';
 
 UPDATE clergy_records SET
@@ -860,8 +807,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Bauko, Mountain Province', civil_status = 'Married',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master in Ministry, Trinity Theological College (2005)', other_information = 'Diocesan Christian Education Coordinator',
-  spouse_name = 'Imelda Campbell', marriage_date = '2004-08-16', marriage_place = 'Bauko, Mountain Province',
-  verification = 'Verified'
+  spouse_name = 'Imelda Campbell', marriage_date = '2004-08-16', marriage_place = 'Bauko, Mountain Province'
 WHERE record_id = 'CLG-081';
 
 UPDATE clergy_records SET
@@ -876,8 +822,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tadian, Mountain Province', civil_status = 'Married',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Diploma in Episcopal Studies, St. Andrew''s Theological Seminary (2004)', other_information = 'Ecumenical and Inter-Faith Relations Officer',
-  spouse_name = 'Ferdinand Kidang', marriage_date = '2005-11-16', marriage_place = 'Tadian, Mountain Province',
-  verification = 'Verified'
+  spouse_name = 'Ferdinand Kidang', marriage_date = '2005-11-16', marriage_place = 'Tadian, Mountain Province'
 WHERE record_id = 'CLG-082';
 
 UPDATE clergy_records SET
@@ -892,8 +837,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tinglayan, Kalinga', civil_status = 'Married',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master of Divinity, St. Andrew''s Theological Seminary (1997)', other_information = 'Disaster Preparedness and Response Coordinator',
-  spouse_name = 'Carmelita Roberts', marriage_date = '2000-07-13', marriage_place = 'Tinglayan, Kalinga',
-  verification = 'Verified'
+  spouse_name = 'Carmelita Roberts', marriage_date = '2000-07-13', marriage_place = 'Tinglayan, Kalinga'
 WHERE record_id = 'CLG-083';
 
 UPDATE clergy_records SET
@@ -908,8 +852,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tabuk City, Kalinga', civil_status = 'Married',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Bachelor of Theology, St. Andrew''s Theological Seminary (1996)', other_information = 'Deanery Secretary',
-  spouse_name = 'Ferdinand Codiamat', marriage_date = '1999-12-13', marriage_place = 'Tabuk City, Kalinga',
-  verification = 'Verified'
+  spouse_name = 'Ferdinand Codiamat', marriage_date = '1999-12-13', marriage_place = 'Tabuk City, Kalinga'
 WHERE record_id = 'CLG-084';
 
 UPDATE clergy_records SET
@@ -924,8 +867,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Baguio City', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master of Arts in Theological Studies, St. Andrew''s Theological Seminary (1996)', other_information = 'Deanery Representative to Diocesan Council',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-085';
 
 UPDATE clergy_records SET
@@ -940,8 +882,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'La Trinidad, Benguet', civil_status = 'Married',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master in Ministry, Trinity Theological College (1992)', other_information = 'Assistant Dean of Deanery',
-  spouse_name = 'Danilo Alawas', marriage_date = '1994-10-22', marriage_place = 'La Trinidad, Benguet',
-  verification = 'Verified'
+  spouse_name = 'Danilo Alawas', marriage_date = '1994-10-22', marriage_place = 'La Trinidad, Benguet'
 WHERE record_id = 'CLG-086';
 
 UPDATE clergy_records SET
@@ -956,8 +897,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Cervantes, Ilocos Sur', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Diploma in Episcopal Studies, St. Andrew''s Theological Seminary (1999)', other_information = 'Curate / Assistant Priest',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-087';
 
 UPDATE clergy_records SET
@@ -972,8 +912,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Bontoc, Mountain Province', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master of Divinity, St. Andrew''s Theological Seminary (2018)', other_information = 'Diocesan Youth Ministry Coordinator',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-088';
 
 UPDATE clergy_records SET
@@ -988,8 +927,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Sagada, Mountain Province', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Bachelor of Theology, St. Andrew''s Theological Seminary (2011)', other_information = 'Episcopal Church Women Spiritual Adviser',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-089';
 
 UPDATE clergy_records SET
@@ -1004,8 +942,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Besao, Mountain Province', civil_status = 'Married',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master of Arts in Theological Studies, St. Andrew''s Theological Seminary (2005)', other_information = 'Commission on Liturgy and Music Member',
-  spouse_name = 'Lito Caligtan', marriage_date = '2005-02-10', marriage_place = 'Besao, Mountain Province',
-  verification = 'Verified'
+  spouse_name = 'Lito Caligtan', marriage_date = '2005-02-10', marriage_place = 'Besao, Mountain Province'
 WHERE record_id = 'CLG-090';
 
 UPDATE clergy_records SET
@@ -1020,8 +957,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Bauko, Mountain Province', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master in Ministry, Trinity Theological College (2008)', other_information = 'Stewardship and Finance Committee Member',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-091';
 
 UPDATE clergy_records SET
@@ -1036,8 +972,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tadian, Mountain Province', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Diploma in Episcopal Studies, St. Andrew''s Theological Seminary (2016)', other_information = 'Indigenous Peoples Ministry Liaison',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-092';
 
 UPDATE clergy_records SET
@@ -1052,8 +987,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tinglayan, Kalinga', civil_status = 'Married',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master of Divinity, St. Andrew''s Theological Seminary (2007)', other_information = 'Diocesan Christian Education Coordinator',
-  spouse_name = 'Marilou Rogers', marriage_date = '2003-01-02', marriage_place = 'Tinglayan, Kalinga',
-  verification = 'Verified'
+  spouse_name = 'Marilou Rogers', marriage_date = '2003-01-02', marriage_place = 'Tinglayan, Kalinga'
 WHERE record_id = 'CLG-093';
 
 UPDATE clergy_records SET
@@ -1068,8 +1002,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tabuk City, Kalinga', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Bachelor of Theology, St. Andrew''s Theological Seminary (2010)', other_information = 'Ecumenical and Inter-Faith Relations Officer',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-094';
 
 UPDATE clergy_records SET
@@ -1084,8 +1017,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Baguio City', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master of Arts in Theological Studies, St. Andrew''s Theological Seminary (2015)', other_information = 'Disaster Preparedness and Response Coordinator',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-095';
 
 UPDATE clergy_records SET
@@ -1100,8 +1032,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'La Trinidad, Benguet', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master in Ministry, Trinity Theological College (1995)', other_information = 'Deanery Secretary',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-096';
 
 UPDATE clergy_records SET
@@ -1116,8 +1047,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Cervantes, Ilocos Sur', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Diploma in Episcopal Studies, St. Andrew''s Theological Seminary (2023)', other_information = 'Deanery Representative to Diocesan Council',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-097';
 
 UPDATE clergy_records SET
@@ -1132,8 +1062,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Bontoc, Mountain Province', civil_status = 'Married',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master of Divinity, St. Andrew''s Theological Seminary (2009)', other_information = 'Assistant Dean of Deanery',
-  spouse_name = 'Danilo Kidang', marriage_date = '2008-12-26', marriage_place = 'Bontoc, Mountain Province',
-  verification = 'Verified'
+  spouse_name = 'Danilo Kidang', marriage_date = '2008-12-26', marriage_place = 'Bontoc, Mountain Province'
 WHERE record_id = 'CLG-098';
 
 UPDATE clergy_records SET
@@ -1148,8 +1077,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Sagada, Mountain Province', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Bachelor of Theology, St. Andrew''s Theological Seminary (2023)', other_information = 'Curate / Assistant Priest',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-099';
 
 UPDATE clergy_records SET
@@ -1164,8 +1092,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Besao, Mountain Province', civil_status = 'Married',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master of Arts in Theological Studies, St. Andrew''s Theological Seminary (2008)', other_information = 'Diocesan Youth Ministry Coordinator',
-  spouse_name = 'Corazon Park', marriage_date = '2006-06-27', marriage_place = 'Besao, Mountain Province',
-  verification = 'Verified'
+  spouse_name = 'Corazon Park', marriage_date = '2006-06-27', marriage_place = 'Besao, Mountain Province'
 WHERE record_id = 'CLG-100';
 
 UPDATE clergy_records SET
@@ -1180,8 +1107,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Bauko, Mountain Province', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master in Ministry, Trinity Theological College (2019)', other_information = 'Episcopal Church Women Spiritual Adviser',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-101';
 
 UPDATE clergy_records SET
@@ -1196,8 +1122,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tadian, Mountain Province', civil_status = 'Married',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Diploma in Episcopal Studies, St. Andrew''s Theological Seminary (2013)', other_information = 'Commission on Liturgy and Music Member',
-  spouse_name = 'Leonora Zhang', marriage_date = '2013-04-05', marriage_place = 'Tadian, Mountain Province',
-  verification = 'Verified'
+  spouse_name = 'Leonora Zhang', marriage_date = '2013-04-05', marriage_place = 'Tadian, Mountain Province'
 WHERE record_id = 'CLG-102';
 
 UPDATE clergy_records SET
@@ -1212,8 +1137,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tinglayan, Kalinga', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master of Divinity, St. Andrew''s Theological Seminary (2020)', other_information = 'Stewardship and Finance Committee Member',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-103';
 
 UPDATE clergy_records SET
@@ -1228,8 +1152,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tabuk City, Kalinga', civil_status = 'Married',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Bachelor of Theology, St. Andrew''s Theological Seminary (2008)', other_information = 'Indigenous Peoples Ministry Liaison',
-  spouse_name = 'Grace Patel', marriage_date = '2004-07-14', marriage_place = 'Tabuk City, Kalinga',
-  verification = 'Verified'
+  spouse_name = 'Grace Patel', marriage_date = '2004-07-14', marriage_place = 'Tabuk City, Kalinga'
 WHERE record_id = 'CLG-104';
 
 UPDATE clergy_records SET
@@ -1244,8 +1167,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Baguio City', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master of Arts in Theological Studies, St. Andrew''s Theological Seminary (2017)', other_information = 'Diocesan Christian Education Coordinator',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-105';
 
 UPDATE clergy_records SET
@@ -1260,8 +1182,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'La Trinidad, Benguet', civil_status = 'Single',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master in Ministry, Trinity Theological College (2016)', other_information = 'Ecumenical and Inter-Faith Relations Officer',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-106';
 
 UPDATE clergy_records SET
@@ -1276,8 +1197,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Cervantes, Ilocos Sur', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Diploma in Episcopal Studies, St. Andrew''s Theological Seminary (2014)', other_information = 'Disaster Preparedness and Response Coordinator',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-107';
 
 UPDATE clergy_records SET
@@ -1292,8 +1212,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Bontoc, Mountain Province', civil_status = 'Married',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master of Divinity, St. Andrew''s Theological Seminary (2001)', other_information = 'Deanery Secretary',
-  spouse_name = 'Fe Schmidt', marriage_date = '2002-02-13', marriage_place = 'Bontoc, Mountain Province',
-  verification = 'Verified'
+  spouse_name = 'Fe Schmidt', marriage_date = '2002-02-13', marriage_place = 'Bontoc, Mountain Province'
 WHERE record_id = 'CLG-108';
 
 UPDATE clergy_records SET
@@ -1308,8 +1227,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Sagada, Mountain Province', civil_status = 'Married',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Bachelor of Theology, St. Andrew''s Theological Seminary (1989)', other_information = 'Deanery Representative to Diocesan Council',
-  spouse_name = 'Imelda Larsson', marriage_date = '1992-06-08', marriage_place = 'Sagada, Mountain Province',
-  verification = 'Verified'
+  spouse_name = 'Imelda Larsson', marriage_date = '1992-06-08', marriage_place = 'Sagada, Mountain Province'
 WHERE record_id = 'CLG-109';
 
 UPDATE clergy_records SET
@@ -1324,8 +1242,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Besao, Mountain Province', civil_status = 'Married',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Master of Arts in Theological Studies, St. Andrew''s Theological Seminary (2009)', other_information = 'Assistant Dean of Deanery',
-  spouse_name = 'Marilou Kidang', marriage_date = '2008-11-16', marriage_place = 'Besao, Mountain Province',
-  verification = 'Verified'
+  spouse_name = 'Marilou Kidang', marriage_date = '2008-11-16', marriage_place = 'Besao, Mountain Province'
 WHERE record_id = 'CLG-110';
 
 UPDATE clergy_records SET
@@ -1340,8 +1257,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Bauko, Mountain Province', civil_status = 'Single',
   baptism_place = 'St. Mary the Virgin, Sagada', confirmation_place = 'St. Mary the Virgin - Sagada',
   education = 'Master in Ministry, Trinity Theological College (2018)', other_information = 'Curate / Assistant Priest',
-  spouse_name = '', marriage_date = NULL, marriage_place = '',
-  verification = 'Verified'
+  spouse_name = '', marriage_date = NULL, marriage_place = ''
 WHERE record_id = 'CLG-111';
 
 UPDATE clergy_records SET
@@ -1356,8 +1272,7 @@ UPDATE clergy_profiles SET
   place_of_birth = 'Tadian, Mountain Province', civil_status = 'Married',
   baptism_place = 'All Saints Cathedral, Bontoc', confirmation_place = 'All Saints Cathedral - Bontoc',
   education = 'Diploma in Episcopal Studies, St. Andrew''s Theological Seminary (1990)', other_information = 'Diocesan Youth Ministry Coordinator',
-  spouse_name = 'Jaime Bang-as', marriage_date = '1990-06-20', marriage_place = 'Tadian, Mountain Province',
-  verification = 'Verified'
+  spouse_name = 'Jaime Bang-as', marriage_date = '1990-06-20', marriage_place = 'Tadian, Mountain Province'
 WHERE record_id = 'CLG-112';
 
 COMMIT;

@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic import RedirectView
 
 from . import views
 
@@ -17,7 +18,9 @@ urlpatterns = [
     path('clergy-records/<str:record_id>/ember-letters/upload/', views.upload_ember_letter, name='upload_ember_letter'),
     path('clergy-records/<str:record_id>/photo/', views.view_profile_picture, name='view_profile_picture'),
     path('clergy-records/<str:record_id>/', views.record_detail, name='record_detail'),
-    path('documents/', views.documents_overview, name='documents_overview'),
+    path('clergy-document-checklist/', views.clergy_document_checklist, name='clergy_document_checklist'),
+    # Old address of the Clergy Document Checklist, kept so bookmarks still land.
+    path('documents/', RedirectView.as_view(pattern_name='registrar:clergy_document_checklist', query_string=True, permanent=True)),
     path('ordination-requirements/', views.ordination_requirements, name='ordination_requirements'),
     path('documents/<int:document_id>/view/', views.view_document, name='view_document'),
     path('documents/<int:document_id>/download/', views.download_document, name='download_document'),

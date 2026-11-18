@@ -188,7 +188,6 @@ def seed_one(index, r, parishes, special, used_emails, force):
     profile.confirmation_place = diac_place
     profile.other_information = COMMITTEE_ROLES[index % len(COMMITTEE_ROLES)]
     profile.diocese = 'Episcopal Diocese of Northern Philippines'
-    profile.verification = 'Verified'
     profile.spouse_birth_date = None
     profile.children_names = ''
     children = []

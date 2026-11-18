@@ -9,26 +9,44 @@
 </head>
 <body>
   <!-- Screen-Only Docked Actions Toolbar -->
-  <header class="actions" role="toolbar" aria-label="Print controls">
+  <header class="actions" aria-label="Print controls">
     <div class="toolbar-brand">
       <span class="toolbar-title">Clergy Personal Record</span>
       <span class="toolbar-meta">{{ profile.full_name }} &bull; {{ profile.record.id|default:"Pending ID" }}</span>
     </div>
-    <div class="toolbar-buttons">
-      <a class="download-btn" href="{% url 'clergy:my_profile' %}" data-back-page data-back-url="{% url 'clergy:my_profile' %}">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-        Back to Record
-      </a>
-      {% if download_url %}
-      <a class="download-btn" href="{{ download_url }}">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-        Download PDF
-      </a>
-      {% endif %}
-      <button type="button" class="print-btn" data-print-page>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-        Print Record
-      </button>
+    <div class="toolbar-controls">
+      <div class="scope-switch" role="group" aria-label="Record sections to include">
+        <button type="button"
+                class="scope-btn{% if include_attachments|default_if_none:True %} is-selected{% endif %}"
+                aria-pressed="{% if include_attachments|default_if_none:True %}true{% else %}false{% endif %}"
+                data-print-scope="include"
+                data-scope-url="{{ include_attachments_url|default:'' }}">
+          With Attachment Status
+        </button>
+        <button type="button"
+                class="scope-btn{% if include_attachments == False %} is-selected{% endif %}"
+                aria-pressed="{% if include_attachments == False %}true{% else %}false{% endif %}"
+                data-print-scope="personal"
+                data-scope-url="{{ personal_only_url|default:'?include_attachments=0' }}">
+          Personal Info Only
+        </button>
+      </div>
+      <div class="toolbar-buttons">
+        <a class="download-btn" href="{% url 'clergy:my_profile' %}" data-back-page data-back-url="{% url 'clergy:my_profile' %}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          Back to Record
+        </a>
+        {% if download_url %}
+        <a class="download-btn" href="{{ download_url }}" data-download-record data-download-base="{{ download_base_url }}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Download PDF
+        </a>
+        {% endif %}
+        <button type="button" class="print-btn" data-print-page>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          Print Record
+        </button>
+      </div>
     </div>
   </header>
 
@@ -78,12 +96,6 @@
               <span class="badge badge-neutral">Retired</span>
               {% else %}
               <span class="badge badge-neutral">{{ profile.record.status|default:"Recorded" }}</span>
-              {% endif %}
-
-              {% if profile.verification == 'Verified' %}
-              <span class="badge badge-verified">Verified Record</span>
-              {% else %}
-              <span class="badge badge-pending">For Verification</span>
               {% endif %}
             </div>
           </div>
@@ -400,8 +412,9 @@
           {% endif %}
         </section>
 
+        {% if include_attachments|default_if_none:True %}
         <!-- 6. Canonical Requirements & Attachments -->
-        <section class="doc-section">
+        <section class="doc-section" id="attachments-section">
           <div class="section-header-split">
             <h3 class="section-title"><span class="section-num">6</span> Canonical Requirements &amp; Attachments</h3>
             <div class="checklist-summary-stat">
@@ -509,43 +522,21 @@
             </div>
           {% endif %}
         </section>
+        {% endif %}
 
-        <!-- 7. Certification, Official Seal & Privacy Notice -->
+        <!-- Clergy Member Attestation & Privacy Notice -->
         <div class="closing-block">
-          <section class="doc-section certification-section">
-            <div class="sign-grid">
-              <div class="sign-block">
-                <div>
-                  <div class="sign-heading">Clergy Member Attestation</div>
-                  <p class="sign-text">I hereby attest that the personal, ministerial, and educational information stated herein is true and complete to the best of my knowledge.</p>
-                </div>
-                <div>
-                  <div class="sign-space"></div>
-                  <div class="sign-line"></div>
-                  <div class="sign-name">{{ profile.full_name }}</div>
-                  <div class="sign-caption">Clergy Member Signature &bull; Date</div>
-                </div>
+          <section class="certification-section" aria-label="Clergy member attestation">
+            <div class="sign-block">
+              <div class="sign-copy">
+                <div class="sign-heading">Clergy Member Attestation</div>
+                <p class="sign-text">I hereby attest that the personal, ministerial, and educational information stated herein is true and complete to the best of my knowledge.</p>
               </div>
-
-              <div class="sign-block registrar-block">
-                <div>
-                  <div class="sign-heading">Diocesan Registry Certification</div>
-                  <p class="sign-text">Certified official record extract from the database of the Episcopal Diocese of Northern Philippines.</p>
-                </div>
-                <div>
-                  <div class="stamp-box">
-                    <div class="stamp-inner-circle">
-                      <div class="stamp-ring">
-                        <span class="stamp-text-org">EDNP</span>
-                        <span class="stamp-text-org">REGISTRAR</span>
-                        <span class="stamp-text-loc">OFFICIAL SEAL</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="sign-line"></div>
-                  <div class="sign-name">Office of the Diocesan Registrar</div>
-                  <div class="sign-caption">Diocesan Center &bull; Bontoc, Mountain Province</div>
-                </div>
+              <div class="sign-signature">
+                <div class="sign-space"></div>
+                <div class="sign-line"></div>
+                <div class="sign-name">{{ profile.full_name }}</div>
+                <div class="sign-caption">Clergy Member Signature &bull; Date</div>
               </div>
             </div>
           </section>
@@ -563,6 +554,6 @@
     </article>
   </main>
 
-  <script src="{% static 'print-page.js' %}"></script>
+  <script src="{% static 'print-page.js' %}?v={% now 'U' %}"></script>
 </body>
 </html>

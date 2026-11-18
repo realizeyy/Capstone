@@ -52,7 +52,6 @@ CLERGY_DATA = [
             'pagibig_number': '1210-9482-1745',
             'education': 'Master of Divinity, St. Andrew\'s Theological Seminary (2016)',
             'other_information': 'ECW Spiritual Director, Besao Deanery',
-            'verification': 'Verified',
         },
         'children': [
             {'name': 'Lucas Reyes', 'gender': 'Male', 'birth_date': date(2018, 2, 14)},
@@ -100,7 +99,6 @@ CLERGY_DATA = [
             'pagibig_number': '1211-8392-0194',
             'education': 'Master in Ministry, Trinity Theological College (2018)',
             'other_information': 'Central Deanery Council Member and Youth Mentor',
-            'verification': 'Verified',
         },
         'children': [
             {'name': 'Joshua Mendoza', 'gender': 'Male', 'birth_date': date(2014, 3, 10)},
@@ -151,7 +149,6 @@ CLERGY_DATA = [
             'pagibig_number': '1210-7482-9103',
             'education': 'Master of Divinity, St. Andrew\'s Theological Seminary (2008)',
             'other_information': 'Diocesan Disaster Preparedness and Response Coordinator',
-            'verification': 'Verified',
         },
         'children': [
             {'name': 'Ethan Navarro', 'gender': 'Male', 'birth_date': date(2010, 5, 16)},
@@ -200,7 +197,6 @@ CLERGY_DATA = [
             'pagibig_number': '1212-0394-8271',
             'education': 'Master of Divinity, St. Andrew\'s Theological Seminary (2017)',
             'other_information': 'Sunday School Curriculum Committee Member',
-            'verification': 'Verified',
         },
         'children': [
             {'name': 'Gabriel Torres', 'gender': 'Male', 'birth_date': date(2020, 9, 5)},
@@ -247,7 +243,6 @@ CLERGY_DATA = [
             'pagibig_number': '1213-9182-7364',
             'education': 'Master of Divinity, St. Andrew\'s Theological Seminary (2018)',
             'other_information': 'Curate and Youth Ministry Counselor',
-            'verification': 'Verified',
         },
         'children': [
             {'name': 'Mia Rivera', 'gender': 'Female', 'birth_date': date(2023, 4, 12)},
@@ -294,7 +289,6 @@ CLERGY_DATA = [
             'pagibig_number': '1211-9283-7401',
             'education': 'Master of Divinity, St. Andrew\'s Theological Seminary (2016)',
             'other_information': 'Diocesan Communications Officer',
-            'verification': 'Verified',
         },
         'children': [
             {'name': 'Dominic Pascual', 'gender': 'Male', 'birth_date': date(2017, 1, 18)},
@@ -353,7 +347,6 @@ def run():
             profile.pagibig_number = p_data['pagibig_number']
             profile.education = p_data['education']
             profile.other_information = p_data['other_information']
-            profile.verification = p_data['verification']
             profile.save()
 
             # Children

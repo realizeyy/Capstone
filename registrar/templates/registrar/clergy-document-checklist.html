@@ -1,0 +1,76 @@
+{% extends "registrar/base.html" %}
+{% load static %}
+{% load registrar_extras %}
+{% block page_name %}Clergy Document Checklist{% endblock %}
+{% block page_name_heading %}Clergy Document Checklist{% endblock %}
+{% block content %}
+  <section class="page active">
+    <div class="panel">
+      <div id="clergyStickySentinel" aria-hidden="true"></div>
+      <div class="clergy-sticky-header" id="clergyStickyHeader">
+        <div class="panel-head">
+          <div>
+            <h3><i class="fa-solid fa-folder-open"></i> Clergy Document Checklist</h3>
+            <span class="muted">Document checklist status across every clergy</span>
+          </div>
+        </div>
+        <form class="toolbar" method="get">
+          <input type="hidden" name="per_page" value="{{ per_page }}">
+          <input name="q"
+                 class="search"
+                 placeholder="Search by clergy name, assignment or ID..."
+                 value="{{ search_query }}">
+          <!-- ds-allow-native-select: search filter dropdown -->
+          <select name="rank" class="select" data-autosubmit>
+            <option value="">All Ranks</option>
+            {% for value, label in rank_choices %}
+              <option value="{{ value }}"
+                      {% if rank_filter|lower == value|lower %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <button type="submit" class="btn secondary"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+          {% if search_query or rank_filter %}
+            <a class="btn secondary" href="{% url 'registrar:clergy_document_checklist' %}">Clear</a>
+          {% endif %}
+        </form>
+        {% include "registrar/_table_meta_bar.html" with position="top" select_id="perPageSelect" item_label="clergy records" %}
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Record ID</th>
+              <th>Clergy Name</th>
+              <th>Rank</th>
+              <th>Documents</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+              <tr>
+                <td>{{ row.record.id }}</td>
+                <td><b>{{ row.record.name }}</b></td>
+                <td>{{ row.record.get_rank_display }}</td>
+                <td>
+                  <span class="badge {{ row.summary|document_badge_class }}">{{ row.summary.submitted }}/{{ row.summary.total }} Submitted</span>
+                  {% if row.summary.expired %}<span class="badge inactive-b">{{ row.summary.expired }} Expired</span>{% endif %}
+                </td>
+                <td><a class="btn small secondary"
+     href="{% url 'registrar:record_detail' row.record.id %}?tab=documents"><i class="fa-solid fa-list-check"></i> View Checklist</a></td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5" class="empty">No clergy records found.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div id="clergyPagerSentinel" style="height: 1px;"></div>
+      {% if page.has_other_pages or page.paginator.count > 0 %}
+        {% include "registrar/_table_meta_bar.html" with position="bottom" bar_id="clergyBottomPager" select_id="bottomPerPageSelect" item_label="clergy records" %}
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}

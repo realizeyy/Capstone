@@ -9,7 +9,6 @@
   /* Palette & Semantic Tokens */
   --color-primary: #17324d;
   --color-primary-dark: #102438;
-  --color-primary-tint: #eef3f8;
   --color-accent: #2f6fed;
   --color-accent-hover: #2458c2;
   --color-accent-active: #1b4291;
@@ -94,13 +93,13 @@
   --size-seal-h: 72px;
   --size-num-badge: 20px;
   --size-sign-space: 44px;
-  --size-stamp-circle: 68px;
-  --size-stamp-inner: 58px;
+  --size-sign-col-width: 240px;
+  --size-sign-line-max: 220px;
+  --measure-sign-text: 52ch;
   --size-stat-min-width: 112px;
   --size-sheet-width: 210mm;
   --size-sheet-min-height: 297mm;
   --size-progress-height: 7px;
-  --size-sign-line-width: 78%;
   --size-touch-min: 44px;
   --size-rule-thin: 1px;
   --size-rule-medium: 1.5px;
@@ -204,10 +203,9 @@ body {
   print-color-adjust: exact;
 }
 
-/* Sticky Top Actions Toolbar (Never Overlaps Letterhead) */
+/* Top Actions Toolbar (Static on Narrow Phones, Sticky on Tablet/Desktop) */
 .actions {
-  position: sticky;
-  top: 0px;
+  position: relative;
   z-index: 100;
   display: flex;
   flex-wrap: wrap;
@@ -240,6 +238,95 @@ body {
   color: var(--color-text-muted);
 }
 
+.toolbar-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-5);
+  width: 100%;
+}
+
+.scope-switch {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  background-color: var(--color-bg-muted);
+  border: var(--size-rule-thin) solid var(--color-border-sheet);
+  border-radius: var(--radius-md);
+  width: 100%;
+}
+
+/* 8-State Interactive Contract: Segmented Print Scope Toggle */
+.scope-btn {
+  flex: 1 1 auto;
+  border: var(--size-rule-thin) solid transparent;
+  border-radius: var(--radius-sm);
+  min-height: var(--size-touch-min);
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  font-family: var(--font-family-sans);
+  line-height: 1.25;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: transparent;
+  color: var(--color-primary);
+  transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease, border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+}
+.scope-btn:hover {
+  background-color: var(--color-bg-sheet);
+  color: var(--color-text-dark);
+  border-color: var(--color-border-light);
+}
+.scope-btn:focus {
+  outline: none;
+  box-shadow: var(--shadow-focus-muted);
+}
+.scope-btn:focus-visible {
+  outline: var(--size-rule-thick) solid var(--color-accent);
+  outline-offset: var(--space-1);
+}
+.scope-btn:active {
+  background-color: var(--color-border-light);
+  color: var(--color-text-dark);
+}
+.scope-btn:disabled,
+.scope-btn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.scope-btn.is-loading {
+  opacity: 0.75;
+  cursor: wait;
+}
+.scope-btn.is-error {
+  border-color: var(--color-danger-border);
+  color: var(--color-danger-text);
+}
+.scope-btn.is-selected,
+.scope-btn[aria-pressed="true"] {
+  background-color: var(--color-primary);
+  color: var(--color-bg-sheet);
+  border-color: var(--color-primary-dark);
+  box-shadow: var(--shadow-button);
+}
+.scope-btn.is-selected:hover,
+.scope-btn[aria-pressed="true"]:hover {
+  background-color: var(--color-primary-dark);
+  color: var(--color-bg-sheet);
+  border-color: var(--color-primary-dark);
+}
+.scope-btn.is-selected:active,
+.scope-btn[aria-pressed="true"]:active {
+  background-color: var(--color-text-dark);
+  border-color: var(--color-text-dark);
+}
+
 .toolbar-buttons {
   display: flex;
   flex-wrap: wrap;
@@ -247,8 +334,8 @@ body {
   gap: var(--space-4);
 }
 
-.actions a,
-.actions button {
+.toolbar-buttons a,
+.toolbar-buttons button {
   border: var(--size-rule-thin) solid transparent;
   border-radius: var(--radius-md);
   min-height: var(--size-touch-min);
@@ -556,7 +643,6 @@ body {
 }
 
 .badge-active,
-.badge-verified,
 .badge-submitted {
   background-color: var(--color-success-bg);
   color: var(--color-success-text);
@@ -569,8 +655,7 @@ body {
   border: var(--size-rule-thin) solid var(--color-border-sheet);
 }
 
-.badge-warning,
-.badge-pending {
+.badge-warning {
   background-color: var(--color-warning-bg);
   color: var(--color-warning-text);
   border: var(--size-rule-thin) solid var(--color-warning-border);
@@ -699,6 +784,10 @@ body {
   position: relative;
   z-index: 1;
   margin-bottom: var(--space-6);
+}
+
+.doc-section[hidden] {
+  display: none !important;
 }
 
 .section-title {
@@ -1025,7 +1114,7 @@ body {
 }
 
 /* ==========================================================================
-   5. Certification, Official Seal & Running Footer Block
+   5. Clergy Attestation & Running Footer Block
    ========================================================================== */
 .closing-block {
   break-inside: avoid;
@@ -1040,22 +1129,18 @@ body {
   page-break-inside: avoid;
 }
 
-.sign-grid {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-}
-
 .sign-block {
-  flex: 1 1 50%;
   background-color: var(--color-bg-row-alt);
   border: var(--size-rule-thin) solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--space-5) var(--space-6);
-  text-align: center;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: var(--space-5);
+}
+
+.sign-copy {
+  text-align: left;
 }
 
 .sign-heading {
@@ -1064,71 +1149,30 @@ body {
   color: var(--color-primary);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  margin-bottom: var(--space-1);
+  margin-bottom: var(--space-2);
 }
 
 .sign-text {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-  margin: 0px 0px var(--space-4) 0px;
-  line-height: 1.35;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-body);
+  margin: 0px;
+  line-height: 1.4;
+  max-width: var(--measure-sign-text);
+}
+
+.sign-signature {
+  text-align: center;
 }
 
 .sign-space {
-  height: var(--size-stamp-circle);
+  height: var(--size-sign-space);
   margin-bottom: var(--space-2);
-}
-
-.stamp-box {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: var(--space-2);
-}
-
-.stamp-inner-circle {
-  width: var(--size-stamp-circle);
-  height: var(--size-stamp-circle);
-  border: var(--size-rule-medium) dashed var(--color-primary);
-  border-radius: var(--radius-circle);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-2);
-  color: var(--color-primary);
-  background-color: var(--color-primary-tint);
-}
-
-.stamp-ring {
-  width: var(--size-stamp-inner);
-  height: var(--size-stamp-inner);
-  border: var(--size-rule-thin) solid var(--color-border-sheet);
-  border-radius: var(--radius-circle);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-1);
-}
-
-.stamp-text-org {
-  font-size: var(--font-size-2xs);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  line-height: 1.05;
-}
-
-.stamp-text-loc {
-  font-size: var(--font-size-2xs);
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  line-height: 1.05;
-  color: var(--color-text-label);
 }
 
 .sign-line {
   border-top: var(--size-rule-thin) solid var(--color-text-main);
-  width: var(--size-sign-line-width);
+  width: 100%;
+  max-width: var(--size-sign-line-max);
   margin: 0px auto var(--space-2) auto;
 }
 
@@ -1180,6 +1224,29 @@ body {
    6. Progressive Breakpoints (Tablet & Desktop Paper Sheet Layout)
    ========================================================================== */
 @media (min-width: 640px) {
+  .actions {
+    position: sticky;
+    top: 0px;
+  }
+
+  .toolbar-controls {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    width: auto;
+    flex: 1 1 auto;
+  }
+
+  .scope-switch {
+    width: auto;
+  }
+
+  .scope-btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
   .letterhead-top {
     flex-direction: row;
     justify-content: space-between;
@@ -1241,8 +1308,26 @@ body {
     width: 28%;
   }
 
-  .sign-grid {
+  .sign-block {
     flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-8);
+  }
+
+  .sign-copy {
+    flex: 1 1 auto;
+  }
+
+  .sign-signature {
+    flex: 0 0 auto;
+    width: var(--size-sign-col-width);
+  }
+}
+
+@media (min-width: 960px) {
+  .toolbar-controls {
+    justify-content: flex-end;
   }
 }
 
@@ -1407,29 +1492,27 @@ body {
     width: 28% !important;
   }
 
-  .sign-grid {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: stretch !important;
-  }
-
   .sign-block {
-    display: block !important;
-    padding: var(--space-4) var(--space-5) !important;
+    display: table !important;
+    width: 100% !important;
+    padding: var(--space-4) var(--space-6) !important;
   }
 
-  .sign-text {
-    margin-bottom: var(--space-4) !important;
+  .sign-copy {
+    display: table-cell !important;
+    vertical-align: middle !important;
+    padding-right: var(--space-8) !important;
+  }
+
+  .sign-signature {
+    display: table-cell !important;
+    width: var(--size-sign-col-width) !important;
+    vertical-align: bottom !important;
+    text-align: center !important;
   }
 
   .sign-space {
-    height: var(--size-stamp-circle) !important;
-    margin-bottom: var(--space-2) !important;
-  }
-
-  .stamp-box {
-    display: flex !important;
-    justify-content: center !important;
+    height: var(--size-sign-space) !important;
     margin-bottom: var(--space-2) !important;
   }
 

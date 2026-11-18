@@ -21,7 +21,6 @@ class ClergyProfile(models.Model):
     needing a separate manually-maintained "valid until" field."""
 
     CIVIL_STATUS_CHOICES = [('Single', 'Single'), ('Married', 'Married'), ('Widowed', 'Widowed')]
-    VERIFICATION_CHOICES = [('Verified', 'Verified'), ('For Verification', 'For Verification')]
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='clergy_profile')
     record = models.OneToOneField(ClergyRecord, on_delete=models.SET_NULL, blank=True, null=True, related_name='profile')
@@ -47,8 +46,6 @@ class ClergyProfile(models.Model):
     pagibig_number = EncryptedCharField('Pag-IBIG Number', plain_max_length=30, blank=True)
 
     diocese = models.CharField(max_length=150, blank=True, default='Episcopal Diocese of Northern Philippines')
-    verification = models.CharField(max_length=20, choices=VERIFICATION_CHOICES, default='For Verification')
-    verified_at = models.DateField(blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

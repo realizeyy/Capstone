@@ -52,8 +52,7 @@ UPDATE clergy_profiles SET
   philhealth_number = '12-059281746-1',
   pagibig_number = '1210-9482-1745',
   education = 'Master of Divinity, St. Andrew\'s Theological Seminary (2016)',
-  other_information = 'ECW Spiritual Director, Besao Deanery',
-  verification = 'Verified'
+  other_information = 'ECW Spiritual Director, Besao Deanery'
 WHERE record_id = 'CLG-012';
 
 DELETE FROM clergy_children WHERE profile_id = (SELECT id FROM clergy_profiles WHERE record_id = 'CLG-012');
@@ -108,8 +107,7 @@ UPDATE clergy_profiles SET
   philhealth_number = '12-048291038-2',
   pagibig_number = '1211-8392-0194',
   education = 'Master in Ministry, Trinity Theological College (2018)',
-  other_information = 'Central Deanery Council Member and Youth Mentor',
-  verification = 'Verified'
+  other_information = 'Central Deanery Council Member and Youth Mentor'
 WHERE record_id = 'CLG-015';
 
 DELETE FROM clergy_children WHERE profile_id = (SELECT id FROM clergy_profiles WHERE record_id = 'CLG-015');
@@ -167,8 +165,7 @@ UPDATE clergy_profiles SET
   philhealth_number = '12-039182745-9',
   pagibig_number = '1210-7482-9103',
   education = 'Master of Divinity, St. Andrew\'s Theological Seminary (2008)',
-  other_information = 'Diocesan Disaster Preparedness and Response Coordinator',
-  verification = 'Verified'
+  other_information = 'Diocesan Disaster Preparedness and Response Coordinator'
 WHERE record_id = 'CLG-021';
 
 DELETE FROM clergy_children WHERE profile_id = (SELECT id FROM clergy_profiles WHERE record_id = 'CLG-021');
@@ -224,8 +221,7 @@ UPDATE clergy_profiles SET
   philhealth_number = '12-068192837-4',
   pagibig_number = '1212-0394-8271',
   education = 'Master of Divinity, St. Andrew\'s Theological Seminary (2017)',
-  other_information = 'Sunday School Curriculum Committee Member',
-  verification = 'Verified'
+  other_information = 'Sunday School Curriculum Committee Member'
 WHERE record_id = 'CLG-022';
 
 DELETE FROM clergy_children WHERE profile_id = (SELECT id FROM clergy_profiles WHERE record_id = 'CLG-022');
@@ -279,8 +275,7 @@ UPDATE clergy_profiles SET
   philhealth_number = '12-079283741-5',
   pagibig_number = '1213-9182-7364',
   education = 'Master of Divinity, St. Andrew\'s Theological Seminary (2018)',
-  other_information = 'Curate and Youth Ministry Counselor',
-  verification = 'Verified'
+  other_information = 'Curate and Youth Ministry Counselor'
 WHERE record_id = 'CLG-026';
 
 DELETE FROM clergy_children WHERE profile_id = (SELECT id FROM clergy_profiles WHERE record_id = 'CLG-026');
@@ -334,8 +329,7 @@ UPDATE clergy_profiles SET
   philhealth_number = '12-058291047-3',
   pagibig_number = '1211-9283-7401',
   education = 'Master of Divinity, St. Andrew\'s Theological Seminary (2016)',
-  other_information = 'Diocesan Communications Officer',
-  verification = 'Verified'
+  other_information = 'Diocesan Communications Officer'
 WHERE record_id = 'CLG-028';
 
 DELETE FROM clergy_children WHERE profile_id = (SELECT id FROM clergy_profiles WHERE record_id = 'CLG-028');

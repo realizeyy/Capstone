@@ -623,7 +623,6 @@ body {
 }
 
 .badge-active,
-.badge-verified,
 .badge-submitted {
   background-color: var(--color-success-bg);
   color: var(--color-success-text);
@@ -636,8 +635,7 @@ body {
   border: var(--size-rule-thin) solid var(--color-border-sheet);
 }
 
-.badge-warning,
-.badge-pending {
+.badge-warning {
   background-color: var(--color-warning-bg);
   color: var(--color-warning-text);
   border: var(--size-rule-thin) solid var(--color-warning-border);

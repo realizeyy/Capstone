@@ -5,7 +5,7 @@
   stored PDF, unless it was restored first; Delete now does it straight away. Only an
   archived report can be deleted, so no report disappears in one click.
 - Clergy records. Only a retired clergy member's record can be archived. It leaves Clergy
-  Records, the Dashboard, Documents and Contract Review, but is never deleted: it keeps its
+  Records, the Dashboard, Clergy Document Checklist and Contract Review, but is never deleted: it keeps its
   documents and portal account, still appears in reports (they are the diocese's official
   record), and can be restored at any time.
 

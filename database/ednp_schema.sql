@@ -79,7 +79,6 @@ CREATE TABLE clergy_accounts (
   status ENUM('Active','Assigned Abroad','Inactive','Retired') NULL,
   diocese VARCHAR(150) NULL,
   contract_end DATE NULL,
-  verification ENUM('Verified','For Verification') NOT NULL DEFAULT 'For Verification',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (record_id) REFERENCES clergy_records(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;

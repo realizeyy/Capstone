@@ -344,7 +344,7 @@ class RecordArchiveTests(RegistrarTestCase):
         self.assertNotIn(self.active, list(dashboard.context['recent_records']))
         self.assertContains(dashboard, 'not counting 1 archived')
 
-        documents = self.client.get(reverse('registrar:documents_overview')).context['rows']
+        documents = self.client.get(reverse('registrar:clergy_document_checklist')).context['rows']
         self.assertEqual([row['record'].id for row in documents], ['CLG-001'])
         self.assertEqual(self.client.get(reverse('registrar:contract_review')).context['rows'], [])
 

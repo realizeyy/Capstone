@@ -76,7 +76,7 @@ def provision_account(record):
 
     # Every profile field starts blank; the clergy member fills in their own
     # details after activation.
-    ClergyProfile.objects.create(user=user, record=record, verification='For Verification')
+    ClergyProfile.objects.create(user=user, record=record)
     UserSecurity.objects.create(user=user, setup_expires_at=_expiry_from_now())
     return user, password
 

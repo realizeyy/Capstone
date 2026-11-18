@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-          content="{% block meta_description %}Electronic Diocese Network Portal - Clergy Records Management System.{% endblock %}">
+          content="{% block meta_description %}Clergy Records Management System.{% endblock %}">
     <title>EDNP - {% block page_name %}{% endblock %}</title>
     <link rel="icon" type="image/png" href="{% static 'ednp_logo.png' %}">
     <link rel="stylesheet" href="{% static 'registrar/css/style.css' %}?v=33">
@@ -45,8 +45,8 @@
              href="{% url 'registrar:dashboard' %}"><i class="fa-solid fa-gauge"></i> Dashboard</a>
           <a class="{% if active_page == 'clergy_records' %}active{% endif %}"
              href="{% url 'registrar:clergy_records' %}"><i class="fa-solid fa-address-book"></i> Clergy Records</a>
-          <a class="{% if active_page == 'documents' %}active{% endif %}"
-             href="{% url 'registrar:documents_overview' %}"><i class="fa-solid fa-folder-open"></i> Documents {% if nav_documents_count %}<span class="badge blue">{{ nav_documents_count }}</span>{% endif %}</a>
+          <a class="{% if active_page == 'clergy_document_checklist' %}active{% endif %}"
+             href="{% url 'registrar:clergy_document_checklist' %}"><i class="fa-solid fa-folder-open"></i> Clergy Document Checklist {% if nav_documents_count %}<span class="badge blue">{{ nav_documents_count }}</span>{% endif %}</a>
           <a class="{% if active_page == 'ordination_requirements' %}active{% endif %}"
              href="{% url 'registrar:ordination_requirements' %}"><i class="fa-solid fa-list-check"></i> Ordination Requirements</a>
           <div class="section-title">Services</div>
@@ -71,7 +71,7 @@
       </aside>
       <main>
         <div class="topbar">
-          <div class="title"><h1>{% block page_name_heading %}{% endblock %}</h1><p>Electronic Diocese Network Portal: Clergy Records Management</p></div>
+          <div class="title"><h1>{% block page_name_heading %}{% endblock %}</h1><p>Clergy Records Management</p></div>
           <div class="topbar-right">
             {% block top_actions %}{% endblock %}
           </div>

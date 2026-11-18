@@ -528,6 +528,43 @@ def my_profile(request):
     return render(request, 'clergy/my-profile.html', context)
 
 
+def _include_attachments_from_request(request):
+    """Parse the print-scope query parameter; defaults to including attachment status."""
+    raw = (request.GET.get('include_attachments') or '').strip().lower()
+    return raw not in ('0', 'false', 'no', 'off')
+
+
+def _build_print_record_context(profile, include_attachments, *, include_urls=False):
+    """Build template context shared by the printable preview and WeasyPrint PDF export."""
+    context = {
+        'profile': profile,
+        'include_attachments': include_attachments,
+        'generated_at': timezone.now(),
+    }
+    if include_attachments:
+        checklist_grouped = profile.record.document_checklist_grouped()
+        doc_summary = profile.record.document_summary()
+        total_reqs = doc_summary.get('total', 0)
+        submitted_reqs = doc_summary.get('submitted', 0)
+        percent_complete = round((submitted_reqs / total_reqs * 100)) if total_reqs else 0
+        context.update({
+            'checklist': profile.record.document_checklist(),
+            'checklist_grouped': checklist_grouped,
+            'doc_summary': doc_summary,
+            'percent_complete': percent_complete,
+        })
+    if include_urls:
+        base_download_url = reverse('clergy:download_own_record')
+        base_print_url = reverse('clergy:print_own_record')
+        context.update({
+            'download_url': base_download_url if include_attachments else f'{base_download_url}?include_attachments=0',
+            'download_base_url': base_download_url,
+            'include_attachments_url': base_print_url,
+            'personal_only_url': f'{base_print_url}?include_attachments=0',
+        })
+    return context
+
+
 @clergy_required
 def print_own_record(request):
     """A letterhead-style printable copy of the clergy member's own record: 
@@ -541,21 +578,12 @@ def print_own_record(request):
         return redirect('clergy:dashboard')
     profile.record.record_expired_contract()
 
-    checklist_grouped = profile.record.document_checklist_grouped()
-    doc_summary = profile.record.document_summary()
-    total_reqs = doc_summary.get('total', 0)
-    submitted_reqs = doc_summary.get('submitted', 0)
-    percent_complete = round((submitted_reqs / total_reqs * 100)) if total_reqs else 0
-
-    return render(request, 'clergy/print-record.html', {
-        'profile': profile,
-        'checklist': profile.record.document_checklist(),
-        'checklist_grouped': checklist_grouped,
-        'doc_summary': doc_summary,
-        'percent_complete': percent_complete,
-        'download_url': reverse('clergy:download_own_record'),
-        'generated_at': timezone.now(),
-    })
+    include_attachments = _include_attachments_from_request(request)
+    return render(
+        request,
+        'clergy/print-record.html',
+        _build_print_record_context(profile, include_attachments, include_urls=True),
+    )
 
 
 @clergy_required
@@ -570,26 +598,19 @@ def download_own_record(request):
 
     from ednp.pdf import PdfGenerationError, html_to_pdf
 
-    checklist_grouped = profile.record.document_checklist_grouped()
-    doc_summary = profile.record.document_summary()
-    total_reqs = doc_summary.get('total', 0)
-    submitted_reqs = doc_summary.get('submitted', 0)
-    percent_complete = round((submitted_reqs / total_reqs * 100)) if total_reqs else 0
-
-    html = render_to_string('clergy/print-record.html', {
-        'profile': profile,
-        'checklist': profile.record.document_checklist(),
-        'checklist_grouped': checklist_grouped,
-        'doc_summary': doc_summary,
-        'percent_complete': percent_complete,
-        'generated_at': timezone.now(),
-    })
+    include_attachments = _include_attachments_from_request(request)
+    html = render_to_string(
+        'clergy/print-record.html',
+        _build_print_record_context(profile, include_attachments),
+    )
     try:
         pdf_bytes = html_to_pdf(html)
     except PdfGenerationError as exc:
         messages.error(request, str(exc))
         return redirect('clergy:my_profile')
-    filename = f"clergy_record_{profile.record.id or request.user.username}.pdf"
+    base_id = profile.record.id or request.user.username
+    suffix = '' if include_attachments else '_personal'
+    filename = f"clergy_record_{base_id}{suffix}.pdf"
     response = HttpResponse(pdf_bytes, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response

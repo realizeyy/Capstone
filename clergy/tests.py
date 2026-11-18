@@ -452,11 +452,36 @@ class EnhancedClergyProfileTests(TestCase):
         self.assertContains(res, 'Ben Skywalker')
         self.assertContains(res, 'B.Th.')
         self.assertContains(res, 'Extracted ')
-        self.assertContains(res, 'stamp-ring')
+        self.assertContains(res, 'Clergy Member Attestation')
+        self.assertContains(res, 'Canonical Requirements &amp; Attachments')
+        self.assertContains(res, 'With Attachment Status')
+        self.assertContains(res, 'Personal Info Only')
+        self.assertNotContains(res, 'stamp-ring')
+        self.assertNotContains(res, 'registrar-block')
+        self.assertNotContains(res, 'Diocesan Registry Certification')
+        self.assertNotContains(res, 'OFFICIAL SEAL')
         self.assertNotContains(res, 'id="sheet-1"')
         self.assertNotContains(res, 'Page 1 of 2')
+        self.assertNotContains(res, 'For Verification')
+        self.assertNotContains(res, 'Verified Record')
+        self.assertNotContains(res, 'badge-verified')
+        self.assertNotContains(res, 'badge-pending')
 
-        # Missionary status renders styled info badge and PDF export compiles cleanly
+        # Personal Info Only option omits Section 6 while keeping Sections 1-5 and syncs Download PDF URL
+        personal_res = self.client.get(reverse('clergy:print_own_record') + '?include_attachments=0')
+        self.assertEqual(personal_res.status_code, 200)
+        self.assertContains(personal_res, 'Personal &amp; Civic Profile')
+        self.assertContains(personal_res, 'Sacramental &amp; Holy Orders History')
+        self.assertContains(personal_res, 'Deployments &amp; Station History')
+        self.assertContains(personal_res, 'Family Background')
+        self.assertContains(personal_res, 'Educational Background')
+        self.assertContains(personal_res, 'Clergy Member Attestation')
+        self.assertContains(personal_res, reverse('clergy:download_own_record') + '?include_attachments=0')
+        self.assertNotContains(personal_res, 'Canonical Requirements &amp; Attachments')
+        self.assertNotContains(personal_res, 'id="attachments-section"')
+        self.assertNotContains(personal_res, 'Diocesan Registry Certification')
+
+        # Missionary status renders styled info badge and PDF export compiles cleanly in both modes
         self.record.status = 'Missionary to Other Diocese'
         self.record.save(update_fields=['status'])
         missionary_res = self.client.get(reverse('clergy:print_own_record'))
@@ -467,6 +492,12 @@ class EnhancedClergyProfileTests(TestCase):
         self.assertEqual(pdf_res.status_code, 200)
         self.assertEqual(pdf_res['Content-Type'], 'application/pdf')
         self.assertTrue(pdf_res.content.startswith(b'%PDF'))
+
+        personal_pdf_res = self.client.get(reverse('clergy:download_own_record') + '?include_attachments=0')
+        self.assertEqual(personal_pdf_res.status_code, 200)
+        self.assertEqual(personal_pdf_res['Content-Type'], 'application/pdf')
+        self.assertIn('_personal.pdf', personal_pdf_res['Content-Disposition'])
+        self.assertTrue(personal_pdf_res.content.startswith(b'%PDF'))
 
     def test_date_attachments_map_and_quick_upload_flow(self):
         from django.core.files.uploadedfile import SimpleUploadedFile
@@ -781,6 +812,22 @@ class DashboardSearchAndWelcomeTests(TestCase):
         self.assertFalse(response.context['show_welcome'])
         self.assertNotContains(response, 'id="clergyWelcomeBanner"')
         self.assertContains(response, 'id="dashboardSearchInput"')
+
+    def test_clergy_portal_and_profile_model_have_no_verification_status(self):
+        field_names = {f.name for f in ClergyProfile._meta.get_fields()}
+        self.assertNotIn('verification', field_names)
+        self.assertNotIn('verified_at', field_names)
+
+        self.client.force_login(self.user)
+        dashboard = self.client.get(reverse('clergy:dashboard'))
+        self.assertEqual(dashboard.status_code, 200)
+        self.assertNotContains(dashboard, '<label>Verification</label>')
+        self.assertNotContains(dashboard, 'For Verification')
+
+        profile_page = self.client.get(reverse('clergy:my_profile'))
+        self.assertEqual(profile_page.status_code, 200)
+        self.assertNotContains(profile_page, 'For Verification')
+        self.assertNotContains(profile_page, '<span class="badge blue">Verified</span>')
 
 
 class SchoolPickerIntegrationTests(TestCase):
