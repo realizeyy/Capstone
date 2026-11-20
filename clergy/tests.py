@@ -435,9 +435,17 @@ class EnhancedClergyProfileTests(TestCase):
         self.assertFalse(ClergyDeployment.objects.filter(id=dep.id).exists())
 
     def test_print_own_record_renders_enhancements(self):
+        from datetime import timedelta
+        from registrar.models import Document, DocumentType
+
         ClergyDeployment.objects.create(
             record=self.record, station_name='Holy Trinity Mission',
             place_name='Bontoc', role='Rector', is_current=True
+        )
+        ClergyDeployment.objects.create(
+            record=self.record, station_name='St. Paul Outstation',
+            place_name='Sagada', role='Vicar', is_current=False,
+            start_date=date(2008, 1, 1), end_date=date(2010, 12, 31)
         )
         ClergyChild.objects.create(
             profile=self.profile, name='Ben Skywalker', birth_date=date(2012, 1, 1), gender='Male'
@@ -445,10 +453,39 @@ class EnhancedClergyProfileTests(TestCase):
         ClergyEducation.objects.create(
             profile=self.profile, degree='B.Th.', institution='SAS', place='QC', year_graduated=2004
         )
+        submitted_type, _ = DocumentType.objects.get_or_create(
+            name='Unified Status Submitted Doc',
+            defaults={'uploaded_by': 'clergy', 'required_from_rank': 'deacon', 'is_required': True},
+        )
+        expired_type, _ = DocumentType.objects.get_or_create(
+            name='Unified Status Expired Doc',
+            defaults={
+                'uploaded_by': 'clergy',
+                'required_from_rank': 'deacon',
+                'is_required': True,
+                'validity_period_months': 6,
+            },
+        )
+        DocumentType.objects.get_or_create(
+            name='Unified Status Missing Doc',
+            defaults={'uploaded_by': 'clergy', 'required_from_rank': 'deacon', 'is_required': True},
+        )
+        Document.objects.create(
+            record=self.record,
+            document_type=submitted_type,
+            submitted_date=date.today(),
+        )
+        Document.objects.create(
+            record=self.record,
+            document_type=expired_type,
+            submitted_date=date.today() - timedelta(days=400),
+        )
+
         res = self.client.get(reverse('clergy:print_own_record'))
         self.assertEqual(res.status_code, 200)
         self.assertContains(res, 'All Saints Cathedral, Bontoc')
         self.assertContains(res, 'Holy Trinity Mission')
+        self.assertContains(res, 'St. Paul Outstation')
         self.assertContains(res, 'Ben Skywalker')
         self.assertContains(res, 'B.Th.')
         self.assertContains(res, 'Extracted ')
@@ -456,6 +493,25 @@ class EnhancedClergyProfileTests(TestCase):
         self.assertContains(res, 'Canonical Requirements &amp; Attachments')
         self.assertContains(res, 'With Attachment Status')
         self.assertContains(res, 'Personal Info Only')
+        self.assertContains(res, '<span class="badge badge-status">Active Status</span>')
+        self.assertContains(res, '<span class="badge badge-status">Current</span>')
+        self.assertContains(res, '<span class="badge badge-status">Completed</span>')
+        self.assertContains(res, '<span class="badge badge-status">Submitted</span>')
+        self.assertContains(res, '<span class="badge badge-status">Expired</span>')
+        self.assertContains(res, '<span class="badge badge-status">Not Uploaded</span>')
+        self.assertContains(res, '<span class="stat-pill">')
+        for forbidden_class in (
+            'badge-active',
+            'badge-warning',
+            'badge-info',
+            'badge-neutral',
+            'badge-submitted',
+            'badge-danger',
+            'stat-pill-green',
+            'stat-pill-slate',
+            'stat-pill-red',
+        ):
+            self.assertNotContains(res, forbidden_class)
         self.assertNotContains(res, 'stamp-ring')
         self.assertNotContains(res, 'registrar-block')
         self.assertNotContains(res, 'Diocesan Registry Certification')
@@ -481,12 +537,19 @@ class EnhancedClergyProfileTests(TestCase):
         self.assertNotContains(personal_res, 'id="attachments-section"')
         self.assertNotContains(personal_res, 'Diocesan Registry Certification')
 
-        # Missionary status renders styled info badge and PDF export compiles cleanly in both modes
-        self.record.status = 'Missionary to Other Diocese'
-        self.record.save(update_fields=['status'])
-        missionary_res = self.client.get(reverse('clergy:print_own_record'))
-        self.assertContains(missionary_res, 'badge-info')
-        self.assertContains(missionary_res, 'Missionary')
+        # All clergy statuses share the single unified badge-status class and full status label
+        for status_value, expected_label in (
+            ('Active', 'Active Status'),
+            ('On Leave', 'On Leave'),
+            ('Missionary to Other Diocese', 'Missionary to Other Diocese'),
+            ('Retired', 'Retired'),
+        ):
+            self.record.status = status_value
+            self.record.save(update_fields=['status'])
+            status_res = self.client.get(reverse('clergy:print_own_record'))
+            self.assertContains(status_res, f'<span class="badge badge-status">{expected_label}</span>')
+            for forbidden_class in ('badge-active', 'badge-warning', 'badge-info', 'badge-neutral'):
+                self.assertNotContains(status_res, forbidden_class)
 
         pdf_res = self.client.get(reverse('clergy:download_own_record'))
         self.assertEqual(pdf_res.status_code, 200)

@@ -618,6 +618,9 @@
         value="{{ record.leave_reason|default:'' }}"
         placeholder="e.g. medical leave, sabbatical">
               </div>
+              <div class="edit-field full hidden" id="editRetiredNotice">
+                <div class="alert">Setting status to Retired closes active deployments and clears assignment and contract end date. Date of Retirement defaults to today if left blank.</div>
+              </div>
 
               <div class="edit-field full" style="font-weight: 700; font-size: 15px; color: #17324d; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 12px; display: flex; align-items: center; gap: 8px;">
                 <i class="fa-solid fa-church" style="color: #2f6fed;"></i> Assignment &amp; Jurisdiction
@@ -644,11 +647,13 @@
               </div>
               <div class="edit-field">
                 <label>Contract End Date</label><input name="contract_end"
+       id="editContractEnd"
        type="date"
        value="{{ record.contract_end|date:'Y-m-d' }}">
               </div>
               <div class="edit-field">
                 <label>Date of Retirement</label><input name="retirement_date"
+       id="editRetirementDate"
        type="date"
        value="{{ record.retirement_date|date:'Y-m-d' }}">
               </div>
@@ -671,7 +676,7 @@
             <button type="button" class="btn small" onclick="openModal('addDeploymentModal')"><i class="fa-solid fa-plus"></i> Add Deployment</button>
           </div>
           <div class="notice" id="noticeRecordDetailDeployments">
-            <div class="notice-content">Parish assignments and mission deployments. Both Registrar and clergy can edit.</div>
+            <div class="notice-content">Parish assignments and mission deployments. Both Registrar and clergy can edit. Official assignment and Contract End Date (tracked in Contract Review) are managed under Deployment &amp; Official Status.</div>
             <button type="button" class="notice-dismiss" data-dismiss-notice="noticeRecordDetailDeployments" aria-label="Dismiss notice" title="Dismiss">
               <i class="fa-solid fa-xmark"></i>
             </button>
@@ -1240,9 +1245,16 @@
           <input name="end_date" type="date">
         </div>
         <div class="edit-field full">
+          {% if record.status == 'Retired' %}
+          <label style="display:flex;align-items:center;gap:6px;opacity:0.65;cursor:not-allowed;">
+            <input type="checkbox" name="is_current" value="1" disabled> This is the current active assignment
+          </label>
+          <small class="muted">Retired clergy can only record past deployments.</small>
+          {% else %}
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
             <input type="checkbox" name="is_current" value="1"> This is the current active assignment
           </label>
+          {% endif %}
         </div>
         <div class="edit-field full">
           <label>Notes (optional)</label>
@@ -1329,8 +1341,8 @@
 {% endblock %}
 
 {% block extra_js %}
-  <script src="{% static 'registrar/js/clergy-records.js' %}?v=18"></script>
-  <script src="{% static 'registrar/js/record-detail.js' %}?v=8"></script>
+  <script src="{% static 'registrar/js/clergy-records.js' %}?v=20"></script>
+  <script src="{% static 'registrar/js/record-detail.js' %}?v=9"></script>
   <script src="{% static 'ember-letters.js' %}?v=11"></script>
   <script src="{% static 'clergy/js/address-picker.js' %}?v=11"></script>
   <script>
@@ -1485,6 +1497,9 @@
         updateOrdinationStages();
         if (typeof toggleLeaveReason === 'function') {
           toggleLeaveReason('editStatus', 'editLeaveReasonField');
+        }
+        if (typeof syncRetiredFields === 'function') {
+          syncRetiredFields('editStatus', false);
         }
 
         const restoredJson = JSON.stringify(captureProfileSnapshot());
@@ -2149,7 +2164,7 @@
         initialSectionId = reopenSection;
         forcePersonalTab = true;
       } else if (pendingReturnInputEl) {
-        const returnSec = pendingReturnInputEl.closest('.edit-grid');
+        const returnSec = pendingReturnInputEl.closest('.edit-grid[id], .section-card[id]');
         if (returnSec && returnSec.id) initialSectionId = returnSec.id;
         forcePersonalTab = true;
       } else if (urlTarget.sectionId && document.getElementById(urlTarget.sectionId)) {
@@ -2219,8 +2234,8 @@
         }
       }
       if (invalidControl) {
-        const parentSec = invalidControl.closest('.edit-grid');
-        const targetSecId = parentSec ? parentSec.id : savedSectionId;
+        const parentSec = invalidControl.closest('.edit-grid[id], .section-card[id]');
+        const targetSecId = (parentSec && parentSec.id) ? parentSec.id : savedSectionId;
         openSectionInModal(targetSecId, { shouldFocus: false });
         if (typeof showToast === 'function') {
           showToast('Please correct the highlighted field before saving.', 'warn');
@@ -2235,6 +2250,7 @@
       }
 
       const origHtml = sectionSaveBtn.innerHTML;
+      let isReloading = false;
       sectionSaveBtn.disabled = true;
       sectionSaveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
 
@@ -2250,17 +2266,18 @@
         const data = (typeof parseJsonResponse === 'function') ? await parseJsonResponse(res) : await res.json();
         if (!data.ok) {
           if (typeof applyFormErrors === 'function' && data.errors) {
-            applyFormErrors(mainForm, data.errors);
             returnSectionToPage();
+            applyFormErrors(mainForm, data.errors);
             const errField = mainForm.querySelector('.has-error');
-            const errSec = errField ? errField.closest('.edit-grid') : null;
-            openSectionInModal(errSec ? errSec.id : savedSectionId, { shouldFocus: !!errSec });
+            const errSec = errField ? errField.closest('.edit-grid[id], .section-card[id]') : null;
+            openSectionInModal((errSec && errSec.id) ? errSec.id : savedSectionId, { shouldFocus: !!errSec });
           }
           if (typeof showToast === 'function') {
             showToast((data && data.error) || 'Please check the form and try again.', 'error');
           }
           return;
         }
+        returnSectionToPage();
         if (typeof applyFormErrors === 'function') {
           applyFormErrors(mainForm, {});
         }
@@ -2269,12 +2286,27 @@
           sessionStorage.removeItem(RETURN_FIELD_KEY);
         } catch (_e) {}
         setDraftBadgeVisible(false);
-        returnSectionToPage();
-        serverBaselineJson = JSON.stringify(captureProfileSnapshot());
-        openSectionInModal(savedSectionId, { shouldFocus: false, scrollPill: false, skipAnimate: true });
         const saveBar = document.querySelector('.floating-save-bar');
         if (saveBar) saveBar.classList.remove('visible');
         document.dispatchEvent(new CustomEvent('ednp:form-saved'));
+        if (data.lifecycle_changed) {
+          isReloading = true;
+          try {
+            if (savedSectionId) {
+              sessionStorage.setItem(AUTO_OPEN_SECTION_KEY, savedSectionId);
+            }
+            sessionStorage.setItem('ednp_pending_toast', JSON.stringify({
+              message: data.message || 'Changes saved successfully.',
+              level: 'success'
+            }));
+          } catch (_e) {}
+          sectionSaveBtn.classList.add('saved-success');
+          sectionSaveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
+          window.location.reload();
+          return;
+        }
+        serverBaselineJson = JSON.stringify(captureProfileSnapshot());
+        openSectionInModal(savedSectionId, { shouldFocus: false, scrollPill: false, skipAnimate: true });
         if (typeof showToast === 'function') {
           showToast(data.message || 'Changes saved successfully.', 'success');
         }
@@ -2291,9 +2323,11 @@
           showToast('Network error while saving. Please try again.', 'error');
         }
       } finally {
-        sectionSaveBtn.disabled = false;
-        if (!sectionSaveBtn.classList.contains('saved-success')) {
-          sectionSaveBtn.innerHTML = origHtml;
+        if (!isReloading) {
+          sectionSaveBtn.disabled = false;
+          if (!sectionSaveBtn.classList.contains('saved-success')) {
+            sectionSaveBtn.innerHTML = origHtml;
+          }
         }
       }
     });

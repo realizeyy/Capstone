@@ -1040,6 +1040,12 @@ main{
   color:var(--red);
 }
 
+.badge.slate{
+  background:var(--bg);
+  color:var(--navy);
+  border:1px solid var(--line);
+}
+
 
 /* =========================
    NOTICES

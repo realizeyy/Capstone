@@ -200,9 +200,18 @@ def record_restored(record, registrar):
            f'{_registrar(registrar)} restored your clergy record from the archive.')
 
 
-def record_updated(record, registrar, form):
+def record_updated(record, registrar, form, previous_values=None):
     """After the registrar saves a clergy member's record (call it after form.save())."""
-    changes = [_describe(form, name) for name in form.changed_data]
+    field_names = list(form.changed_data)
+    if previous_values:
+        for name in SPELLED_OUT_FIELDS:
+            if name not in form.fields or name in field_names or name not in previous_values:
+                continue
+            current = getattr(record, f'{name}_id') if name == 'deanery' else getattr(record, name)
+            old = previous_values[name]
+            if (old or None) != (current or None):
+                field_names.append(name)
+    changes = [_describe(form, name) for name in field_names]
     if changes:
         notify(_owner(record), 'record_updated', 'Your record was updated',
                f'{_registrar(registrar)} changed: {", ".join(changes)}.')
@@ -297,7 +306,8 @@ def sync_reminders(user, record, today=None):
     if record is None or user.is_staff:
         return
     today = today or date.today()
-    if record.contract_end and record.contract_end <= today:
+    record.sync_retirement_status(today=today)
+    if record.status != 'Retired' and record.contract_end and record.contract_end < today:
         record.record_expired_contract(today=today)
     due = [*_contract_reminders(record, today), *_document_reminders(record, today)]
     if not due:

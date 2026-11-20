@@ -1,6 +1,7 @@
 import calendar
 import re
 import secrets
+import time
 from datetime import date, datetime, timedelta
 import urllib.parse
 
@@ -33,7 +34,8 @@ from .forms import (ClergyDeploymentForm, ClergyRecordForm, ContractStatusUpdate
                     EmberLetterUploadForm, PersonalInfoForm, first_error)
 from .models import (RANK_CHOICES, REPORT_ARCHIVE_DAYS, BackupArchive, ClergyRecord, ClergyDeployment, Deanery, Document, DocumentType,
                      EmberLetter, GeneratedReport, delete_ember_letter as remove_ember_letter,
-                     note_document_submission, save_document, save_ember_letter, sync_expired_contracts)
+                     note_document_submission, save_document, save_ember_letter,
+                     sync_clergy_lifecycle)
 from .provisioning import (SETUP_WINDOW_DAYS, ProvisionError, account_status, provision_account, reset_credentials,
                            reset_lost_phone)
 
@@ -191,7 +193,6 @@ def download_document(request, document_id):
 @login_required(login_url='index')
 def view_profile_picture(request, record_id):
     record = get_object_or_404(ClergyRecord, id=record_id)
-    record.record_expired_contract()
     profile = getattr(request.user, 'clergy_profile', None)
     if not (request.user.is_staff or (profile is not None and profile.record_id == record.id)):
         raise Http404
@@ -571,13 +572,15 @@ def _build_registrar_search_catalog(user=None):
 
 @registrar_required
 def dashboard(request):
-    sync_expired_contracts()
+    sync_clergy_lifecycle()
     records = ClergyRecord.objects.current()
     near_expiry_cutoff = date.today() + timedelta(days=NEAR_EXPIRY_WINDOW_DAYS)
     stats = {
         'total': records.count(),
         'active': records.filter(status='Active').count(),
-        'expiry': records.filter(contract_end__isnull=False, contract_end__lt=near_expiry_cutoff).count(),
+        'expiry': records.exclude(status='Retired').filter(
+            contract_end__isnull=False, contract_end__lt=near_expiry_cutoff
+        ).count(),
         'archived': ClergyRecord.objects.archived().count(),
     }
     recent_records = records.order_by('-created_at')[:5]
@@ -600,6 +603,7 @@ def clergy_records(request):
     """The working list, or with `?view=archived` the archived records (retired
     clergy filed away; see registrar/archive.py). Search and the status, deanery,
     and rank filters work within whichever list is showing."""
+    sync_clergy_lifecycle()
     query = request.GET.get('q', '').strip()
     status = request.GET.get('status', '').strip()
     deanery_filter = request.GET.get('deanery', '').strip()
@@ -792,6 +796,7 @@ def create_record(request):
             'baptism_date': request.POST.get('baptism_date', ''),
             'confirmation_date': request.POST.get('confirmation_date', ''),
             'contract_end': request.POST.get('contract_end', ''),
+            'retirement_date': request.POST.get('retirement_date', ''),
         }
         request.session['record_modal_errors'] = {
             field: [str(e) for e in errs] for field, errs in form.errors.items()
@@ -809,6 +814,7 @@ def create_record(request):
             record = form.save(commit=False)
             record.id = ClergyRecord.allocate_id()
             record.save()
+            record.sync_lifecycle_after_save(created=True)
             user, password = provision_account(record)
             audit.record(request.user, user, 'account_created', target_name=record.name)
             request.session.pop('record_modal_draft', None)
@@ -1033,6 +1039,9 @@ def record_detail(request, record_id):
     page can link straight into a specific record's Documents tab."""
     record = get_object_or_404(ClergyRecord, id=record_id)
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+    if request.method == 'GET':
+        record.sync_retirement_status()
+        record.record_expired_contract()
 
     if request.method == 'POST' and request.POST.get('action') == 'toggle_noted_requirement':
         dt_id = request.POST.get('document_type_id')
@@ -1090,13 +1099,14 @@ def record_detail(request, record_id):
         return redirect(f"{request.path}?tab={tab}")
 
     if request.method == 'POST' and request.POST.get('action') == 'add_deployment':
-        dep_form = ClergyDeploymentForm(request.POST)
+        record.sync_retirement_status()
+        dep_form = ClergyDeploymentForm(request.POST, record=record)
         if dep_form.is_valid():
             dep = dep_form.save(commit=False)
             dep.record = record
             if dep.is_current:
                 dep.end_date = None
-                record.deployments.filter(is_current=True).update(is_current=False)
+                record.close_current_deployments(end_date=dep.start_date or date.today())
             dep.save()
             notifications.deployment_added(record, request.user, dep)
             msg = f'Deployment at {dep.station_name} added successfully.'
@@ -1121,6 +1131,12 @@ def record_detail(request, record_id):
 
     if request.method == 'POST':
         was_archived = record.is_archived
+        previous_assignment = record.assignment or ''
+        previous_deanery_id = record.deanery_id
+        previous_status = record.status
+        previous_rank = record.rank
+        previous_contract_end = record.contract_end
+        previous_retirement_date = record.retirement_date
         form = PersonalInfoForm(request.POST, instance=record)
         if not form.is_valid():
             err = first_error(form) or 'Please check the form and try again.'
@@ -1134,25 +1150,65 @@ def record_detail(request, record_id):
                 return JsonResponse({'ok': False, 'error': err, 'errors': {'status': [err]}}, status=400)
             messages.error(request, err)
         else:
-            form.save()
-            profile = getattr(record, 'profile', None)
-            if profile:
-                profile_changed = False
-                if 'place_of_birth' in request.POST:
-                    profile.place_of_birth = request.POST.get('place_of_birth', '').strip()[:150]
-                    profile_changed = True
-                if 'baptism_place' in request.POST:
-                    profile.baptism_place = request.POST.get('baptism_place', '').strip()[:150]
-                    profile_changed = True
-                if 'confirmation_place' in request.POST:
-                    profile.confirmation_place = request.POST.get('confirmation_place', '').strip()[:150]
-                    profile_changed = True
-                if profile_changed:
-                    profile.save()
-            record.record_expired_contract()
-            notifications.record_updated(record, request.user, form)
+            with transaction.atomic():
+                form.save()
+                profile = getattr(record, 'profile', None)
+                if profile:
+                    profile_changed = False
+                    if 'place_of_birth' in request.POST:
+                        profile.place_of_birth = request.POST.get('place_of_birth', '').strip()[:150]
+                        profile_changed = True
+                    if 'baptism_place' in request.POST:
+                        profile.baptism_place = request.POST.get('baptism_place', '').strip()[:150]
+                        profile_changed = True
+                    if 'confirmation_place' in request.POST:
+                        profile.confirmation_place = request.POST.get('confirmation_place', '').strip()[:150]
+                        profile_changed = True
+                    if profile_changed:
+                        profile.save()
+                record.sync_lifecycle_after_save(
+                    previous_assignment=previous_assignment,
+                    previous_deanery_id=previous_deanery_id,
+                    previous_status=previous_status,
+                    previous_contract_end=previous_contract_end,
+                )
+                notifications.record_updated(
+                    record,
+                    request.user,
+                    form,
+                    previous_values={
+                        'status': previous_status,
+                        'deanery': previous_deanery_id,
+                        'assignment': previous_assignment,
+                        'contract_end': previous_contract_end,
+                        'retirement_date': previous_retirement_date,
+                    },
+                )
             if is_ajax:
-                return JsonResponse({'ok': True, 'message': 'Changes saved successfully.'})
+                lifecycle_changed = (
+                    previous_status != record.status
+                    or previous_rank != record.rank
+                    or previous_deanery_id != record.deanery_id
+                    or previous_assignment != (record.assignment or '')
+                    or previous_contract_end != record.contract_end
+                    or previous_retirement_date != record.retirement_date
+                )
+                return JsonResponse({
+                    'ok': True,
+                    'message': 'Changes saved successfully.',
+                    'lifecycle_changed': lifecycle_changed,
+                    'record': {
+                        'id': record.id,
+                        'rank': record.rank,
+                        'status': record.status,
+                        'leave_reason': record.leave_reason or '',
+                        'deanery_id': record.deanery_id,
+                        'assignment': record.assignment or '',
+                        'contract_end': record.contract_end.isoformat() if record.contract_end else '',
+                        'retirement_date': record.retirement_date.isoformat() if record.retirement_date else '',
+                        'years_of_service_display': record.years_of_service_display,
+                    },
+                })
             messages.success(request, 'Personal Information updated successfully.')
         return redirect(f"{request.path}?tab=personal")
 
@@ -1238,7 +1294,7 @@ def ordination_requirements(request):
 
 @registrar_required
 def contract_review(request):
-    sync_expired_contracts()
+    sync_clergy_lifecycle()
     query = request.GET.get('q', '').strip()
     expiry_filter = request.GET.get('expiry', '').strip()
     status_filter = request.GET.get('status', '').strip()
@@ -1247,6 +1303,7 @@ def contract_review(request):
     soon_cutoff = today + timedelta(days=NEAR_EXPIRY_WINDOW_DAYS)
     records = (
         ClergyRecord.objects.current()
+        .exclude(status='Retired')
         .select_related('deanery')
         .prefetch_related('deployments')
         .filter(contract_end__isnull=False)
@@ -1268,7 +1325,16 @@ def contract_review(request):
         records,
         page_params={'q': query, 'expiry': expiry_filter, 'status': status_filter},
     )
-    rows = [{'record': r, 'days_left': (r.contract_end - today).days} for r in pagination['page'].object_list]
+    rows = []
+    for r in pagination['page'].object_list:
+        days_left = (r.contract_end - today).days
+        rows.append({
+            'record': r,
+            'days_left': days_left,
+            'days_overdue': max(-days_left, 0),
+            'near_expiry': 0 < days_left <= NEAR_EXPIRY_WINDOW_DAYS,
+        })
+    filter_status_choices = [choice for choice in ClergyRecord.STATUS_CHOICES if choice[0] != 'Retired']
     return render(request, 'registrar/contract-review.html', {
         'active_page': 'contract_review',
         'rows': rows,
@@ -1277,6 +1343,7 @@ def contract_review(request):
         'expiry_filter': expiry_filter,
         'expiry_choices': CONTRACT_EXPIRY_CHOICES,
         'status_filter': status_filter,
+        'filter_status_choices': filter_status_choices,
         'status_choices': ClergyRecord.STATUS_CHOICES,
         'rank_choices': RANK_CHOICES,
         'deaneries_map': _build_deaneries_map(),
@@ -1309,6 +1376,12 @@ def update_contract_status(request, record_id):
             return JsonResponse({'ok': False, 'error': 'POST required.'}, status=405)
         return redirect('registrar:contract_review')
 
+    previous_assignment = record.assignment or ''
+    previous_deanery_id = record.deanery_id
+    previous_status = record.status
+    previous_contract_end = record.contract_end
+    previous_retirement_date = record.retirement_date
+
     form = ContractStatusUpdateForm(request.POST, instance=record)
     if not form.is_valid():
         err = first_error(form) or 'Please check the form and try again.'
@@ -1326,8 +1399,24 @@ def update_contract_status(request, record_id):
 
     with transaction.atomic():
         form.save()
-        record.record_expired_contract()
-        notifications.record_updated(record, request.user, form)
+        record.sync_lifecycle_after_save(
+            previous_assignment=previous_assignment,
+            previous_deanery_id=previous_deanery_id,
+            previous_status=previous_status,
+            previous_contract_end=previous_contract_end,
+        )
+        notifications.record_updated(
+            record,
+            request.user,
+            form,
+            previous_values={
+                'status': previous_status,
+                'deanery': previous_deanery_id,
+                'assignment': previous_assignment,
+                'contract_end': previous_contract_end,
+                'retirement_date': previous_retirement_date,
+            },
+        )
 
     msg = f'Deployment and official status updated for {record.name}.'
     if is_ajax:
@@ -1354,23 +1443,47 @@ def update_contract_status(request, record_id):
 def generate_report(request):
     archive.purge_expired_reports()   # no scheduler: archived reports past their 30 days go when this page opens
     if request.method == 'POST':
+        is_ajax = _is_ajax_request(request)
         report_type = request.POST.get('type')
         if report_type not in reports.REPORT_TYPES:
-            messages.error(request, 'Please choose a report type first.')
+            err_msg = 'Please choose a report type first.'
+            if is_ajax:
+                return JsonResponse({'ok': False, 'message': err_msg}, status=400)
+            messages.error(request, err_msg)
             return redirect('registrar:generate_report')
 
+        started_at = time.monotonic()
         report = reports.build_report(report_type, generated_by=request.user)
         try:
             pdf_bytes = reports.render_pdf(report)
         except PdfGenerationError as exc:
+            if is_ajax:
+                return JsonResponse({'ok': False, 'message': str(exc)}, status=500)
             messages.error(request, str(exc))
             return redirect('registrar:generate_report')
         filename = f"{report_type}_{report['generated_at'].strftime('%Y%m%d_%H%M%S')}.pdf"
 
         generated = GeneratedReport(report_type=report_type, title=report['title'], generated_by=request.user)
         generated.file.save(filename, ContentFile(pdf_bytes), save=True)
+        elapsed_seconds = round(max(0.0, time.monotonic() - started_at), 2)
+        success_msg = f"{report['title']} generated."
 
-        messages.success(request, f"{report['title']} generated.")
+        if is_ajax:
+            return JsonResponse({
+                'ok': True,
+                'message': success_msg,
+                'duration_seconds': elapsed_seconds,
+                'redirect_url': reverse('registrar:generate_report'),
+                'report': {
+                    'id': generated.id,
+                    'report_type': generated.report_type,
+                    'title': generated.title,
+                    'preview_url': reverse('registrar:preview_generated_report', args=[generated.id]),
+                    'download_url': reverse('registrar:download_generated_report', args=[generated.id]),
+                },
+            })
+
+        messages.success(request, success_msg)
         return redirect('registrar:generate_report')
 
     query = request.GET.get('q', '').strip()
@@ -1403,6 +1516,14 @@ def generate_report(request):
     now = timezone.now()
     for generated in archived_reports:
         generated.days_left = archive.days_left(generated, now)
+
+    clergy_count = ClergyRecord.objects.exclude(rank='postulancy').count()
+    report_progress_config = {
+        'clergy_count': clergy_count,
+        'estimates': reports.estimate_all_generation_seconds(clergy_count),
+        'titles': reports.REPORT_TYPES,
+        'redirect_url': reverse('registrar:generate_report'),
+    }
     return render(request, 'registrar/generate-report.html', {
         'active_page': 'generate_report',
         'report_types': reports.REPORT_TYPES.items(),
@@ -1413,6 +1534,7 @@ def generate_report(request):
         'report_type_filter': report_type_filter,
         'archived_reports': archived_reports,
         'archive_days': REPORT_ARCHIVE_DAYS,
+        'report_progress_config': report_progress_config,
     })
 
 

@@ -28,6 +28,34 @@ REPORT_SUBTITLES = {
     'ordination_documents': 'Canonical Ordination & Registry Document Filing Audit',
 }
 
+# Baseline WeasyPrint render profiles (base seconds, seconds per clergy record,
+# minimum seconds) calibrated against the diocesan dataset so the Generate Report
+# countdown starts close to reality before per-browser self-calibration takes over.
+REPORT_DURATION_ESTIMATE_PROFILE = {
+    'clerical_directory': (3.0, 0.115, 6),
+    'ordination_documents': (3.0, 0.125, 6),
+    'status_report': (2.5, 0.025, 4),
+    'per_deanery': (2.5, 0.022, 4),
+}
+
+
+def estimate_generation_seconds(report_type, clergy_count):
+    """Estimate PDF generation duration in whole seconds for a report type."""
+    base, per_record, min_seconds = REPORT_DURATION_ESTIMATE_PROFILE.get(
+        report_type, (3.0, 0.05, 5)
+    )
+    count = max(0, int(clergy_count or 0))
+    estimated = round(base + count * per_record)
+    return max(min_seconds, min(300, estimated))
+
+
+def estimate_all_generation_seconds(clergy_count):
+    """Return a mapping of every report_type to its estimated duration in seconds."""
+    return {
+        report_type: estimate_generation_seconds(report_type, clergy_count)
+        for report_type in REPORT_TYPES
+    }
+
 UNASSIGNED_DEANERY_LABEL = 'Unassigned / Not Matched to a Parish'
 
 
@@ -45,13 +73,34 @@ def _fmt_date(value):
     return value.strftime('%b %d, %Y') if value else '—'
 
 
+def _sync_loaded_records(records, today=None):
+    """Lazily transition any loaded records whose retirement_date or contract_end has passed,
+    adding zero extra queries when every record is already up to date."""
+    today = today or date.today()
+    for r in records:
+        if r.status != 'Retired' and r.retirement_date and r.retirement_date <= today:
+            r.sync_retirement_status(today=today)
+            if hasattr(r, '_prefetched_objects_cache'):
+                r._prefetched_objects_cache.pop('deployments', None)
+        elif (
+            r.status != 'Retired'
+            and not r.is_archived
+            and r.contract_end
+            and r.contract_end < today
+            and (r.assignment or '').strip()
+        ):
+            if r.record_expired_contract(today=today) and hasattr(r, '_prefetched_objects_cache'):
+                r._prefetched_objects_cache.pop('deployments', None)
+
+
 def _build_clerical_directory():
-    records = (
+    records = list(
         ClergyRecord.objects.exclude(rank='postulancy')
         .select_related('profile', 'deanery')
         .prefetch_related('deployments', 'profile__children', 'profile__educations')
         .order_by('name')
     )
+    _sync_loaded_records(records)
     entries = []
     columns = ['No.', 'Name', 'Deployment / Assignment', 'Date of Ordination', 'Status']
     rows = []
@@ -203,6 +252,7 @@ def _build_clerical_directory():
 
 def _build_status_report():
     records = list(ClergyRecord.objects.exclude(rank='postulancy').select_related('deanery').order_by('name'))
+    _sync_loaded_records(records)
     columns = ['Name', 'Status', 'Leave Reason', 'Current Deployment']
     rows = []
     rich_rows = []
@@ -240,6 +290,7 @@ def _build_status_report():
 def _build_per_deanery_report():
     mapping = _assignment_to_deanery_map()
     records = list(ClergyRecord.objects.exclude(rank='postulancy').select_related('deanery').order_by('name'))
+    _sync_loaded_records(records)
     groups = {}
     unassigned_count = 0
     for r in records:
@@ -295,6 +346,7 @@ def _build_ordination_documents_report():
         .prefetch_related('documents__document_type')
         .order_by('name')
     )
+    _sync_loaded_records(records)
     columns = ['Name', 'Rank', 'Current Deployment', 'Status', 'Documents Submitted', 'Documents Missing']
     rows = []
     rich_rows = []

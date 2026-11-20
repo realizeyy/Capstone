@@ -31,7 +31,7 @@
           <!-- ds-allow-native-select: search filter dropdown -->
           <select name="status" class="select" data-autosubmit>
             <option value="">All Status</option>
-            {% for value, label in status_choices %}
+            {% for value, label in filter_status_choices %}
               <option value="{{ value }}"
                       {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
@@ -72,7 +72,17 @@
                   {% endif %}
                 </td>
                 <td>{{ row.record.contract_end }}</td>
-                <td><b>{{ row.days_left }}</b></td>
+                <td>
+                  {% if row.days_left < 0 %}
+                    <span class="badge inactive-b">Expired ({{ row.days_overdue }}d overdue)</span>
+                  {% elif row.days_left == 0 %}
+                    <span class="badge pending-b">Ends today</span>
+                  {% elif row.near_expiry %}
+                    <span class="badge pending-b">{{ row.days_left }}d left</span>
+                  {% else %}
+                    <b>{{ row.days_left }}d left</b>
+                  {% endif %}
+                </td>
                 <td><span class="badge {{ row.record.status|status_badge_class }}">{{ row.record.status }}</span></td>
                 <td>
                   <button type="button"
@@ -232,6 +242,9 @@
                    maxlength="255"
                    placeholder="e.g. medical leave, sabbatical">
           </div>
+          <div class="edit-field full" id="contractRetireNote" hidden>
+            <div class="alert">Setting status to Retired closes current deployments and clears assignment and contract end date. Date of Retirement defaults to today if left blank.</div>
+          </div>
 
           <div class="edit-field full contract-section-heading">
             <i class="fa-solid fa-church" aria-hidden="true"></i>
@@ -311,5 +324,5 @@
   {{ deaneries_map|json_script:"deaneries-data" }}
 {% endblock %}
 {% block extra_js %}
-  <script src="{% static 'registrar/js/contract-review.js' %}?v=2"></script>
+  <script src="{% static 'registrar/js/contract-review.js' %}?v=3"></script>
 {% endblock %}

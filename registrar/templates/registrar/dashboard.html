@@ -221,6 +221,12 @@
           <div class="field {% if record_modal_errors.contract_end %}has-error{% endif %}">
             <label for="newContractEnd">Contract End</label><input id="newContractEnd" name="contract_end" type="date" value="{{ record_modal_draft.contract_end|default:'' }}">
           </div>
+          <div class="field {% if record_modal_errors.retirement_date %}has-error{% endif %}">
+            <label for="newRetirementDate">Date of Retirement</label><input id="newRetirementDate" name="retirement_date" type="date" value="{{ record_modal_draft.retirement_date|default:'' }}">
+          </div>
+          <div class="field full hidden" id="newRetiredNotice">
+            <div class="alert">Retired clergy do not require an assignment or contract end date. Date of Retirement defaults to today if left blank.</div>
+          </div>
         </div>
         <p class="muted form-note">Creates a portal username and one-time temporary password on a printable slip.</p>
         <div class="modal-actions">
@@ -234,7 +240,7 @@
   {{ deaneries_map|json_script:"deaneries-data" }}
 {% endblock %}
 {% block extra_js %}
-  <script src="{% static 'registrar/js/clergy-records.js' %}?v=18"></script>
+  <script src="{% static 'registrar/js/clergy-records.js' %}?v=20"></script>
   <script>
   document.addEventListener('DOMContentLoaded', function() {
     // 1. Welcome banner dismiss logic with localStorage persistence

@@ -25,6 +25,7 @@
   var yearsInput = document.getElementById('contractYearsService');
   var leaveFieldEl = document.getElementById('contractLeaveReasonField');
   var leaveInput = document.getElementById('contractLeaveReason');
+  var retireNoteEl = document.getElementById('contractRetireNote');
   var contractEndInput = document.getElementById('contractEndDate');
   var retirementDateInput = document.getElementById('contractRetirementDate');
   var saveBtn = document.getElementById('contractModalSaveBtn');
@@ -32,6 +33,14 @@
 
   var lastTriggerBtn = null;
   var openListboxes = [];
+  var modalInitialState = { deaneryId: '', assignment: '', contractEnd: '' };
+
+  function localTodayIso() {
+    var now = new Date();
+    var m = String(now.getMonth() + 1).padStart(2, '0');
+    var d = String(now.getDate()).padStart(2, '0');
+    return now.getFullYear() + '-' + m + '-' + d;
+  }
 
   function closeAllListboxes(exceptInstance) {
     openListboxes.forEach(function (inst) {
@@ -286,9 +295,61 @@
     leaveFieldEl.classList.toggle('hidden', !isOnLeave);
   }
 
+  function syncRetirementFieldState(isUserChange) {
+    if (!statusSelect) return;
+    var isRetired = statusSelect.getValue() === 'Retired';
+    var todayIso = localTodayIso();
+
+    if (retireNoteEl) {
+      retireNoteEl.hidden = !isRetired;
+    }
+
+    if (isRetired) {
+      if (deanerySelect) {
+        deanerySelect.setValue('', false);
+        deanerySelect.setDisabled(true, 'Cleared on retirement');
+      }
+      if (assignmentSelect) {
+        assignmentSelect.setValue('', false);
+        assignmentSelect.setDisabled(true, 'Cleared on retirement');
+      }
+      if (contractEndInput) {
+        contractEndInput.value = '';
+        contractEndInput.disabled = true;
+      }
+      if (retirementDateInput && isUserChange && !retirementDateInput.value) {
+        retirementDateInput.value = todayIso;
+      }
+      return;
+    }
+
+    if (deanerySelect) {
+      deanerySelect.setDisabled(false);
+      if (isUserChange && !deanerySelect.getValue() && modalInitialState.deaneryId) {
+        deanerySelect.setValue(modalInitialState.deaneryId, false);
+      }
+    }
+    var curDeanery = deanerySelect ? deanerySelect.getValue() : '';
+    var preferredAssign = (isUserChange && !assignmentSelect.getValue() && modalInitialState.assignment)
+      ? modalInitialState.assignment
+      : (assignmentSelect ? assignmentSelect.getValue() : '');
+    syncAssignmentOptions(curDeanery, preferredAssign);
+
+    if (contractEndInput) {
+      contractEndInput.disabled = false;
+      if (isUserChange && !contractEndInput.value && modalInitialState.contractEnd) {
+        contractEndInput.value = modalInitialState.contractEnd;
+      }
+    }
+    if (retirementDateInput && isUserChange && retirementDateInput.value && retirementDateInput.value <= todayIso) {
+      retirementDateInput.value = '';
+    }
+  }
+
   var rankSelect = createListbox(form.querySelector('[data-edit-select="rank"]'));
   var statusSelect = createListbox(form.querySelector('[data-edit-select="status"]'), function () {
     toggleLeaveReasonField();
+    syncRetirementFieldState(true);
   });
   var assignmentSelect = createListbox(form.querySelector('[data-edit-select="assignment"]'));
   var deanerySelect = createListbox(form.querySelector('[data-edit-select="deanery"]'), function (deaneryId) {
@@ -379,12 +440,25 @@
     if (leaveInput) leaveInput.value = d.leaveReason || '';
     toggleLeaveReasonField();
 
+    modalInitialState = {
+      deaneryId: d.deaneryId || '',
+      assignment: d.assignment || '',
+      contractEnd: d.contractEnd || '',
+    };
+
     populateDeaneriesOptions();
-    if (deanerySelect) deanerySelect.setValue(d.deaneryId || '', false);
+    if (deanerySelect) {
+      deanerySelect.setDisabled(false);
+      deanerySelect.setValue(d.deaneryId || '', false);
+    }
     syncAssignmentOptions(d.deaneryId || '', d.assignment || '');
 
-    if (contractEndInput) contractEndInput.value = d.contractEnd || '';
+    if (contractEndInput) {
+      contractEndInput.disabled = false;
+      contractEndInput.value = d.contractEnd || '';
+    }
     if (retirementDateInput) retirementDateInput.value = d.retirementDate || '';
+    syncRetirementFieldState(false);
 
     var modalCard = modal.querySelector('.modal');
     if (modalCard) modalCard.scrollTop = 0;
@@ -493,6 +567,18 @@
       }
       if (typeof window.showToast === 'function') {
         window.showToast(leaveMsg, 'error');
+      }
+      return;
+    }
+
+    if (statusSelect && statusSelect.getValue() === 'Retired' && retirementDateInput && retirementDateInput.value && retirementDateInput.value > localTodayIso()) {
+      resetSubmitState();
+      var retMsg = 'Retirement date cannot be in the future while status is Retired. Keep an active status for a planned retirement date.';
+      if (typeof window.applyFormErrors === 'function') {
+        window.applyFormErrors(form, { retirement_date: [retMsg] });
+      }
+      if (typeof window.showToast === 'function') {
+        window.showToast(retMsg, 'error');
       }
       return;
     }

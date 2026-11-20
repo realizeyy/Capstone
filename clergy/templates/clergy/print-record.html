@@ -87,15 +87,9 @@
             </div>
             <div class="doc-meta-pills">
               {% if profile.record.status == 'Active' %}
-              <span class="badge badge-active">Active Status</span>
-              {% elif profile.record.status == 'On Leave' %}
-              <span class="badge badge-warning">On Leave</span>
-              {% elif profile.record.status == 'Missionary to Other Diocese' %}
-              <span class="badge badge-info">Missionary</span>
-              {% elif profile.record.status == 'Retired' %}
-              <span class="badge badge-neutral">Retired</span>
+              <span class="badge badge-status">Active Status</span>
               {% else %}
-              <span class="badge badge-neutral">{{ profile.record.status|default:"Recorded" }}</span>
+              <span class="badge badge-status">{{ profile.record.status|default:"Recorded" }}</span>
               {% endif %}
             </div>
           </div>
@@ -118,8 +112,13 @@
                 <span class="stat-label">Years of Service</span>
               </div>
               <div class="stat-cell">
+                {% if profile.record.status == 'Retired' %}
+                <span class="stat-number">{% if profile.record.retirement_date %}{{ profile.record.retirement_date|date:"M Y" }}{% else %}Retired{% endif %}</span>
+                <span class="stat-label">Retired</span>
+                {% else %}
                 <span class="stat-number">{% if profile.record.contract_end %}{{ profile.record.contract_end|date:"M Y" }}{% else %}Permanent{% endif %}</span>
                 <span class="stat-label">Contract Term</span>
+                {% endif %}
               </div>
             </div>
           </div>
@@ -267,9 +266,9 @@
                   </td>
                   <td>
                     {% if dep.is_current %}
-                    <span class="badge badge-active">Current</span>
+                    <span class="badge badge-status">Current</span>
                     {% else %}
-                    <span class="badge badge-neutral">Completed</span>
+                    <span class="badge badge-status">Completed</span>
                     {% endif %}
                   </td>
                 </tr>
@@ -295,7 +294,7 @@
                   <td>{{ profile.record.deanery|default:"EDNP" }}</td>
                   <td>{{ profile.record.get_rank_display|default:"Clergy"|title }}</td>
                   <td>Current Assignment</td>
-                  <td><span class="badge badge-active">Current</span></td>
+                  <td><span class="badge badge-status">Current</span></td>
                 </tr>
               </tbody>
             </table>
@@ -426,10 +425,10 @@
             <div class="progress-info">
               <span class="progress-label">Filing Status Summary</span>
               <div class="progress-pills">
-                <span class="stat-pill stat-pill-green">{{ doc_summary.submitted|default:0 }} Submitted</span>
-                <span class="stat-pill stat-pill-slate">{{ doc_summary.missing|default:0 }} Awaiting Upload</span>
+                <span class="stat-pill">{{ doc_summary.submitted|default:0 }} Submitted</span>
+                <span class="stat-pill">{{ doc_summary.missing|default:0 }} Awaiting Upload</span>
                 {% if doc_summary.expired %}
-                <span class="stat-pill stat-pill-red">{{ doc_summary.expired }} Expired</span>
+                <span class="stat-pill">{{ doc_summary.expired }} Expired</span>
                 {% endif %}
               </div>
             </div>
@@ -460,11 +459,11 @@
                       <td><b>{{ item.document_type.name }}</b></td>
                       <td>
                         {% if item.status == 'Submitted' %}
-                        <span class="badge badge-submitted">Submitted</span>
+                        <span class="badge badge-status">Submitted</span>
                         {% elif item.status == 'Expired' %}
-                        <span class="badge badge-danger">Expired</span>
+                        <span class="badge badge-status">Expired</span>
                         {% else %}
-                        <span class="badge badge-neutral">Not Uploaded</span>
+                        <span class="badge badge-status">Not Uploaded</span>
                         {% endif %}
                       </td>
                       <td>
@@ -497,11 +496,11 @@
                     <td><b>{{ item.document_type.name }}</b></td>
                     <td>
                       {% if item.status == 'Submitted' %}
-                      <span class="badge badge-submitted">Submitted</span>
+                      <span class="badge badge-status">Submitted</span>
                       {% elif item.status == 'Expired' %}
-                      <span class="badge badge-danger">Expired</span>
+                      <span class="badge badge-status">Expired</span>
                       {% else %}
-                      <span class="badge badge-neutral">Not Uploaded</span>
+                      <span class="badge badge-status">Not Uploaded</span>
                       {% endif %}
                     </td>
                     <td>

@@ -986,9 +986,16 @@ body.modal-open {
           <input name="end_date" type="date">
         </div>
         <div class="field full">
+          {% if profile.record.status == 'Retired' %}
+          <label style="display:flex;align-items:center;gap:6px;opacity:0.65;cursor:not-allowed;">
+            <input type="checkbox" name="is_current" value="1" disabled> This is the current active assignment
+          </label>
+          <small class="muted">Retired clergy can only record past deployments.</small>
+          {% else %}
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
             <input type="checkbox" name="is_current" value="1"> This is the current active assignment
           </label>
+          {% endif %}
         </div>
         <div class="field full">
           <label>Notes (optional)</label>

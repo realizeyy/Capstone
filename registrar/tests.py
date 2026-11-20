@@ -299,8 +299,9 @@ class PaginationAndQueryCountTests(TestCase):
         for i in range(1, 15):
             r = ClergyRecord.objects.create(id=f'CLG-{i:03d}', name=f'Fr. {i}')
             Document.objects.create(record=r, document_type=self.doc_type, file='a.pdf', submitted_date=date.today())
-        # 14 records on the page, but the query count stays flat (no per-record checklist queries)
-        with self.assertNumQueries(15):
+        # 14 records on the page, but the query count stays flat (no per-record checklist queries;
+        # includes 1 combined lifecycle sync query for scheduled retirements and expired contracts)
+        with self.assertNumQueries(16):
             res = self.client.get(reverse('registrar:clergy_records'))
         self.assertEqual(len(res.context['records']), 14)
         self.assertEqual(res.context['records'][0].doc_summary['submitted'], 1)
@@ -1502,6 +1503,104 @@ class ContractReviewModalUpdateTests(TestCase):
         self.assertIsNotNone(dep)
         self.assertEqual(dep.station_name, 'St. Luke Parish')
         self.assertFalse(dep.is_current)
+
+
+class ReportGenerationProgressTests(TestCase):
+    def setUp(self):
+        self.tmp_media = tempfile.mkdtemp(prefix='ednp_report_progress_')
+        self.addCleanup(shutil.rmtree, self.tmp_media, True)
+        self.registrar = activate(User.objects.create_user('reg_report_prog', password='pw12345!x', is_staff=True))
+        self.client.force_login(self.registrar)
+        self.url = reverse('registrar:generate_report')
+        ClergyRecord.objects.create(id='CLG-701', name='Fr. Report Alpha', rank='priest', status='Active')
+        ClergyRecord.objects.create(id='CLG-702', name='Rev. Report Beta', rank='deacon', status='Active')
+        ClergyRecord.objects.create(id='CLG-703', name='Postulant Excluded', rank='postulancy', status='Active')
+
+    def test_get_renders_progress_modal_config_and_async_form(self):
+        res = self.client.get(self.url)
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, 'id="generateReportForm"')
+        self.assertContains(res, 'data-async-submit="true"')
+        self.assertContains(res, 'id="reportProgressModal"')
+        self.assertContains(res, 'role="progressbar"')
+        self.assertContains(res, 'id="reportProgressCountdownValue"')
+        self.assertContains(res, 'id="reportProgressConfig"')
+        self.assertContains(res, 'registrar/css/report-progress.css')
+
+        cfg = res.context['report_progress_config']
+        self.assertEqual(cfg['clergy_count'], 2)
+        self.assertEqual(set(cfg['estimates'].keys()), set(reports.REPORT_TYPES.keys()))
+        for sec in cfg['estimates'].values():
+            self.assertIsInstance(sec, int)
+            self.assertGreaterEqual(sec, 4)
+
+    def test_estimate_generation_seconds_scales_and_bounds(self):
+        self.assertGreaterEqual(reports.estimate_generation_seconds('clerical_directory', 0), 6)
+        self.assertGreater(
+            reports.estimate_generation_seconds('clerical_directory', 264),
+            reports.estimate_generation_seconds('status_report', 264),
+        )
+        self.assertGreater(
+            reports.estimate_generation_seconds('ordination_documents', 264),
+            reports.estimate_generation_seconds('per_deanery', 264),
+        )
+        self.assertLessEqual(reports.estimate_generation_seconds('ordination_documents', 5000), 300)
+
+    def test_ajax_post_generates_report_and_returns_json(self):
+        with override_settings(MEDIA_ROOT=self.tmp_media):
+            with mock.patch('registrar.reports.render_pdf', return_value=PDF) as mocked_render:
+                res = self.client.post(
+                    self.url,
+                    {'type': 'status_report'},
+                    HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+                    HTTP_ACCEPT='application/json',
+                )
+        self.assertEqual(res.status_code, 200)
+        mocked_render.assert_called_once()
+        payload = res.json()
+        self.assertTrue(payload['ok'])
+        self.assertEqual(payload['message'], 'Status Report generated.')
+        self.assertGreaterEqual(payload['duration_seconds'], 0.0)
+        self.assertEqual(payload['redirect_url'], self.url)
+        self.assertEqual(payload['report']['report_type'], 'status_report')
+        self.assertEqual(payload['report']['title'], 'Status Report')
+        self.assertTrue(GeneratedReport.objects.filter(id=payload['report']['id']).exists())
+
+    def test_ajax_post_invalid_type_returns_400_json(self):
+        res = self.client.post(
+            self.url,
+            {'type': 'unknown_type'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+        self.assertEqual(res.status_code, 400)
+        payload = res.json()
+        self.assertFalse(payload['ok'])
+        self.assertEqual(payload['message'], 'Please choose a report type first.')
+        self.assertEqual(GeneratedReport.objects.count(), 0)
+
+    def test_ajax_post_pdf_error_returns_500_json(self):
+        from ednp.pdf import PdfGenerationError
+
+        with mock.patch('registrar.reports.render_pdf', side_effect=PdfGenerationError('GTK runtime unavailable')):
+            res = self.client.post(
+                self.url,
+                {'type': 'clerical_directory'},
+                HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+            )
+        self.assertEqual(res.status_code, 500)
+        payload = res.json()
+        self.assertFalse(payload['ok'])
+        self.assertEqual(payload['message'], 'GTK runtime unavailable')
+        self.assertEqual(GeneratedReport.objects.count(), 0)
+
+    def test_non_ajax_post_keeps_redirect_and_flash_behavior(self):
+        with override_settings(MEDIA_ROOT=self.tmp_media):
+            with mock.patch('registrar.reports.render_pdf', return_value=PDF):
+                res = self.client.post(self.url, {'type': 'per_deanery'})
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(res['Location'], self.url)
+        self.assertEqual(GeneratedReport.objects.filter(report_type='per_deanery').count(), 1)
+
 
 
 

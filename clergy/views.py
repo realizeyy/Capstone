@@ -252,10 +252,11 @@ def _build_portal_search_catalog(profile, user):
 def dashboard(request):
     profile = _get_or_create_profile(request.user)
     if profile.record:
+        profile.record.sync_retirement_status()
         profile.record.record_expired_contract()
     sync_reminders(request.user, profile.record)   # every sign-in lands here
     days_left = None
-    if profile.record and profile.record.contract_end:
+    if profile.record and profile.record.status != 'Retired' and profile.record.contract_end:
         days_left = (profile.record.contract_end - date.today()).days
 
     # Only show the welcome onboarding banner during the first 14 days of account activation
@@ -303,9 +304,10 @@ def my_profile(request):
         messages.error(request, 'Your account is not yet linked to an official clergy record :  ask the Registrar to link one before editing your profile.')
         return redirect('clergy:dashboard')
 
+    profile.record.sync_retirement_status()
     profile.record.record_expired_contract()
     days_left = None
-    if profile.record.contract_end:
+    if profile.record.status != 'Retired' and profile.record.contract_end:
         days_left = (profile.record.contract_end - date.today()).days
 
     medical_psych = [
@@ -327,13 +329,13 @@ def my_profile(request):
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
     if request.method == 'POST' and request.POST.get('action') == 'add_deployment':
-        dep_form = ClergyDeploymentForm(request.POST)
+        dep_form = ClergyDeploymentForm(request.POST, record=profile.record)
         if dep_form.is_valid():
             dep = dep_form.save(commit=False)
             dep.record = profile.record
             if dep.is_current:
                 dep.end_date = None
-                profile.record.deployments.filter(is_current=True).update(is_current=False)
+                profile.record.close_current_deployments(end_date=dep.start_date or date.today())
             dep.save()
             msg = f'Deployment at {dep.station_name} added successfully.'
             if is_ajax:
@@ -576,6 +578,7 @@ def print_own_record(request):
     if not profile.record:
         messages.error(request, 'Your account is not yet linked to an official clergy record: ask the Registrar to link one first.')
         return redirect('clergy:dashboard')
+    profile.record.sync_retirement_status()
     profile.record.record_expired_contract()
 
     include_attachments = _include_attachments_from_request(request)
@@ -595,6 +598,8 @@ def download_own_record(request):
     if not profile.record:
         messages.error(request, 'Your account is not yet linked to an official clergy record: ask the Registrar to link one first.')
         return redirect('clergy:dashboard')
+    profile.record.sync_retirement_status()
+    profile.record.record_expired_contract()
 
     from ednp.pdf import PdfGenerationError, html_to_pdf
 

@@ -97,6 +97,9 @@ function initRecordDetailTabs(activeTab) {
   }
 
   toggleLeaveReason('editStatus', 'editLeaveReasonField');
+  if (typeof syncRetiredFields === 'function') {
+    syncRetiredFields('editStatus', false);
+  }
 }
 
 document.querySelectorAll('.page-tabs [data-tab]').forEach(function (button) {

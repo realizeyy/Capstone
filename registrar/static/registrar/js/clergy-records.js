@@ -29,11 +29,84 @@ function updateParishOptions(deanerySelectId,assignmentSelectId){
  parishSel.disabled=false;
 }
 
+function localTodayIso(){
+ const now=new Date();
+ const m=String(now.getMonth()+1).padStart(2,'0');
+ const d=String(now.getDate()).padStart(2,'0');
+ return `${now.getFullYear()}-${m}-${d}`;
+}
+
 function toggleLeaveReason(statusSelectId,fieldId){
  const statusEl=document.getElementById(statusSelectId);
  const fieldEl=document.getElementById(fieldId);
  if(!statusEl || !fieldEl)return;
  fieldEl.classList.toggle('hidden',statusEl.value!=='On Leave');
+}
+
+function syncRetiredFields(statusSelectId,isUserChange){
+ const statusEl=document.getElementById(statusSelectId);
+ if(!statusEl)return;
+ const isNew=(statusSelectId==='newStatus');
+ const deaneryId=isNew ? 'newDeanery' : 'editDeanery';
+ const assignId=isNew ? 'newAssignment' : 'editAssignment';
+ const contractId=isNew ? 'newContractEnd' : 'editContractEnd';
+ const retireId=isNew ? 'newRetirementDate' : 'editRetirementDate';
+ const noticeId=isNew ? 'newRetiredNotice' : 'editRetiredNotice';
+
+ const deaneryEl=document.getElementById(deaneryId);
+ const assignEl=document.getElementById(assignId);
+ const contractEl=document.getElementById(contractId);
+ const retireEl=document.getElementById(retireId);
+ const noticeEl=document.getElementById(noticeId);
+ const isRetired=statusEl.value==='Retired';
+ const todayIso=localTodayIso();
+
+ if(noticeEl)noticeEl.classList.toggle('hidden',!isRetired);
+
+ if(isRetired){
+  if(deaneryEl){
+   deaneryEl.value='';
+   deaneryEl.disabled=true;
+  }
+  if(assignEl){
+   assignEl.innerHTML='<option value="">Cleared on retirement</option>';
+   assignEl.value='';
+   assignEl.disabled=true;
+   assignEl.removeAttribute('required');
+  }
+  if(contractEl){
+   contractEl.value='';
+   contractEl.disabled=true;
+  }
+  if(retireEl && isUserChange && !retireEl.value){
+   retireEl.value=todayIso;
+  }
+  return;
+ }
+
+ const wasRetiredDisabled=Boolean(deaneryEl && deaneryEl.disabled);
+ if(deaneryEl)deaneryEl.disabled=false;
+ if(assignEl){
+  if(isNew)assignEl.setAttribute('required','required');
+  if(wasRetiredDisabled){
+   const prevAssign=assignEl.value;
+   updateParishOptions(deaneryId,assignId);
+   if(prevAssign && !assignEl.disabled){
+    const hasOpt=Array.from(assignEl.options).some(o=>o.value===prevAssign);
+    if(!hasOpt){
+     const opt=document.createElement('option');
+     opt.value=prevAssign;
+     opt.textContent=prevAssign;
+     assignEl.appendChild(opt);
+    }
+    assignEl.value=prevAssign;
+   }
+  }
+ }
+ if(contractEl)contractEl.disabled=false;
+ if(retireEl && isUserChange && retireEl.value && retireEl.value<=todayIso){
+  retireEl.value='';
+ }
 }
 
 function clearCreateRecordErrors(form){
@@ -70,6 +143,7 @@ function openNewRecordModal(e){
   leaveReasonInput.value='';
  }
  toggleLeaveReason('newStatus','newLeaveReasonField');
+ syncRetiredFields('newStatus',false);
  openModal('recordModal');
 }
 
@@ -93,7 +167,10 @@ document.querySelectorAll('[data-parish-target]').forEach(sel=>{
  sel.addEventListener('change',()=>updateParishOptions(sel.id,sel.dataset.parishTarget));
 });
 document.querySelectorAll('[data-leave-field]').forEach(sel=>{
- sel.addEventListener('change',()=>toggleLeaveReason(sel.id,sel.dataset.leaveField));
+ sel.addEventListener('change',()=>{
+  toggleLeaveReason(sel.id,sel.dataset.leaveField);
+  syncRetiredFields(sel.id,true);
+ });
 });
 
 const newRecordButton=document.getElementById('newRecordButton');
@@ -111,21 +188,28 @@ function validateCreateRecordForm(form){
  const confirmationInput=form.querySelector('[name="confirmation_date"]');
  const holyOrdersInput=form.querySelector('[name="holy_orders_date"]');
  const contractEndInput=form.querySelector('[name="contract_end"]');
+ const retirementDateInput=form.querySelector('[name="retirement_date"]');
+ const isRetired=Boolean(statusSelect && statusSelect.value==='Retired');
+ const todayIso=localTodayIso();
+ const autoRetires=Boolean(!isRetired && retirementDateInput && retirementDateInput.value && retirementDateInput.value<=todayIso);
 
  if(nameInput && !nameInput.value.trim()){
   return {errorMsg:'Please enter the clergy name.',focusTarget:nameInput};
  }
- if(assignmentSelect && (!assignmentSelect.value || assignmentSelect.disabled)){
+ if(!isRetired && !autoRetires && assignmentSelect && (!assignmentSelect.value || assignmentSelect.disabled)){
   const target=(assignmentSelect.disabled && deanerySelect) ? deanerySelect : assignmentSelect;
   return {errorMsg:'Please select a deanery and parish or assignment.',focusTarget:target};
  }
- if(statusSelect && statusSelect.value==='On Leave' && leaveReasonInput && !leaveReasonInput.value.trim()){
+ if(isRetired && retirementDateInput && retirementDateInput.value && retirementDateInput.value>todayIso){
+  return {errorMsg:'Retirement date cannot be in the future while status is Retired.',focusTarget:retirementDateInput};
+ }
+ if(statusSelect && statusSelect.value==='On Leave' && !autoRetires && leaveReasonInput && !leaveReasonInput.value.trim()){
   return {errorMsg:'Leave reason is required when status is On Leave.',focusTarget:leaveReasonInput};
  }
  if(baptismInput && confirmationInput && baptismInput.value && confirmationInput.value && baptismInput.value>confirmationInput.value){
   return {errorMsg:'Confirmation date cannot be earlier than baptism date.',focusTarget:confirmationInput};
  }
- if(holyOrdersInput && contractEndInput && holyOrdersInput.value && contractEndInput.value && holyOrdersInput.value>contractEndInput.value){
+ if(!isRetired && !autoRetires && holyOrdersInput && contractEndInput && holyOrdersInput.value && contractEndInput.value && holyOrdersInput.value>contractEndInput.value){
   return {errorMsg:'Contract end cannot be earlier than Holy Orders date.',focusTarget:contractEndInput};
  }
  return null;
@@ -206,6 +290,7 @@ document.addEventListener('DOMContentLoaded', function () {
    assignmentSel.value = assignmentSel.dataset.selectedAssignment;
   }
  }
+ syncRetiredFields('newStatus', false);
 });
 
 

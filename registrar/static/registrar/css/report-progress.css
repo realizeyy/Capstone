@@ -1,0 +1,705 @@
+/* Report generation progress modal, countdown telemetry, and inline recovery alert.
+   Mobile-first, 100% token-driven, full 4-sided hairline borders, reduced-motion safe. */
+
+:root {
+  --rp-z-modal: 99999;
+  --rp-backdrop-bg: rgba(15, 23, 42, 0.68);
+  --rp-backdrop-blur: 4px;
+  --rp-backdrop-pad: 12px;
+  --rp-backdrop-pad-sm: 20px;
+
+  --rp-surface: #ffffff;
+  --rp-surface-subtle: #f8fafc;
+  --rp-surface-muted: #f1f5f9;
+  --rp-surface-brand: #eff6ff;
+  --rp-surface-success: #f0fdf4;
+  --rp-surface-warn: #fffbeb;
+  --rp-surface-error: #fef2f2;
+  --rp-surface-row-fresh: #eff6ff;
+
+  --rp-ink-strong: #0f172a;
+  --rp-ink: #1e293b;
+  --rp-ink-muted: #475569;
+  --rp-ink-brand: #1d4ed8;
+  --rp-ink-success: #166534;
+  --rp-ink-warn: #92400e;
+  --rp-ink-error: #991b1b;
+
+  --rp-fill-brand: #2563eb;
+  --rp-fill-brand-sheen: rgba(255, 255, 255, 0.32);
+  --rp-fill-success: #15803d;
+  --rp-track-bg: #e2e8f0;
+
+  --rp-border-card: #cbd5e1;
+  --rp-border-subtle: #e2e8f0;
+  --rp-border-brand: #bfdbfe;
+  --rp-border-success: #bbf7d0;
+  --rp-border-warn: #fde68a;
+  --rp-border-error: #fca5a5;
+
+  --rp-shadow-modal: 0 24px 48px -12px rgba(15, 23, 42, 0.34), 0 0 0 1px rgba(15, 23, 42, 0.08);
+  --rp-outline-w: 2px;
+  --rp-outline-offset: 2px;
+
+  --rp-card-max-w: 520px;
+  --rp-card-max-vw: calc(100vw - 24px);
+  --rp-card-max-h: calc(100dvh - 24px);
+  --rp-card-pad: 20px;
+  --rp-card-pad-lg: 26px;
+  --rp-card-radius: 14px;
+  --rp-card-gap: 16px;
+
+  --rp-panel-pad-y: 12px;
+  --rp-panel-pad-x: 14px;
+  --rp-alert-pad-y: 6px;
+  --rp-panel-radius: 10px;
+  --rp-alert-radius: 8px;
+  --rp-pill-radius: 999px;
+  --rp-btn-radius: 8px;
+
+  --rp-gap-xs: 6px;
+  --rp-gap-sm: 10px;
+  --rp-gap-md: 14px;
+
+  --rp-fs-eyebrow: 12px;
+  --rp-fs-xs: 13px;
+  --rp-fs-sm: 14px;
+  --rp-fs-body: 15px;
+  --rp-fs-title: 20px;
+  --rp-fs-title-lg: 22px;
+  --rp-fs-countdown: 26px;
+  --rp-fs-countdown-overtime: 16px;
+  --rp-lh-tight: 1.2;
+  --rp-lh-body: 1.45;
+  --rp-tracking-eyebrow: 0.07em;
+  --rp-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --rp-track-h: 10px;
+  --rp-step-dot: 20px;
+  --rp-step-ring-w: 2px;
+  --rp-icon-sm: 16px;
+  --rp-icon-md: 18px;
+  --rp-target-min: 44px;
+  --rp-countdown-min-w: 128px;
+  --rp-hint-margin-t: 6px;
+  --rp-alert-margin-b: 14px;
+
+  --rp-dur-fast: 160ms;
+  --rp-dur-bar: 320ms;
+  --rp-dur-spin: 850ms;
+  --rp-dur-sheen: 1500ms;
+  --rp-dur-fresh: 2600ms;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Pre-submit dynamic duration hint beneath the report selector */
+.report-estimate-hint {
+  margin: var(--rp-hint-margin-t) 0 0;
+  font-size: var(--rp-fs-sm);
+  line-height: var(--rp-lh-body);
+  color: var(--rp-ink-muted);
+}
+
+.report-estimate-hint[hidden] {
+  display: none;
+}
+
+/* Responsive scroll wrapper and narrow-viewport control bounds on Generate Report */
+.report-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.page .panel {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.page .panel-head {
+  flex-wrap: wrap;
+  gap: var(--rp-gap-sm);
+}
+
+#generateReportForm .field,
+#generateReportForm select {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.toolbar .search,
+.toolbar .select {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+}
+
+/* Inline failure recovery alert inside the Generate Report panel */
+.report-inline-alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rp-gap-sm);
+  margin-bottom: var(--rp-alert-margin-b);
+  padding: var(--rp-alert-pad-y) var(--rp-alert-pad-y) var(--rp-alert-pad-y) var(--rp-panel-pad-x);
+  border: 1px solid var(--rp-border-error);
+  border-radius: var(--rp-alert-radius);
+  background: var(--rp-surface-error);
+  color: var(--rp-ink-error);
+  font-size: var(--rp-fs-sm);
+  line-height: var(--rp-lh-body);
+}
+
+.report-inline-alert[hidden] {
+  display: none;
+}
+
+.report-inline-alert-body {
+  display: flex;
+  align-items: center;
+  gap: var(--rp-gap-sm);
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.report-inline-alert-icon {
+  flex: 0 0 auto;
+  width: var(--rp-icon-md);
+  height: var(--rp-icon-md);
+  color: var(--rp-ink-error);
+}
+
+.report-inline-alert-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: 500;
+}
+
+.report-alert-dismiss {
+  flex: 0 0 auto;
+  min-width: var(--rp-target-min);
+  min-height: var(--rp-target-min);
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--rp-btn-radius);
+  background: transparent;
+  color: var(--rp-ink-error);
+  cursor: pointer;
+  transition: background var(--rp-dur-fast) ease, border-color var(--rp-dur-fast) ease;
+}
+
+.report-alert-dismiss:hover:not(:disabled) {
+  background: var(--rp-surface);
+  border-color: var(--rp-border-error);
+}
+
+.report-alert-dismiss:active:not(:disabled) {
+  background: var(--rp-surface-error);
+}
+
+.report-alert-dismiss:focus-visible {
+  outline: var(--rp-outline-w) solid var(--rp-ink-error);
+  outline-offset: var(--rp-outline-offset);
+}
+
+.report-alert-dismiss:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Full-viewport non-dismissible progress modal */
+.report-progress-modal {
+  position: fixed;
+  inset: 0;
+  z-index: var(--rp-z-modal);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: var(--rp-backdrop-pad);
+  background: var(--rp-backdrop-bg);
+  backdrop-filter: blur(var(--rp-backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--rp-backdrop-blur));
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+}
+
+.report-progress-modal.show {
+  display: flex;
+}
+
+.report-progress-card {
+  width: 100%;
+  max-width: min(var(--rp-card-max-w), var(--rp-card-max-vw));
+  max-height: var(--rp-card-max-h);
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: var(--rp-card-pad);
+  border: 1px solid var(--rp-border-card);
+  border-radius: var(--rp-card-radius);
+  background: var(--rp-surface);
+  color: var(--rp-ink);
+  box-shadow: var(--rp-shadow-modal);
+  display: flex;
+  flex-direction: column;
+  gap: var(--rp-card-gap);
+}
+
+.report-progress-card:focus {
+  outline: none;
+}
+
+.report-progress-card:focus-visible {
+  outline: var(--rp-outline-w) solid var(--rp-fill-brand);
+  outline-offset: var(--rp-outline-offset);
+}
+
+/* Asymmetric header: title & scope on the left, leading countdown metric on the right */
+.report-progress-head {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--rp-gap-md);
+}
+
+.report-progress-heading {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.report-progress-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rp-gap-xs);
+  font-size: var(--rp-fs-eyebrow);
+  font-weight: 700;
+  letter-spacing: var(--rp-tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--rp-ink-brand);
+  margin: 0 0 var(--rp-gap-xs);
+}
+
+.report-progress-modal.is-complete .report-progress-eyebrow {
+  color: var(--rp-ink-success);
+}
+
+.report-progress-eyebrow-icon {
+  width: var(--rp-icon-sm);
+  height: var(--rp-icon-sm);
+  flex-shrink: 0;
+}
+
+.report-progress-spinner {
+  width: var(--rp-icon-sm);
+  height: var(--rp-icon-sm);
+  border-radius: var(--rp-pill-radius);
+  border: var(--rp-step-ring-w) solid var(--rp-border-brand);
+  border-top-color: var(--rp-fill-brand);
+  display: inline-block;
+  flex-shrink: 0;
+  animation: rpSpin var(--rp-dur-spin) linear infinite;
+}
+
+.report-progress-modal.is-complete .report-progress-spinner {
+  display: none;
+}
+
+.report-progress-check-icon {
+  display: none;
+  width: var(--rp-icon-sm);
+  height: var(--rp-icon-sm);
+  color: var(--rp-ink-success);
+  flex-shrink: 0;
+}
+
+.report-progress-modal.is-complete .report-progress-check-icon {
+  display: inline-block;
+}
+
+.report-progress-title {
+  margin: 0;
+  font-size: var(--rp-fs-title);
+  font-weight: 700;
+  line-height: var(--rp-lh-tight);
+  color: var(--rp-ink-strong);
+  overflow-wrap: anywhere;
+}
+
+.report-progress-scope {
+  margin: var(--rp-gap-xs) 0 0;
+  font-size: var(--rp-fs-sm);
+  line-height: var(--rp-lh-body);
+  color: var(--rp-ink-muted);
+}
+
+/* Leading countdown readout block */
+.report-progress-countdown {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--rp-panel-pad-y) var(--rp-panel-pad-x);
+  border: 1px solid var(--rp-border-brand);
+  border-radius: var(--rp-panel-radius);
+  background: var(--rp-surface-brand);
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.report-progress-modal.is-overtime .report-progress-countdown {
+  border-color: var(--rp-border-warn);
+  background: var(--rp-surface-warn);
+}
+
+.report-progress-modal.is-complete .report-progress-countdown {
+  border-color: var(--rp-border-success);
+  background: var(--rp-surface-success);
+}
+
+.report-progress-countdown-value {
+  font-family: var(--rp-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--rp-fs-countdown);
+  font-weight: 700;
+  line-height: var(--rp-lh-tight);
+  color: var(--rp-ink-brand);
+  white-space: nowrap;
+}
+
+.report-progress-modal.is-overtime .report-progress-countdown-value {
+  font-size: var(--rp-fs-countdown-overtime);
+  color: var(--rp-ink-warn);
+}
+
+.report-progress-modal.is-complete .report-progress-countdown-value {
+  color: var(--rp-ink-success);
+}
+
+.report-progress-countdown-label {
+  margin-top: var(--rp-gap-xs);
+  font-size: var(--rp-fs-xs);
+  font-weight: 600;
+  color: var(--rp-ink-muted);
+  white-space: nowrap;
+}
+
+.report-progress-modal.is-overtime .report-progress-countdown-label {
+  color: var(--rp-ink-warn);
+}
+
+.report-progress-modal.is-complete .report-progress-countdown-label {
+  color: var(--rp-ink-success);
+}
+
+/* Determinate progress strip */
+.report-progress-bar-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rp-gap-xs);
+}
+
+.report-progress-stage-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--rp-gap-sm);
+}
+
+.report-progress-stage {
+  margin: 0;
+  font-size: var(--rp-fs-sm);
+  font-weight: 600;
+  line-height: var(--rp-lh-body);
+  color: var(--rp-ink-strong);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.report-progress-percent {
+  font-family: var(--rp-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--rp-fs-sm);
+  font-weight: 700;
+  color: var(--rp-ink-brand);
+  flex-shrink: 0;
+}
+
+.report-progress-modal.is-complete .report-progress-percent {
+  color: var(--rp-ink-success);
+}
+
+.report-progress-track {
+  width: 100%;
+  height: var(--rp-track-h);
+  border-radius: var(--rp-pill-radius);
+  background: var(--rp-track-bg);
+  overflow: hidden;
+  position: relative;
+}
+
+.report-progress-fill {
+  position: relative;
+  height: 100%;
+  width: 0%;
+  border-radius: var(--rp-pill-radius);
+  background: var(--rp-fill-brand);
+  transition: width var(--rp-dur-bar) ease-out, background-color var(--rp-dur-fast) ease;
+  overflow: hidden;
+}
+
+.report-progress-modal.is-complete .report-progress-fill {
+  background: var(--rp-fill-success);
+}
+
+.report-progress-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--rp-fill-brand-sheen) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: rpSheen var(--rp-dur-sheen) ease-in-out infinite;
+}
+
+.report-progress-modal.is-complete .report-progress-fill::after {
+  animation: none;
+  opacity: 0;
+}
+
+.report-progress-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rp-gap-xs);
+  font-size: var(--rp-fs-xs);
+  color: var(--rp-ink-muted);
+}
+
+.report-progress-elapsed {
+  font-family: var(--rp-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--rp-ink);
+}
+
+/* 4-step pipeline checklist */
+.report-progress-steps {
+  list-style: none;
+  margin: 0;
+  padding: var(--rp-panel-pad-y) var(--rp-panel-pad-x);
+  border: 1px solid var(--rp-border-subtle);
+  border-radius: var(--rp-panel-radius);
+  background: var(--rp-surface-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: var(--rp-gap-sm);
+}
+
+.report-progress-step {
+  display: flex;
+  align-items: center;
+  gap: var(--rp-gap-sm);
+  font-size: var(--rp-fs-sm);
+  line-height: var(--rp-lh-body);
+  color: var(--rp-ink-muted);
+}
+
+.report-progress-step-indicator {
+  width: var(--rp-step-dot);
+  height: var(--rp-step-dot);
+  border-radius: var(--rp-pill-radius);
+  border: var(--rp-step-ring-w) solid var(--rp-border-card);
+  background: var(--rp-surface);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  color: var(--rp-surface);
+}
+
+.report-progress-step-check {
+  display: none;
+  width: var(--rp-fs-eyebrow);
+  height: var(--rp-fs-eyebrow);
+}
+
+.report-progress-step.is-active {
+  color: var(--rp-ink-strong);
+  font-weight: 600;
+}
+
+.report-progress-step.is-active .report-progress-step-indicator {
+  border-color: var(--rp-border-brand);
+  border-top-color: var(--rp-fill-brand);
+  animation: rpSpin var(--rp-dur-spin) linear infinite;
+}
+
+.report-progress-step.is-done {
+  color: var(--rp-ink);
+}
+
+.report-progress-step.is-done .report-progress-step-indicator {
+  border-color: var(--rp-fill-success);
+  background: var(--rp-fill-success);
+  color: var(--rp-surface);
+  animation: none;
+}
+
+.report-progress-step.is-done .report-progress-step-check {
+  display: block;
+}
+
+/* Reassurance footer notice with full 4-sided hairline border */
+.report-progress-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--rp-gap-sm);
+  padding: var(--rp-panel-pad-y) var(--rp-panel-pad-x);
+  border: 1px solid var(--rp-border-subtle);
+  border-radius: var(--rp-alert-radius);
+  background: var(--rp-surface-subtle);
+  color: var(--rp-ink-muted);
+  font-size: var(--rp-fs-xs);
+  line-height: var(--rp-lh-body);
+}
+
+.report-progress-modal.is-overtime .report-progress-notice {
+  border-color: var(--rp-border-warn);
+  background: var(--rp-surface-warn);
+  color: var(--rp-ink-warn);
+}
+
+.report-progress-notice-icon {
+  flex: 0 0 auto;
+  width: var(--rp-icon-sm);
+  height: var(--rp-icon-sm);
+  margin-top: var(--rp-outline-w);
+  color: var(--rp-ink-brand);
+}
+
+.report-progress-modal.is-overtime .report-progress-notice-icon {
+  color: var(--rp-ink-warn);
+}
+
+.report-progress-modal.is-complete .report-progress-notice {
+  border-color: var(--rp-border-success);
+  background: var(--rp-surface-success);
+  color: var(--rp-ink-success);
+}
+
+.report-progress-modal.is-complete .report-progress-notice-icon {
+  color: var(--rp-ink-success);
+}
+
+/* Subtle row highlight for the newly generated report after page refresh */
+tr.report-row-fresh td {
+  animation: rpRowFresh var(--rp-dur-fresh) ease-out both;
+}
+
+@keyframes rpSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rpSheen {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes rpRowFresh {
+  0% {
+    background-color: var(--rp-surface-row-fresh);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@media (min-width: 480px) {
+  .toolbar .search {
+    width: auto;
+  }
+
+  .toolbar .select {
+    width: auto;
+  }
+
+  .report-progress-modal {
+    padding: var(--rp-backdrop-pad-sm);
+  }
+
+  .report-progress-head {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .report-progress-countdown {
+    align-items: flex-end;
+    text-align: right;
+    min-width: var(--rp-countdown-min-w);
+    flex-shrink: 0;
+  }
+}
+
+@media (min-width: 700px) {
+  .report-progress-card {
+    padding: var(--rp-card-pad-lg);
+  }
+
+  .report-progress-title {
+    font-size: var(--rp-fs-title-lg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .report-progress-spinner,
+  .report-progress-step.is-active .report-progress-step-indicator {
+    animation: none;
+    border-color: var(--rp-fill-brand);
+    background: var(--rp-surface-brand);
+  }
+
+  .report-progress-fill {
+    transition: none;
+  }
+
+  .report-progress-fill::after {
+    animation: none;
+    opacity: 0;
+  }
+
+  .report-alert-dismiss {
+    transition: none;
+  }
+
+  tr.report-row-fresh td {
+    animation: none;
+    background-color: var(--rp-surface-row-fresh);
+  }
+}

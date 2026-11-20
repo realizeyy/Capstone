@@ -24,15 +24,75 @@ def _validate_dates_not_before_dob(form, dob, checks):
             form.add_error(field_name, message)
 
 
+def _normalize_status_and_retirement(form, cleaned_data, *, instance=None, today=None):
+    """Enforce consistent status, retirement_date, leave_reason, and active-ministry cleanup.
+
+    - Setting status to Retired defaults a blank retirement_date to today and rejects a
+      future retirement_date.
+    - Entering a retirement_date <= today on an active/non-Retired record automatically
+      transitions status to Retired.
+    - Moving an existing Retired record back to an active status clears a stale past/today
+      retirement_date while allowing a newly entered future planned retirement_date.
+    - Whenever final status is Retired, clears deanery, assignment, contract_end, and
+      leave_reason; otherwise requires leave_reason for On Leave and clears stale values.
+    """
+    today = today or date.today()
+    status = cleaned_data.get('status')
+    retirement_date = cleaned_data.get('retirement_date')
+    previous_status = instance.status if (instance is not None and instance.pk) else None
+
+    if 'retirement_date' in form.errors:
+        if status != 'Retired':
+            _validate_leave_reason(form, cleaned_data)
+        return
+
+    if status == 'Retired':
+        if retirement_date is None:
+            cleaned_data['retirement_date'] = today
+            retirement_date = today
+        elif retirement_date > today:
+            form.add_error(
+                'retirement_date',
+                'Retirement date cannot be in the future while status is Retired. Keep an active status for a planned retirement date.',
+            )
+            return
+    elif previous_status == 'Retired':
+        if retirement_date is not None and retirement_date <= today:
+            cleaned_data['retirement_date'] = None
+    else:
+        if retirement_date is not None and retirement_date <= today:
+            cleaned_data['status'] = 'Retired'
+            status = 'Retired'
+
+    if status == 'Retired':
+        if 'deanery' in form.fields:
+            cleaned_data['deanery'] = None
+        if 'assignment' in form.fields:
+            cleaned_data['assignment'] = ''
+        if 'contract_end' in form.fields:
+            cleaned_data['contract_end'] = None
+        if 'leave_reason' in form.fields:
+            cleaned_data['leave_reason'] = ''
+    else:
+        _validate_leave_reason(form, cleaned_data)
+        if status != 'On Leave' and 'leave_reason' in form.fields:
+            cleaned_data['leave_reason'] = ''
+
+
 class ClergyRecordForm(forms.ModelForm):
     class Meta:
         model = ClergyRecord
-        fields = ['name', 'deanery', 'assignment', 'status', 'leave_reason', 'rank', 'holy_orders_date', 'baptism_date', 'confirmation_date', 'contract_end']
+        fields = [
+            'name', 'deanery', 'assignment', 'status', 'leave_reason', 'rank',
+            'holy_orders_date', 'baptism_date', 'confirmation_date',
+            'contract_end', 'retirement_date',
+        ]
         widgets = {
             'holy_orders_date': forms.DateInput(attrs={'type': 'date'}),
             'baptism_date': forms.DateInput(attrs={'type': 'date'}),
             'confirmation_date': forms.DateInput(attrs={'type': 'date'}),
             'contract_end': forms.DateInput(attrs={'type': 'date'}),
+            'retirement_date': forms.DateInput(attrs={'type': 'date'}),
         }
 
     def clean_name(self):
@@ -51,12 +111,12 @@ class ClergyRecordForm(forms.ModelForm):
         if rank == 'postulancy':
             cleaned_data['holy_orders_date'] = None
 
-        _validate_leave_reason(self, cleaned_data)
-
         baptism_date = cleaned_data.get('baptism_date')
         confirmation_date = cleaned_data.get('confirmation_date')
         if baptism_date and confirmation_date and baptism_date > confirmation_date:
             self.add_error('confirmation_date', 'Confirmation date cannot be earlier than baptism date.')
+
+        _normalize_status_and_retirement(self, cleaned_data, instance=self.instance)
 
         holy_orders_date = cleaned_data.get('holy_orders_date')
         contract_end = cleaned_data.get('contract_end')
@@ -94,6 +154,10 @@ class PersonalInfoForm(forms.ModelForm):
             raise forms.ValidationError('Name is required.')
         return name
 
+    def clean_assignment(self):
+        assignment = self.cleaned_data.get('assignment')
+        return assignment.strip() if assignment else ''
+
     def clean_date_of_birth(self):
         dob = self.cleaned_data.get('date_of_birth')
         if dob and dob > date.today():
@@ -126,8 +190,6 @@ class PersonalInfoForm(forms.ModelForm):
         elif rank == 'priest':
             cleaned_data['consecration_date'] = None
 
-        _validate_leave_reason(self, cleaned_data)
-
         dob = cleaned_data.get('date_of_birth')
         baptism = cleaned_data.get('baptism_date')
         confirmation = cleaned_data.get('confirmation_date')
@@ -158,6 +220,8 @@ class PersonalInfoForm(forms.ModelForm):
             self.add_error('consecration_date', 'Bishop consecration date cannot be earlier than Priesthood ordination date.')
         if diaconate and consecration and diaconate > consecration:
             self.add_error('consecration_date', 'Bishop consecration date cannot be earlier than Diaconate ordination date.')
+
+        _normalize_status_and_retirement(self, cleaned_data, instance=self.instance)
         return cleaned_data
 
 
@@ -178,17 +242,21 @@ class ContractStatusUpdateForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        _validate_leave_reason(self, cleaned_data)
         dob = getattr(self.instance, 'date_of_birth', None)
         _validate_dates_not_before_dob(self, dob, [
             ('retirement_date', cleaned_data.get('retirement_date'), 'Retirement date cannot be earlier than date of birth.'),
             ('contract_end', cleaned_data.get('contract_end'), 'Contract end cannot be earlier than date of birth.'),
         ])
+        _normalize_status_and_retirement(self, cleaned_data, instance=self.instance)
         return cleaned_data
 
 
 class ClergyDeploymentForm(forms.ModelForm):
     role = forms.CharField(max_length=100, required=False, initial='Priest-in-Charge')
+
+    def __init__(self, *args, **kwargs):
+        self.record = kwargs.pop('record', None)
+        super().__init__(*args, **kwargs)
 
     class Meta:
         model = ClergyDeployment
@@ -213,6 +281,12 @@ class ClergyDeploymentForm(forms.ModelForm):
         start_date = cleaned_data.get('start_date')
         end_date = cleaned_data.get('end_date')
         is_current = cleaned_data.get('is_current')
+
+        if is_current and self.record is not None and self.record.status == 'Retired':
+            self.add_error(
+                'is_current',
+                'Retired clergy cannot have a current active deployment. Uncheck current active assignment to record a past deployment.',
+            )
 
         if is_current and end_date:
             cleaned_data['end_date'] = None

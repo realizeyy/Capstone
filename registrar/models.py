@@ -328,37 +328,191 @@ class ClergyRecord(models.Model):
             return "< 1 year"
         return f"{years} year{'s' if years != 1 else ''}"
 
-    def record_expired_contract(self, today=None):
-        """Automatically records an expired contract assignment into deployments
-        history, and ensures current deployments are unmarked when their contract ends.
-        Prevents duplicate entries and ensures deployments are ordered latest to oldest."""
-        if today is None:
-            today = date.today()
+    def _default_deployment_role(self):
+        if self.rank == 'deacon':
+            return 'Deacon'
+        if self.rank == 'bishop':
+            return 'Bishop'
+        return 'Priest-in-Charge'
 
-        if not self.contract_end or self.contract_end > today:
-            return False
-
-        assignment_text = (self.assignment or '').strip()
+    def _resolve_assignment_parts(self, assignment=None, deanery_id=None):
+        raw_assignment = self.assignment if assignment is None else assignment
+        assignment_text = (raw_assignment or '').strip()
         if not assignment_text:
-            return False
-
+            return '', ''
         station, place = parse_station_and_place(assignment_text)
         if not station:
             station = assignment_text
+        d_id = self.deanery_id if deanery_id is None else deanery_id
+        if not place and d_id:
+            parish = Parish.objects.filter(deanery_id=d_id, parish_name__iexact=station).first()
+            if parish and parish.place_name:
+                place = parish.place_name
+        return station, place
 
-        if not place and self.deanery_id:
-            p = self.deanery.parishes.filter(parish_name__iexact=station).first()
-            if p and p.place_name:
-                place = p.place_name
+    def close_current_deployments(self, end_date=None, exclude_station=None, note=None):
+        """Mark active deployments as ended with a valid end_date so service days are preserved."""
+        target_end = end_date or date.today()
+        skip = (exclude_station or '').strip().lower()
+        closed_stations = set()
+        for dep in self.deployments.filter(is_current=True):
+            if skip and dep.station_name.strip().lower() == skip:
+                continue
+            effective_end = target_end
+            if dep.start_date and effective_end < dep.start_date:
+                effective_end = dep.start_date
+            dep.is_current = False
+            if not dep.end_date:
+                dep.end_date = effective_end
+            if note and not dep.notes:
+                dep.notes = note
+            dep.save(update_fields=['is_current', 'end_date', 'notes'])
+            closed_stations.add(dep.station_name.strip().lower())
+        return closed_stations
+
+    def apply_retirement(self, today=None, previous_assignment='', previous_deanery_id=None, save_record=True):
+        """Transition this record cleanly into Retired status: default retirement_date if
+        missing, close all active deployments, preserve any unlogged final assignment in
+        deployment history, and clear active ministry fields."""
+        if today is None:
+            today = date.today()
+        ret_date = self.retirement_date or today
+        note = f"Ended upon retirement ({ret_date.isoformat()})"
+
+        self.status = 'Retired'
+        self.retirement_date = ret_date
+
+        closed_stations = self.close_current_deployments(end_date=ret_date, note=note)
+
+        last_assignment = (self.assignment or '').strip() or (previous_assignment or '').strip()
+        last_deanery_id = self.deanery_id or previous_deanery_id
+        if last_assignment:
+            station, place = self._resolve_assignment_parts(last_assignment, last_deanery_id)
+            if station and station.lower() not in closed_stations:
+                already_logged = self.deployments.filter(
+                    station_name__iexact=station,
+                    end_date=ret_date,
+                ).exists()
+                if not already_logged:
+                    self.deployments.create(
+                        station_name=station,
+                        place_name=place or None,
+                        role=self._default_deployment_role(),
+                        end_date=ret_date,
+                        is_current=False,
+                        notes=note,
+                    )
+
+        self.deanery = None
+        self.assignment = ''
+        self.contract_end = None
+        self.leave_reason = ''
+        if save_record:
+            self.save(update_fields=['status', 'retirement_date', 'deanery', 'assignment', 'contract_end', 'leave_reason'])
+        return True
+
+    def sync_retirement_status(self, today=None):
+        """Automatically transition an active record to Retired once its scheduled
+        retirement_date arrives (retirement_date <= today)."""
+        if today is None:
+            today = date.today()
+        if self.status != 'Retired' and self.retirement_date and self.retirement_date <= today:
+            return self.apply_retirement(
+                today=today,
+                previous_assignment=self.assignment or '',
+                previous_deanery_id=self.deanery_id,
+                save_record=True,
+            )
+        return False
+
+    def sync_lifecycle_after_save(
+        self,
+        *,
+        previous_assignment='',
+        previous_deanery_id=None,
+        previous_status=None,
+        previous_contract_end=None,
+        created=False,
+        today=None,
+    ):
+        """Coordinate retirement cleanup, one-way Registrar Assignment -> ClergyDeployment
+        sync, and contract expiry recording after a Registrar save."""
+        if today is None:
+            today = date.today()
+
+        if self.status == 'Retired' or (self.retirement_date and self.retirement_date <= today):
+            self.apply_retirement(
+                today=today,
+                previous_assignment=previous_assignment,
+                previous_deanery_id=previous_deanery_id,
+                save_record=True,
+            )
+            return
+
+        old_assign = (previous_assignment or '').strip()
+        new_assign = (self.assignment or '').strip()
+        assignment_changed = (
+            created
+            or old_assign != new_assign
+            or previous_deanery_id != self.deanery_id
+            or (previous_status == 'Retired' and bool(new_assign))
+        )
+        was_expired = bool(previous_contract_end and previous_contract_end < today)
+        is_now_expired = bool(self.contract_end and self.contract_end < today)
+        renewed_from_expired = was_expired and not is_now_expired and bool(new_assign)
+
+        if assignment_changed or renewed_from_expired:
+            station, place = self._resolve_assignment_parts(new_assign, self.deanery_id)
+            self.close_current_deployments(end_date=today, exclude_station=station or None)
+            if station and not is_now_expired:
+                existing_current = self.deployments.filter(
+                    is_current=True,
+                    station_name__iexact=station,
+                ).first()
+                if existing_current:
+                    if place and not existing_current.place_name:
+                        existing_current.place_name = place
+                        existing_current.save(update_fields=['place_name'])
+                else:
+                    self.deployments.create(
+                        station_name=station,
+                        place_name=place or None,
+                        role=self._default_deployment_role(),
+                        start_date=today,
+                        end_date=None,
+                        is_current=True,
+                    )
+
+        self.record_expired_contract(today=today)
+
+    def record_expired_contract(self, today=None):
+        """Automatically records a strictly expired contract (contract_end < today) into
+        deployments history, and marks matching current deployments as ended.
+        Skips Retired or archived records and prevents duplicate entries."""
+        if today is None:
+            today = date.today()
+
+        if self.status == 'Retired' or self.is_archived:
+            return False
+
+        if not self.contract_end or self.contract_end >= today:
+            return False
+
+        station, place = self._resolve_assignment_parts()
+        if not station:
+            return False
 
         # Check and update any currently active deployment for this record that has now expired
         current_deps = list(self.deployments.filter(is_current=True))
         updated_current = False
         for dep in current_deps:
-            if (dep.end_date and dep.end_date <= today) or dep.station_name.lower() == station.lower():
+            if (dep.end_date and dep.end_date < today) or dep.station_name.strip().lower() == station.lower():
                 dep.is_current = False
                 if not dep.end_date:
-                    dep.end_date = self.contract_end
+                    effective_end = self.contract_end
+                    if dep.start_date and effective_end < dep.start_date:
+                        effective_end = dep.start_date
+                    dep.end_date = effective_end
                 if not dep.notes:
                     dep.notes = f"Contract expired on {self.contract_end.isoformat()}"
                 dep.save(update_fields=['is_current', 'end_date', 'notes'])
@@ -371,18 +525,10 @@ class ClergyRecord(models.Model):
         ).exists()
 
         if not already_recorded:
-            role = 'Priest-in-Charge'
-            if self.rank == 'deacon':
-                role = 'Deacon'
-            elif self.rank == 'bishop':
-                role = 'Bishop'
-            elif self.rank == 'priest':
-                role = 'Priest-in-Charge'
-
             self.deployments.create(
                 station_name=station,
                 place_name=place or None,
-                role=role,
+                role=self._default_deployment_role(),
                 end_date=self.contract_end,
                 is_current=False,
                 notes=f"Contract expired on {self.contract_end.isoformat()}"
@@ -595,26 +741,66 @@ class ClergyRecord(models.Model):
         }
 
 
-def sync_expired_contracts(today=None, queryset=None):
-    """Scan and synchronize all expired contracts into deployment records."""
+def sync_scheduled_retirements(today=None, queryset=None):
+    """Transition every non-Retired record whose retirement_date <= today into Retired,
+    closing active deployments and clearing active ministry fields."""
     if today is None:
         today = date.today()
-    if queryset is None:
-        queryset = ClergyRecord.objects.filter(
-            contract_end__isnull=False,
-            contract_end__lte=today
-        ).exclude(assignment__isnull=True).exclude(assignment='')
-    else:
-        queryset = queryset.filter(
-            contract_end__isnull=False,
-            contract_end__lte=today
-        ).exclude(assignment__isnull=True).exclude(assignment='')
+    base = ClergyRecord.objects.all() if queryset is None else queryset
+    due = base.exclude(status='Retired').filter(
+        retirement_date__isnull=False,
+        retirement_date__lte=today,
+    )
+    retired = 0
+    for record in due:
+        if record.sync_retirement_status(today=today):
+            retired += 1
+    return retired
+
+
+def sync_expired_contracts(today=None, queryset=None):
+    """Scan and synchronize all strictly expired contracts (contract_end < today)
+    for active/non-retired, unarchived records into deployment history."""
+    if today is None:
+        today = date.today()
+    base = ClergyRecord.objects.current() if queryset is None else queryset.filter(archived_at__isnull=True)
+    expired_qs = (
+        base.exclude(status='Retired')
+        .filter(contract_end__isnull=False, contract_end__lt=today)
+        .exclude(assignment__isnull=True)
+        .exclude(assignment='')
+    )
 
     synced = 0
-    for record in queryset:
+    for record in expired_qs:
         if record.record_expired_contract(today=today):
             synced += 1
     return synced
+
+
+def sync_clergy_lifecycle(today=None, queryset=None):
+    """Run scheduled retirements first (so retirement takes precedence when both
+    retirement_date and contract_end have passed), then sync expired contracts,
+    using a single combined candidate query."""
+    if today is None:
+        today = date.today()
+    base = ClergyRecord.objects.all() if queryset is None else queryset
+    due_retirement_q = Q(retirement_date__isnull=False, retirement_date__lte=today)
+    due_expiry_q = (
+        Q(archived_at__isnull=True, contract_end__isnull=False, contract_end__lt=today)
+        & ~Q(assignment__isnull=True)
+        & ~Q(assignment='')
+    )
+    candidates = list(base.exclude(status='Retired').filter(due_retirement_q | due_expiry_q))
+    retired = 0
+    expired = 0
+    for record in candidates:
+        if record.retirement_date and record.retirement_date <= today:
+            if record.sync_retirement_status(today=today):
+                retired += 1
+        elif record.record_expired_contract(today=today):
+            expired += 1
+    return retired, expired
 
 
 class DocumentType(models.Model):

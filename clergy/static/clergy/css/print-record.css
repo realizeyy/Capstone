@@ -9,6 +9,8 @@
   /* Palette & Semantic Tokens */
   --color-primary: #17324d;
   --color-primary-dark: #102438;
+  --color-primary-tint: #eef3f8;
+  --color-primary-border: #bfd0e2;
   --color-accent: #2f6fed;
   --color-accent-hover: #2458c2;
   --color-accent-active: #1b4291;
@@ -34,20 +36,6 @@
   --color-border-sheet: #cbd5e1;
   --color-border-hover: #94a3b8;
 
-  --color-success-bg: #ecfdf5;
-  --color-success-text: #065f46;
-  --color-success-border: #a7f3d0;
-  --color-success-bar: #239b62;
-
-  --color-warning-bg: #fffbeb;
-  --color-warning-text: #92400e;
-  --color-warning-border: #fde68a;
-
-  --color-info-bg: #eff6ff;
-  --color-info-text: #1d4ed8;
-  --color-info-border: #bfdbfe;
-
-  --color-danger-bg: #fef2f2;
   --color-danger-text: #991b1b;
   --color-danger-border: #fecaca;
 
@@ -628,7 +616,7 @@ body {
   flex-shrink: 0;
 }
 
-/* Badge System (Full Hairline Borders, Never Single-Sided) */
+/* Unified Institutional Status Badge System (Full Hairline Borders, Never Single-Sided) */
 .badge {
   display: inline-block;
   font-size: var(--font-size-xs);
@@ -642,35 +630,10 @@ body {
   text-align: center;
 }
 
-.badge-active,
-.badge-submitted {
-  background-color: var(--color-success-bg);
-  color: var(--color-success-text);
-  border: var(--size-rule-thin) solid var(--color-success-border);
-}
-
-.badge-neutral {
-  background-color: var(--color-bg-muted);
-  color: var(--color-text-label);
-  border: var(--size-rule-thin) solid var(--color-border-sheet);
-}
-
-.badge-warning {
-  background-color: var(--color-warning-bg);
-  color: var(--color-warning-text);
-  border: var(--size-rule-thin) solid var(--color-warning-border);
-}
-
-.badge-info {
-  background-color: var(--color-info-bg);
-  color: var(--color-info-text);
-  border: var(--size-rule-thin) solid var(--color-info-border);
-}
-
-.badge-danger {
-  background-color: var(--color-danger-bg);
-  color: var(--color-danger-text);
-  border: var(--size-rule-thin) solid var(--color-danger-border);
+.badge-status {
+  background-color: var(--color-primary-tint);
+  color: var(--color-primary);
+  border: var(--size-rule-thin) solid var(--color-primary-border);
 }
 
 /* ==========================================================================
@@ -1038,24 +1001,9 @@ body {
   letter-spacing: 0.03em;
   white-space: nowrap;
   flex-shrink: 0;
-}
-
-.stat-pill-green {
-  background-color: var(--color-success-bg);
-  color: var(--color-success-text);
-  border: var(--size-rule-thin) solid var(--color-success-border);
-}
-
-.stat-pill-slate {
-  background-color: var(--color-bg-muted);
-  color: var(--color-text-label);
-  border: var(--size-rule-thin) solid var(--color-border-sheet);
-}
-
-.stat-pill-red {
-  background-color: var(--color-danger-bg);
-  color: var(--color-danger-text);
-  border: var(--size-rule-thin) solid var(--color-danger-border);
+  background-color: var(--color-primary-tint);
+  color: var(--color-primary);
+  border: var(--size-rule-thin) solid var(--color-primary-border);
 }
 
 .progress-track {
@@ -1069,7 +1017,7 @@ body {
 
 .progress-fill {
   height: 100%;
-  background-color: var(--color-success-bar);
+  background-color: var(--color-primary);
   border-radius: var(--radius-xs);
 }
 
